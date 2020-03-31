@@ -1,0 +1,30 @@
+{
+  "name": "helm",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node app.js",
+    "start-dev": "nodemon app.js",
+    "test": "mocha"
+  },
+  "dependencies": {
+    "apollo-server": "^2.11.0",
+    "graphql": "^14.6.0"
+  },
+  "devDependencies": {
+    "mocha": "^5.1.1",
+    "nodemon": "^2.0.2"
+  },
+  "description": "This project is the API backing helm",
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/tstep916/helm.git"
+  },
+  "author": "Thomas Step",
+  "license": "AGPL-3.0-or-later",
+  "bugs": {
+    "url": "https://gitlab.com/tstep916/helm/issues"
+  },
+  "homepage": "https://gitlab.com/tstep916/helm#readme"
+}
