@@ -1,5 +1,5 @@
 {
-  "name": "helm-bow",
+  "name": "helm-stern",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -15,7 +15,7 @@
     "mocha": "^5.1.1",
     "nodemon": "^2.0.2"
   },
-  "description": "This project is the API frentend of helm",
+  "description": "This project is the API backend of helm",
   "main": "app.js",
   "repository": {
     "type": "git",

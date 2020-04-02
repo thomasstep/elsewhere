@@ -1,21 +1,25 @@
 {
-  "name": "helm",
+  "name": "helm-bow",
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node app.js",
-    "start-dev": "nodemon app.js",
-    "test": "mocha"
+    "dev": "next",
+    "build": "next build",
+    "start": "next start"
   },
   "dependencies": {
+    "@material-ui/core": "^4.9.8",
     "apollo-server": "^2.11.0",
-    "graphql": "^14.6.0"
+    "graphql": "^14.6.0",
+    "next": "^9.3.4",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
   },
   "devDependencies": {
     "mocha": "^5.1.1",
     "nodemon": "^2.0.2"
   },
-  "description": "This project is the API backing helm",
+  "description": "This project is the API frentend of helm",
   "main": "app.js",
   "repository": {
     "type": "git",
