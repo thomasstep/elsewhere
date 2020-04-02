@@ -1,0 +1,34 @@
+{
+  "name": "helm-bow",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@material-ui/core": "^4.9.8",
+    "apollo-server": "^2.11.0",
+    "graphql": "^14.6.0",
+    "next": "^9.3.4",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
+  "devDependencies": {
+    "mocha": "^5.1.1",
+    "nodemon": "^2.0.2"
+  },
+  "description": "This project is the API frentend of helm",
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/tstep916/helm.git"
+  },
+  "author": "Thomas Step",
+  "license": "AGPL-3.0-or-later",
+  "bugs": {
+    "url": "https://gitlab.com/tstep916/helm/issues"
+  },
+  "homepage": "https://gitlab.com/tstep916/helm#readme"
+}
