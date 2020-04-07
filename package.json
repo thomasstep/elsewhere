@@ -1,5 +1,5 @@
 {
-  "name": "helm-bow",
+  "name": "helm",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -11,15 +11,17 @@
     "@material-ui/core": "^4.9.8",
     "apollo-server": "^2.11.0",
     "graphql": "^14.6.0",
+    "isomorphic-unfetch": "^3.0.0",
     "next": "^9.3.4",
     "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "react-dom": "^16.13.1",
+    "swr": "^0.2.0"
   },
   "devDependencies": {
     "mocha": "^5.1.1",
     "nodemon": "^2.0.2"
   },
-  "description": "This project is the API frentend of helm",
+  "description": "This is helm",
   "main": "app.js",
   "repository": {
     "type": "git",
