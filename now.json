@@ -1,8 +1,8 @@
 {
-  "name": "helm-api",
+  "name": "api-keys",
   "version": 2,
   "env": {
-    "MONGODB_URI": "@helm-mongo-uri",
-    "GOOGLE_MAPS_KEY": "@helm-google-maps-key"
+    "MONGODB_URI": "@mongo-uri",
+    "GOOGLE_MAPS_KEY": "@google-maps-key"
   }
 }
