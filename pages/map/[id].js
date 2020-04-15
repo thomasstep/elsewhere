@@ -1,5 +1,7 @@
+import Box from '@material-ui/core/Box';
 import { Map, GoogleApiWrapper, Marker, InfoWindow } from 'google-maps-react';
 
+import Layout from '../../components/layout';
 import { getMarkers } from '../../utils/db';
 
 export async function getServerSideProps(context) {
@@ -12,20 +14,23 @@ export async function getServerSideProps(context) {
 }
 
 
-export class ElsewhereMap extends React.Component {
-  
+export class ElsewhereMap extends React.Component {  
   render() {
     return (
-      <Map google={this.props.google} zoom={14}>
+      <Layout>
+        <Box>
+          <Map google={this.props.google} zoom={14}>
 
-        {this.props.markers.map((marker) => 
-          <Marker
-            name={'Current location'}
-            position={marker}
-          />
-        )}
- 
-      </Map>
+            {this.props.markers.map((marker) => 
+              <Marker
+                name={'Current location'}
+                position={marker}
+              />
+            )}
+    
+          </Map>
+        </Box>
+      </Layout>
     );
   }
 }
