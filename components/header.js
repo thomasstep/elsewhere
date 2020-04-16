@@ -11,16 +11,16 @@ import MailIcon from '@material-ui/icons/Mail';
 const useStyles = makeStyles({
   list: {
     width: 250,
-  },
-  fab: {
-    margin: 0,
-    top: 'auto',
-    right: 20,
-    bottom: 20,
-    left: 'auto',
-    position: 'fixed',
   }
 });
+
+const style = {
+  margin: 0,
+  top: 10,
+  left: '50%',
+  position: 'fixed',
+  zIndex: 100,
+};
 
 export default function Header() {
   const classes = useStyles();
@@ -55,7 +55,7 @@ export default function Header() {
 
   return (
     <React.Fragment key='top'>
-      <Fab onClick={toggleDrawer(true)}>Nav bar</Fab>
+      <Fab onClick={toggleDrawer(true)} style={style}>Nav</Fab>
       <Drawer anchor='top' open={state.open} onClose={toggleDrawer(false)}>
         {list()}
       </Drawer>

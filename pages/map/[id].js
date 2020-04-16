@@ -1,20 +1,37 @@
+import { useRouter } from 'next/router';
 import Box from '@material-ui/core/Box';
 import { Map, GoogleApiWrapper, Marker, InfoWindow } from 'google-maps-react';
+import axios from 'axios';
 
 import Layout from '../../components/layout';
-import { getMarkers } from '../../utils/db';
 
-export async function getServerSideProps(context) {
-  const markers = getMarkers(context.params.id);
-  return {
-    props: {
-      markers,
-    },
-  }
-}
+// export async function getServerSideProps(context) {
+//   const markers = await axios.post('http://localhost:3000/api/graphql', {
+//     query: `{  
+//       getMarkers(id: ${context.params.id}) {
+//         markers {
+//           lat
+//           lng
+//         }
+//       }
+//     }`
+//   });
+//   const json = markers.json();
+//   console.log(json)
+//   return {
+//     props: {
+//       markers,
+//     }
+//   };
+// }
 
 
-export class ElsewhereMap extends React.Component {  
+export class ElsewhereMap extends React.Component {
+  // constructor(props) {
+  //   super(props);
+  //   // this.state = {markers: getMarkers(props.params.id)};  
+  // }
+
   render() {
     return (
       <Layout>
@@ -23,7 +40,6 @@ export class ElsewhereMap extends React.Component {
 
             {this.props.markers.map((marker) => 
               <Marker
-                name={'Current location'}
                 position={marker}
               />
             )}

@@ -1,11 +1,13 @@
 const MongoClient = require('mongodb').MongoClient;
 const uri = process.env.MONGODB_URI;
 
-// const client = new MongoClient(uri, { useNewUrlParser: true });
-// client.connect(err => {
-//   const collection = client.db("test").collection("devices");
-//   // perform actions on the collection object
-//   client.close();
+const clientOptions = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}
+const client = new MongoClient(uri, clientOptions);
+// const connection = client.connect(err => {
+//   console.error(err)
 // });
 
 const sampleMarkers = {
@@ -20,6 +22,19 @@ const sampleMarkers = {
 }
 
 function getMarkers(mapId) {
+  console.log(mapId)
+  return client.connect(err => {
+    return client.db('elsewhere').collection('maps').findOne({ map: mapId }, (err, docs) => {
+      console.log('Found these:')
+      console.log(docs)
+      return docs.markers;
+    });
+  });
+  // const map = connection.then((err) => {
+  //   console.error(err);
+  //   const map = connection.db('elsewhere').collection('maps').find({ map: mapId });
+  //   console.log(map)
+  // })
   return sampleMarkers[mapId].markers;
 }
 
