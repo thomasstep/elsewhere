@@ -1,8 +1,7 @@
-const { graphql, buildSchema } = require('graphql');
+const { ApolloServer, gql } = require('apollo-server-micro');
+const { maps } = require('./utils/db');
 
-const { getMarkers } = require('../../utils/db');
-
-const schema = buildSchema(`
+const schema = gql`
   type Marker {
     lat: Float!
     lng: Float!
@@ -12,31 +11,28 @@ const schema = buildSchema(`
     hello: String!
     getMarkers(id: ID!): [Marker]!
   }
-`);
+`;
 
 const resolvers = {
-  // Query: {
-    hello: (_parent, _args, _context) => "Hello!",
-    getMarkers: (parent, args, context) => {
-      console.log('HISDJLFK:SJD:OLI')
-      return getMarkers(args.id);
+  Query: {
+    hello: (parent, args, context) => "Hello!",
+    getMarkers: async (parent, args) => {
+      const { markers } = await maps.findOne({ map: args.id });
+      console.log('Markers')
+      console.log(markers)
+      return markers;
     },
-  // },
+  },
 };
 
-module.exports = async (req, res) => {
-  const query = req.body.query;
-  const response = await graphql(schema, query, resolvers);
 
-  return res.end(JSON.stringify(response));
+const apolloServer = new ApolloServer({ typeDefs: schema, resolvers });
+const handler = apolloServer.createHandler({ path: "/api/graphql" });
+
+export const config = {
+  api: {
+    bodyParser: false
+  }
 };
 
-module.exports({
-  body: {
-    query: 'query{getMarkers(id:1){lat lng}}'
-  }
-}, {
-  end: (res) => {
-    console.log(res)
-  }
-})
+export default handler;
