@@ -10,7 +10,7 @@ const fetcher = (query) => request('/api/graphql', query);
 function ElsewhereMap(props) {
   const { data, error } = useSWR(
     `{
-      getMarkers(id: 1) {
+      getMarkers(map: 1) {
         lat
         lng
       }
