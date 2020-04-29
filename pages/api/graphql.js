@@ -27,7 +27,7 @@ const resolvers = {
   Query: {
     hello: (parent, args, context) => "Hello!",
     getMarkers: async (parent, args) => {
-      const { markers } = await maps.findOne({ map: args.id });
+      const { markers } = await maps.findOne({ map: args.map });
       console.log('Markers')
       console.log(markers)
       return markers;
@@ -38,7 +38,7 @@ const resolvers = {
       const promises = [];
       args.markers.forEach((marker) => {
         promises.push(
-          maps.update(
+          maps.updateOne(
             {
               map: args.map
             },

@@ -5,19 +5,22 @@ import { request } from 'graphql-request';
 
 import Layout from '../../components/layout';
 
-const fetcher = (query) => request('/api/graphql', query);
+const fetcher = (query) => request('http://localhost:3000/api/graphql', query);
 
 function ElsewhereMap(props) {
+  console.log(props)
   const { data, error } = useSWR(
     `{
-      getMarkers(map: 1) {
+      getMarkers(map: ${props.url.query.id}) {
         lat
         lng
       }
     }`,
     fetcher,
   );
+  console.log('Data:')
   console.log(data)
+  console.log('Error:')
   console.error(error)
 
   return (
@@ -25,7 +28,7 @@ function ElsewhereMap(props) {
       <Box>
         <Map google={props.google} zoom={14}>
 
-          {data.getMarkers.map((marker) => 
+          {data.getMarkers.map((marker) =>
             <Marker
               position={marker}
             />
