@@ -26,6 +26,7 @@ function ElsewhereMap(props) {
           {data ? data.getMarkers.map((marker) =>
             <Marker
               position={marker}
+              key={marker.lat.toString().concat(marker.lng.toString())}
             />
           ) : null}
    
