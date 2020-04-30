@@ -28,8 +28,6 @@ const resolvers = {
     hello: (parent, args, context) => "Hello!",
     getMarkers: async (parent, args) => {
       const { markers } = await maps.findOne({ map: args.map });
-      console.log('Markers')
-      console.log(markers)
       return markers;
     },
   },

@@ -5,35 +5,69 @@ import { request } from 'graphql-request';
 
 import Layout from '../../components/layout';
 
-const fetcher = (query) => request('/api/graphql', query);
+const fetcher = async (query) => {
+  const res = await request('/api/graphql', query)
+  return res;
+};
+const getMarkers = `{
+  getMarkers(map: 1) {
+    lat
+    lng
+  }
+}`;
 
-function ElsewhereMap(props) {
-  const { data, error } = useSWR(
-    `{
-      getMarkers(map: 1) {
-        lat
-        lng
-      }
-    }`,
-    fetcher,
-  );
+class ElsewhereMap extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      activeMarker: {},
+      activeInfoWindow: false,
+      markers: [],
+    };
+  }
 
-  return (
-    <Layout>
-      <Box>
-        <Map google={props.google} zoom={14}>
+  componentDidMount() {
+    fetcher(getMarkers).then(({ getMarkers: markers }) => {
+      this.setState({
+        markers,
+      });
+    });
+  }
 
-          {data ? data.getMarkers.map((marker) =>
-            <Marker
-              position={marker}
-              key={marker.lat.toString().concat(marker.lng.toString())}
-            />
-          ) : null}
-   
-        </Map>
-      </Box>
-    </Layout>
-  );
+  render() {
+    return (
+      <Layout>
+        <Box>
+          <Map google={this.props.google} zoom={14}>
+
+            {this.state.markers.length ? this.state.markers.map((marker) =>
+              <Marker
+                position={marker}
+                onClick={(props, marker) => {
+                    this.setState({
+                      activeInfoWindow: true,
+                      activeMarker: marker,
+                    });
+                  }
+                }
+                key={marker.lat.toString().concat(marker.lng.toString())}
+              />
+            ) : null}
+
+            <InfoWindow
+              visible={this.state.activeInfoWindow}
+              marker={this.state.activeMarker}
+              >
+                <div>
+                  I am here
+                </div>
+            </InfoWindow>
+    
+          </Map>
+        </Box>
+      </Layout>
+    );
+  }
 }
 
 export default GoogleApiWrapper({
