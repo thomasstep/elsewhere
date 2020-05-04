@@ -27,7 +27,6 @@ const resolvers = {
   Query: {
     hello: (parent, args, context) => "Hello!",
     getMarkers: async (parent, args) => {
-      console.log(process.env)
       const { markers } = await maps.findOne({ map: args.map });
       return markers;
     },

@@ -17,7 +17,6 @@ if (!mongoose.connection.readyStates) {
   };
 
   try {
-    console.log(`Connecting to ${process.env.MONGODB_URI}`)
     connection = mongoose.connect(process.env.MONGODB_URI, options).then(() => {
       console.log('Connected to DB.');
     }, (err) => {
