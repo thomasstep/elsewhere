@@ -4,5 +4,11 @@
   "env": {
     "MONGODB_URI": "@mongo-uri",
     "GOOGLE_MAPS_KEY": "@google-maps-key"
+  },
+  "build": {
+    "env": {
+      "MONGODB_URI": "@mongo-uri",
+      "GOOGLE_MAPS_KEY": "@google-maps-key"
+    }
   }
 }
