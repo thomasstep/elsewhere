@@ -1,5 +1,28 @@
 const { ApolloServer, gql } = require('apollo-server-micro');
+const passport = require('passport');
+
 const { maps } = require('../../utils/db');
+
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+
+passport.use(new GoogleStrategy({
+    clientID: GOOGLE_OAUTH_CLIENT_ID,
+    clientSecret: GOOGLE_OAUTH_CLIENT_SECRET,
+    callbackURL: "http://www.example.com/auth/google/callback"
+  },
+  function(accessToken, refreshToken, profile, cb) {
+    User.findOrCreate({ googleId: profile.id }, function (err, user) {
+      return cb(err, user);
+    });
+  }
+));
+
+const authenticateGoogle = (req, res) => new Promise((resolve, reject) => {
+  passport.authenticate('google-token', { session: false }, (err, data, info) => {
+      if (err) reject(err);
+      resolve({ data, info });
+  })(req, res);
+});
 
 const schema = gql`
   type Marker {
@@ -25,7 +48,6 @@ const schema = gql`
 
 const resolvers = {
   Query: {
-    hello: (parent, args, context) => "Hello!",
     getMarkers: async (parent, args) => {
       const { markers } = await maps.findOne({ map: args.map });
       return markers;
@@ -87,7 +109,42 @@ const resolvers = {
       }
 
       return true;
-    }
+    },
+    authGoogle: async (_, { input: { accessToken } }, { req, res }) => {
+      req.body = {
+        ...req.body,
+        access_token: accessToken,
+      };
+
+      try {
+        // data contains the accessToken, refreshToken and profile from passport
+        const { data, info } = await authenticateGoogle(req, res);
+
+        if (data) {
+          const user = await User.upsertGoogleUser(data);
+
+          if (user) {
+            return ({
+              name: user.name,
+              token: user.generateJWT(),
+            });
+          }
+        }
+
+        if (info) {
+          console.log(info);
+          switch (info.code) {
+            case 'ETIMEDOUT':
+              return (new Error('Failed to reach Google: Try Again'));
+            default:
+              return (new Error('something went wrong'));
+          }
+        }
+        return (Error('server error'));
+      } catch (error) {
+        return error;
+      }
+    },
   },
 };
 
