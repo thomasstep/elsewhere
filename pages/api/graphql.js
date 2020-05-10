@@ -13,7 +13,6 @@ const schema = gql`
   }
 
   type Query {
-    hello: String!
     getMarkers(map: ID!): [Marker]!
   }
 
@@ -25,7 +24,6 @@ const schema = gql`
 
 const resolvers = {
   Query: {
-    hello: (parent, args, context) => "Hello!",
     getMarkers: async (parent, args) => {
       const { markers } = await maps.findOne({ map: args.map });
       return markers;
