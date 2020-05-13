@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 require('dotenv').config({ path: `${__dirname}\\..\\..\\.env`});
-const { maps } = require('./dbSchemas');
+const schemas = require('./dbSchemas');
 
 let connection;
 
@@ -29,6 +29,4 @@ if (!mongoose.connection.readyStates) {
   }
 }
 
-module.exports = {
-  maps,
-};
+module.exports = schemas;
