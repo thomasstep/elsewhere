@@ -35,8 +35,6 @@ export const typeDefs = gql`
   }
 
   type Query {
-    user(id: ID!): User!
-    users: [User]!
     viewer: User
     getMarkers(map: ID!): [Marker]!
   }

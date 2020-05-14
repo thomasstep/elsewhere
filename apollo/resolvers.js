@@ -1,7 +1,6 @@
 import { AuthenticationError, UserInputError } from 'apollo-server-micro'
 import cookie from 'cookie'
 import jwt from 'jsonwebtoken'
-import getConfig from 'next/config'
 import bcrypt from 'bcrypt'
 const { v4 } = require('uuid');
 
@@ -26,20 +25,10 @@ function validPassword(user, password) {
 export const resolvers = {
   Query: {
     async viewer(_parent, _args, context, _info) {
-      console.log(context.req.headers.cookie)
-      const { token } = cookie.parse(context.req.headers.cookie ?? '')
-      if (token) {
-        try {
-          const { id, email } = jwt.verify(token, JWT_SECRET)
-          const user = await users.findOne({ id, email });
-
-          return user;
-        } catch {
-          throw new AuthenticationError('Authentication token is invalid, please log in.');
-        }
-      } else {
-        throw new AuthenticationError('No token found, please log in.');
+      if (!context.user) {
+        throw new AuthenticationError('Authentication token is invalid, please log in.');
       }
+      return context.user;
     },
     getMarkers: async (parent, args) => {
       const { markers } = await maps.findOne({ map: args.map });
