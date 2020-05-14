@@ -11,6 +11,7 @@ const fetcher = async (query) => {
   const res = await request('/api/graphql', query)
   return res;
 };
+
 const getMarkers = (id) => `{
   getMarkers(map: ${id}) {
     lat

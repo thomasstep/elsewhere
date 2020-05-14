@@ -26,17 +26,19 @@ function validPassword(user, password) {
 export const resolvers = {
   Query: {
     async viewer(_parent, _args, context, _info) {
+      console.log(context.req.headers.cookie)
       const { token } = cookie.parse(context.req.headers.cookie ?? '')
       if (token) {
         try {
           const { id, email } = jwt.verify(token, JWT_SECRET)
+          const user = await users.findOne({ id, email });
 
-          return users.find(user => user.id === id && user.email === email)
+          return user;
         } catch {
-          throw new AuthenticationError(
-            'Authentication token is invalid, please log in'
-          )
+          throw new AuthenticationError('Authentication token is invalid, please log in.');
         }
+      } else {
+        throw new AuthenticationError('No token found, please log in.');
       }
     },
     getMarkers: async (parent, args) => {
