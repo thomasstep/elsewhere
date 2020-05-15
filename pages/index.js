@@ -1,10 +1,10 @@
-import Layout from '../components/layout';
 import Link from 'next/link';
 import { request } from 'graphql-request';
-import { withRouter } from 'next/router'
+import { withRouter } from 'next/router';
+import Layout from '../components/layout';
 
 const fetcher = async (query) => {
-  const res = await request('/api/graphql', query)
+  const res = await request('/api/graphql', query);
   return res;
 };
 
@@ -13,7 +13,7 @@ const viewerQuery = `{
       id
       email
     }
-  }`
+  }`;
 
 class Index extends React.Component {
   constructor(props) {
@@ -46,7 +46,7 @@ class Index extends React.Component {
       return (
         <Layout>
           <main className="center">
-            <Link href='/map/[id]' as='/map/1'>
+            <Link href="/map/[id]" as="/map/1">
               <a>Go to a map</a>
             </Link>
           </main>
@@ -54,7 +54,7 @@ class Index extends React.Component {
       );
     }
 
-    return <p>Loading...</p>
+    return <p>Loading...</p>;
   }
 }
 

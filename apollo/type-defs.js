@@ -1,6 +1,6 @@
-import gql from 'graphql-tag'
+import gql from 'graphql-tag';
 
-export const typeDefs = gql`
+const typeDefs = gql`
   type User {
     id: ID!
     email: String!
@@ -46,4 +46,6 @@ export const typeDefs = gql`
     upsertMarkers(map: ID!, markers: [MarkerInput]!): Boolean!
     deleteMarkers(map: ID!, markers: [MarkerInput]!): Boolean!
   }
-`
+`;
+
+module.exports = { typeDefs };

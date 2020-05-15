@@ -1,31 +1,32 @@
 const mongoose = require('mongoose');
-require('dotenv').config({ path: `${__dirname}\\..\\..\\.env`});
+require('dotenv').config({ path: `${__dirname}\\..\\..\\.env` });
+
 const schemas = require('./dbSchemas');
+const { log } = require('./log');
 
-let connection;
 
-console.log('Mongoose ready state:')
-console.log(mongoose.connection.readyState)
+log.info('Mongoose ready state:');
+log.info(mongoose.connection.readyState);
 if (!mongoose.connection.readyStates) {
   mongoose.Promise = global.Promise;
   const options = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      bufferCommands: false,
-      dbName: 'elsewhere',
-      w: 'majority',
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    bufferCommands: false,
+    dbName: 'elsewhere',
+    w: 'majority',
   };
 
   try {
-    connection = mongoose.connect(process.env.MONGODB_URI, options).then(() => {
-      console.log('Connected to DB.');
+    mongoose.connect(process.env.MONGODB_URI, options).then(() => {
+      log.info('Connected to DB.');
     }, (err) => {
-      console.error('Error callback connecting to DB.');
-      console.error(err);
+      log.error('Error callback connecting to DB.');
+      log.error(err);
     });
   } catch (e) {
-    console.error('Caught error connecting to DB.');
-    console.error(e);
+    log.error('Caught error connecting to DB.');
+    log.error(e);
   }
 }
 

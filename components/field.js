@@ -5,7 +5,8 @@ export default function Field(props) {
         id={[props.name, 'label'].join('-')}
         htmlFor={[props.name, 'input'].join('-')}
       >
-        {props.label}{' '}
+        {props.label}
+        {' '}
         {props.required ? <span title="Required">*</span> : undefined}
       </label>
       <br />
@@ -17,5 +18,5 @@ export default function Field(props) {
         type={props.type}
       />
     </div>
-  )
+  );
 }

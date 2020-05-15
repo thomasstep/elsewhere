@@ -5,7 +5,7 @@ export default class ElsewhereInfoWindow extends React.Component {
   constructor(props) {
     super(props);
     this.infoWindowRef = React.createRef();
-    this.contentElement = document.createElement(`div`);
+    this.contentElement = document.createElement('div');
   }
 
   componentDidUpdate(prevProps) {

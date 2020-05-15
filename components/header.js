@@ -13,7 +13,7 @@ import Link from 'next/link';
 const useStyles = makeStyles({
   list: {
     width: 250,
-  }
+  },
 });
 
 const style = {
@@ -45,16 +45,16 @@ export default function Header() {
       onKeyDown={toggleDrawer(false)}
     >
       <List>
-        <Link href='/'>
-          <ListItem button key={'Home'}>
-            <ListItemIcon>{<HomeIcon/>}</ListItemIcon>
-            <ListItemText primary={'Home'} />
+        <Link href="/">
+          <ListItem button key="Home">
+            <ListItemIcon><HomeIcon /></ListItemIcon>
+            <ListItemText primary="Home" />
           </ListItem>
         </Link>
-        <Link href='/'>
-          <ListItem button key={'Profile'}>
-            <ListItemIcon>{<AccountBoxIcon/>}</ListItemIcon>
-            <ListItemText primary={'Profile'} />
+        <Link href="/">
+          <ListItem button key="Profile">
+            <ListItemIcon><AccountBoxIcon /></ListItemIcon>
+            <ListItemText primary="Profile" />
           </ListItem>
         </Link>
       </List>
@@ -62,9 +62,9 @@ export default function Header() {
   );
 
   return (
-    <React.Fragment key='top'>
+    <React.Fragment key="top">
       <Fab onClick={toggleDrawer(true)} style={style}>Nav</Fab>
-      <Drawer anchor='top' open={state.open} onClose={toggleDrawer(false)}>
+      <Drawer anchor="top" open={state.open} onClose={toggleDrawer(false)}>
         {list()}
       </Drawer>
     </React.Fragment>

@@ -1,4 +1,4 @@
-import { withRouter } from 'next/router'
+import { withRouter } from 'next/router';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import { Map, GoogleApiWrapper, Marker } from 'google-maps-react';
@@ -8,7 +8,7 @@ import Layout from '../../components/layout';
 import ElsewhereInfoWindow from '../../components/infowindow';
 
 const fetcher = async (query) => {
-  const res = await request('/api/graphql', query)
+  const res = await request('/api/graphql', query);
   return res;
 };
 
@@ -20,7 +20,7 @@ const getMarkers = (id) => `{
 }`;
 
 const upsertMarkers = (id, markers) => {
-  let markersString = `[`;
+  let markersString = '[';
   markers.forEach((marker) => {
     markersString += `
     {
@@ -28,15 +28,15 @@ const upsertMarkers = (id, markers) => {
       lng: ${marker.lng}
     }`;
   });
-  markersString += `]`
-  console.log(markersString)
+  markersString += ']';
+  log.info(markersString);
   return `mutation {
     upsertMarkers(map: ${id}, markers: ${markersString})
   }`;
 };
 
 const deleteMarkers = (id, markers) => {
-  let markersString = `[`;
+  let markersString = '[';
   markers.forEach((marker) => {
     markersString += `
     {
@@ -44,8 +44,8 @@ const deleteMarkers = (id, markers) => {
       lng: ${marker.lng}
     }`;
   });
-  markersString += `]`
-  console.log(markersString)
+  markersString += ']';
+  log.info(markersString);
   return `mutation {
     deleteMarkers(map: ${id}, markers: ${markersString})
   }`;
@@ -76,9 +76,9 @@ class ElsewhereMap extends React.Component {
     };
 
     fetcher(deleteMarkers(this.props.router.query.id, [marker])).then(({ deleteMarkers: success }) => {
-      if(success) {
-        console.log('Marker deleted.');
-        
+      if (success) {
+        log.info('Marker deleted.');
+
         fetcher(getMarkers(this.props.router.query.id)).then(({ getMarkers: markers }) => {
           this.setState({
             activeInfoWindow: false,
@@ -87,7 +87,7 @@ class ElsewhereMap extends React.Component {
           });
         });
       } else {
-        console.error('Problem deleting marker.');
+        log.error('Problem deleting marker.');
         this.setState({
           activeInfoWindow: false,
           activeMarker: {},
@@ -99,26 +99,26 @@ class ElsewhereMap extends React.Component {
   onInfoWindowClose() {
     this.setState({
       activeInfoWindow: false,
-      activeMarker: {}
+      activeMarker: {},
     });
   }
 
   onMapClick(mapProps, map, clickEvent) {
     const marker = {
       lat: clickEvent.latLng.lat(),
-      lng: clickEvent.latLng.lng()
+      lng: clickEvent.latLng.lng(),
     };
 
     fetcher(upsertMarkers(this.props.router.query.id, [marker])).then(({ upsertMarkers: success }) => {
-      if(success) {
-        console.log('Marker upserted.');
+      if (success) {
+        log.info('Marker upserted.');
         this.setState({
           activeInfoWindow: false,
           activeMarker: {},
           markers: [...this.state.markers, marker],
         });
       } else {
-        console.error('Problem upserting marker.');
+        log.error('Problem upserting marker.');
         this.setState({
           activeInfoWindow: false,
           activeMarker: {},
@@ -137,34 +137,33 @@ class ElsewhereMap extends React.Component {
             onClick={this.onMapClick.bind(this)}
           >
 
-            {this.state.markers.length ? this.state.markers.map((marker) =>
+            {this.state.markers.length ? this.state.markers.map((marker) => (
               <Marker
                 position={marker}
                 onClick={(props, marker) => {
-                    console.log(marker)
-                    this.setState({
-                      activeInfoWindow: true,
-                      activeMarker: marker,
-                    });
-                  }
-                }
+                  log.info(marker);
+                  this.setState({
+                    activeInfoWindow: true,
+                    activeMarker: marker,
+                  });
+                }}
                 key={marker.lat.toString().concat(marker.lng.toString())}
               />
-            ) : null}
+            )) : null}
 
             <ElsewhereInfoWindow
               visible={this.state.activeInfoWindow}
               marker={this.state.activeMarker}
               onClose={this.onInfoWindowClose.bind(this)}
-              >
-                <div>
-                  <p>I'm here</p>
-                  <Button onClick={this.deleteMarker.bind(this)}>
-                    Delete this marker
-                  </Button>
-                </div>
+            >
+              <div>
+                <p>I'm here</p>
+                <Button onClick={this.deleteMarker.bind(this)}>
+                  Delete this marker
+                </Button>
+              </div>
             </ElsewhereInfoWindow>
-    
+
           </Map>
         </Box>
       </Layout>
@@ -173,5 +172,5 @@ class ElsewhereMap extends React.Component {
 }
 
 export default GoogleApiWrapper({
-  apiKey: process.env.GOOGLE_MAPS_KEY
+  apiKey: process.env.GOOGLE_MAPS_KEY,
 })(withRouter(ElsewhereMap));

@@ -1,30 +1,33 @@
-import { AuthenticationError, UserInputError } from 'apollo-server-micro'
-import cookie from 'cookie'
-import jwt from 'jsonwebtoken'
-import bcrypt from 'bcrypt'
+import { AuthenticationError, UserInputError } from 'apollo-server-micro';
+import cookie from 'cookie';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+
 const { v4 } = require('uuid');
+const { log } = require('../utils/log');
+
 
 const { maps, users } = require('../utils/db');
 
-const JWT_SECRET = process.env.JWT_SECRET
+const { JWT_SECRET } = process.env;
 
 function createUser(data) {
-  const salt = bcrypt.genSaltSync()
+  const salt = bcrypt.genSaltSync();
 
   return {
     id: v4(),
     email: data.email,
     hashedPassword: bcrypt.hashSync(data.password, salt),
-  }
+  };
 }
 
 function validPassword(user, password) {
-  return bcrypt.compareSync(password, user.hashedPassword)
+  return bcrypt.compareSync(password, user.hashedPassword);
 }
 
-export const resolvers = {
+const resolvers = {
   Query: {
-    async viewer(_parent, _args, context, _info) {
+    async viewer(parent, args, context) {
       if (!context.user) {
         throw new AuthenticationError('Authentication token is invalid, please log in.');
       }
@@ -36,16 +39,16 @@ export const resolvers = {
     },
   },
   Mutation: {
-    async signUp(_parent, args, _context, _info) {
-      const newUser = createUser(args.input)
+    async signUp(parent, args) {
+      const newUser = createUser(args.input);
 
-      await users.create(newUser)
+      await users.create(newUser);
 
-      return { user: newUser }
+      return { user: newUser };
     },
 
-    async signIn(_parent, args, context, _info) {
-      const user = await users.findOne({ email: args.input.email});
+    async signIn(parent, args, context) {
+      const user = await users.findOne({ email: args.input.email });
 
       if (user && validPassword(user, args.input.password)) {
         const token = jwt.sign(
@@ -53,8 +56,8 @@ export const resolvers = {
           JWT_SECRET,
           {
             expiresIn: '6h',
-          }
-        )
+          },
+        );
 
         context.res.setHeader(
           'Set-Cookie',
@@ -64,15 +67,15 @@ export const resolvers = {
             path: '/',
             sameSite: 'lax',
             secure: process.env.NODE_ENV === 'production',
-          })
-        )
+          }),
+        );
 
-        return { user }
+        return { user };
       }
 
-      throw new UserInputError('Invalid email and password combination')
+      throw new UserInputError('Invalid email and password combination');
     },
-    async signOut(_parent, _args, context, _info) {
+    async signOut(parent, args, context) {
       context.res.setHeader(
         'Set-Cookie',
         cookie.serialize('token', '', {
@@ -81,10 +84,10 @@ export const resolvers = {
           path: '/',
           sameSite: 'lax',
           secure: process.env.NODE_ENV === 'production',
-        })
-      )
+        }),
+      );
 
-      return true
+      return true;
     },
     upsertMarkers: async (parent, args) => {
       const promises = [];
@@ -92,24 +95,24 @@ export const resolvers = {
         promises.push(
           maps.updateOne(
             {
-              map: args.map
+              map: args.map,
             },
             {
               $push: {
                 markers: {
-                  ...marker
-                }
-              }
-            }
-          )
+                  ...marker,
+                },
+              },
+            },
+          ),
         );
       });
 
       try {
         await Promise.all(promises);
       } catch (err) {
-        console.error('Error upserting markers.');
-        console.error(err);
+        log.error('Error upserting markers.');
+        log.error(err);
         return false;
       }
 
@@ -131,16 +134,18 @@ export const resolvers = {
           ),
         );
       });
-      
+
       try {
         await Promise.all(promises);
       } catch (err) {
-        console.error('Error deleting markers.');
-        console.error(err);
+        log.error('Error deleting markers.');
+        log.error(err);
         return false;
       }
 
       return true;
     },
   },
-}
+};
+
+module.exports = { resolvers };
