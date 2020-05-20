@@ -1,7 +1,9 @@
+import React from 'react';
+import PropTypes from 'prop-types';
 import { InfoWindow } from 'google-maps-react';
 import ReactDOM from 'react-dom';
 
-export default class ElsewhereInfoWindow extends React.Component {
+class ElsewhereInfoWindow extends React.Component {
   constructor(props) {
     super(props);
     this.infoWindowRef = React.createRef();
@@ -9,9 +11,10 @@ export default class ElsewhereInfoWindow extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.children !== prevProps.children) {
+    const { children } = this.props;
+    if (children !== prevProps.children) {
       ReactDOM.render(
-        React.Children.only(this.props.children),
+        React.Children.only(children),
         this.contentElement,
       );
       this.infoWindowRef.current.infowindow.setContent(this.contentElement);
@@ -22,3 +25,9 @@ export default class ElsewhereInfoWindow extends React.Component {
     return <InfoWindow ref={this.infoWindowRef} {...this.props} />;
   }
 }
+
+ElsewhereInfoWindow.propTypes = {
+  children: PropTypes.element.isRequired,
+};
+
+export default ElsewhereInfoWindow;

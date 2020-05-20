@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 const { ApolloServer } = require('apollo-server-micro');
 const { schema } = require('../../apollo/schema');
 
-const { users } = require('../../utils/db');
+const { log, users } = require('../../utils');
 
 const { JWT_SECRET } = process.env;
 

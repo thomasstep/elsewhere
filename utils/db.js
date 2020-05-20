@@ -1,6 +1,4 @@
 const mongoose = require('mongoose');
-require('dotenv').config({ path: `${__dirname}\\..\\..\\.env` });
-
 const schemas = require('./dbSchemas');
 const { log } = require('./log');
 

@@ -1,16 +1,13 @@
 import { withRouter } from 'next/router';
+import PropTypes from 'prop-types';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
+import React from 'react';
 import { Map, GoogleApiWrapper, Marker } from 'google-maps-react';
-import { request } from 'graphql-request';
+import { fetcher } from '../../utils/fetcher';
 
 import Layout from '../../components/layout';
 import ElsewhereInfoWindow from '../../components/infowindow';
-
-const fetcher = async (query) => {
-  const res = await request('/api/graphql', query);
-  return res;
-};
 
 const getMarkers = (id) => `{
   getMarkers(map: ${id}) {
@@ -29,7 +26,6 @@ const upsertMarkers = (id, markers) => {
     }`;
   });
   markersString += ']';
-  log.info(markersString);
   return `mutation {
     upsertMarkers(map: ${id}, markers: ${markersString})
   }`;
@@ -45,7 +41,6 @@ const deleteMarkers = (id, markers) => {
     }`;
   });
   markersString += ']';
-  log.info(markersString);
   return `mutation {
     deleteMarkers(map: ${id}, markers: ${markersString})
   }`;
@@ -59,40 +54,18 @@ class ElsewhereMap extends React.Component {
       activeInfoWindow: false,
       markers: [],
     };
+
+    this.onMapClick = this.onMapClick.bind(this);
+    this.onInfoWindowClose = this.onInfoWindowClose.bind(this);
+    this.deleteMarker = this.deleteMarker.bind(this);
   }
 
   componentDidMount() {
-    fetcher(getMarkers(this.props.router.query.id)).then(({ getMarkers: markers }) => {
+    const { router } = this.props;
+    fetcher(getMarkers(router.query.id)).then(({ getMarkers: markers }) => {
       this.setState({
         markers,
       });
-    });
-  }
-
-  deleteMarker() {
-    const marker = {
-      lat: this.state.activeMarker.position.lat(),
-      lng: this.state.activeMarker.position.lng(),
-    };
-
-    fetcher(deleteMarkers(this.props.router.query.id, [marker])).then(({ deleteMarkers: success }) => {
-      if (success) {
-        log.info('Marker deleted.');
-
-        fetcher(getMarkers(this.props.router.query.id)).then(({ getMarkers: markers }) => {
-          this.setState({
-            activeInfoWindow: false,
-            activeMarker: {},
-            markers,
-          });
-        });
-      } else {
-        log.error('Problem deleting marker.');
-        this.setState({
-          activeInfoWindow: false,
-          activeMarker: {},
-        });
-      }
     });
   }
 
@@ -104,21 +77,50 @@ class ElsewhereMap extends React.Component {
   }
 
   onMapClick(mapProps, map, clickEvent) {
+    const { router } = this.props;
+    const { markers } = this.state;
+
     const marker = {
       lat: clickEvent.latLng.lat(),
       lng: clickEvent.latLng.lng(),
     };
 
-    fetcher(upsertMarkers(this.props.router.query.id, [marker])).then(({ upsertMarkers: success }) => {
+
+    fetcher(upsertMarkers(router.query.id, [marker])).then(({ upsertMarkers: success }) => {
       if (success) {
-        log.info('Marker upserted.');
         this.setState({
           activeInfoWindow: false,
           activeMarker: {},
-          markers: [...this.state.markers, marker],
+          markers: [...markers, marker],
         });
       } else {
-        log.error('Problem upserting marker.');
+        this.setState({
+          activeInfoWindow: false,
+          activeMarker: {},
+        });
+      }
+    });
+  }
+
+  deleteMarker() {
+    const { router } = this.props;
+    const { activeMarker } = this.state;
+
+    const marker = {
+      lat: activeMarker.position.lat(),
+      lng: activeMarker.position.lng(),
+    };
+
+    fetcher(deleteMarkers(router.query.id, [marker])).then(({ deleteMarkers: success }) => {
+      if (success) {
+        fetcher(getMarkers(router.query.id)).then(({ getMarkers: markers }) => {
+          this.setState({
+            activeInfoWindow: false,
+            activeMarker: {},
+            markers,
+          });
+        });
+      } else {
         this.setState({
           activeInfoWindow: false,
           activeMarker: {},
@@ -128,23 +130,25 @@ class ElsewhereMap extends React.Component {
   }
 
   render() {
+    const { google } = this.props;
+    const { markers, activeInfoWindow, activeMarker } = this.state;
+
     return (
       <Layout>
         <Box>
           <Map
-            google={this.props.google}
+            google={google}
             zoom={14}
-            onClick={this.onMapClick.bind(this)}
+            onClick={this.onMapClick}
           >
 
-            {this.state.markers.length ? this.state.markers.map((marker) => (
+            {markers.length ? markers.map((marker) => (
               <Marker
                 position={marker}
-                onClick={(props, marker) => {
-                  log.info(marker);
+                onClick={(props, clickedMarker) => {
                   this.setState({
                     activeInfoWindow: true,
-                    activeMarker: marker,
+                    activeMarker: clickedMarker,
                   });
                 }}
                 key={marker.lat.toString().concat(marker.lng.toString())}
@@ -152,13 +156,13 @@ class ElsewhereMap extends React.Component {
             )) : null}
 
             <ElsewhereInfoWindow
-              visible={this.state.activeInfoWindow}
-              marker={this.state.activeMarker}
-              onClose={this.onInfoWindowClose.bind(this)}
+              visible={activeInfoWindow}
+              marker={activeMarker}
+              onClose={this.onInfoWindowClose}
             >
               <div>
-                <p>I'm here</p>
-                <Button onClick={this.deleteMarker.bind(this)}>
+                <p>I&apos;m here</p>
+                <Button onClick={this.deleteMarker}>
                   Delete this marker
                 </Button>
               </div>
@@ -170,6 +174,17 @@ class ElsewhereMap extends React.Component {
     );
   }
 }
+
+ElsewhereMap.propTypes = {
+  router: PropTypes.shape({
+    push: PropTypes.func.isRequired,
+    query: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
+  // eslint-disable-next-line react/forbid-prop-types
+  google: PropTypes.object.isRequired,
+};
 
 export default GoogleApiWrapper({
   apiKey: process.env.GOOGLE_MAPS_KEY,

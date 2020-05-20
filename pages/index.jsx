@@ -1,3 +1,5 @@
+import React from 'react';
+import PropTypes from 'prop-types';
 import Link from 'next/link';
 import { request } from 'graphql-request';
 import { withRouter } from 'next/router';
@@ -24,25 +26,22 @@ class Index extends React.Component {
   }
 
   componentDidMount() {
+    const { router } = this.props;
     fetcher(viewerQuery)
       .then(({ viewer: { email } }) => {
         this.setState({
           email,
         });
       })
-      .catch((error) => {
-        if (error.message === 'No token found, please log in.') {
-          console.info('Not logged in.');
-        } else if (error.message === 'Authentication token is invalid, please log in.') {
-          console.info('Bad token.');
-        }
-
-        this.props.router.push('/signin');
+      .catch(() => {
+        router.push('/signin');
       });
   }
 
   render() {
-    if (this.state.email) {
+    const { email } = this.state;
+
+    if (email) {
       return (
         <Layout>
           <main className="center">
@@ -57,5 +56,11 @@ class Index extends React.Component {
     return <p>Loading...</p>;
   }
 }
+
+Index.propTypes = {
+  router: PropTypes.shape({
+    push: PropTypes.func.isRequired,
+  }).isRequired,
+};
 
 export default withRouter(Index);

@@ -23,5 +23,10 @@ module.exports = {
     'react',
   ],
   rules: {
+    'import/prefer-default-export': 'off',
+    'react/jsx-props-no-spreading': ['error', {
+      'custom': 'ignore',
+    }],
+    'jsx-a11y/anchor-is-valid': 'off',
   },
 };
