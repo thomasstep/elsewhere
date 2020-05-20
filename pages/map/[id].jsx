@@ -4,8 +4,8 @@ import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import React from 'react';
 import { Map, GoogleApiWrapper, Marker } from 'google-maps-react';
-import { fetcher } from '../../utils/fetcher';
 
+import { fetcher } from '../../utils/fetcher';
 import Layout from '../../components/layout';
 import ElsewhereInfoWindow from '../../components/infowindow';
 

@@ -1,10 +1,9 @@
 import cookie from 'cookie';
 import jwt from 'jsonwebtoken';
+import { ApolloServer } from 'apollo-server-micro';
 
-const { ApolloServer } = require('apollo-server-micro');
-const { schema } = require('../../apollo/schema');
-
-const { log, users } = require('../../utils');
+import { schema } from '../../apollo/schema';
+import { log, users } from '../../utils';
 
 const { JWT_SECRET } = process.env;
 

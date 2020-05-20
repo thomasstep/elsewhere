@@ -2,9 +2,9 @@ import { AuthenticationError, UserInputError } from 'apollo-server-micro';
 import cookie from 'cookie';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { v4 } from 'uuid';
 
-const { v4 } = require('uuid');
-const { log } = require('../utils/log');
+import { log } from '../utils/log';
 
 
 const { maps, users } = require('../utils/db');

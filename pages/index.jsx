@@ -1,14 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
-import { request } from 'graphql-request';
 import { withRouter } from 'next/router';
 import Layout from '../components/layout';
-
-const fetcher = async (query) => {
-  const res = await request('/api/graphql', query);
-  return res;
-};
+import { fetcher } from '../utils/fetcher';
 
 const viewerQuery = `{
     viewer {
