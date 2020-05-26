@@ -4,6 +4,9 @@ const typeDefs = gql`
   type User {
     id: ID!
     email: String!
+    ownedMaps: [ID]!
+    readableMaps: [ID]!
+    writableMaps: [ID]!
   }
 
   input SignUpInput {

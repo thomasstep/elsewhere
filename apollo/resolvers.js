@@ -18,6 +18,9 @@ function createUser(data) {
     id: v4(),
     email: data.email,
     hashedPassword: bcrypt.hashSync(data.password, salt),
+    ownedMaps: [],
+    writableMaps: [],
+    readableMaps: [],
   };
 }
 
@@ -27,7 +30,7 @@ function validPassword(user, password) {
 
 const resolvers = {
   Query: {
-    async viewer(parent, args, context) {
+    viewer: async (parent, args, context) => {
       if (!context.user) {
         throw new AuthenticationError('Authentication token is invalid, please log in.');
       }
@@ -39,15 +42,18 @@ const resolvers = {
     },
   },
   Mutation: {
-    async signUp(parent, args) {
+    signUp: async (parent, args) => {
       const newUser = createUser(args.input);
 
       await users.create(newUser);
+      const result = { user: newUser };
+      log.info('User created.');
+      log.info(JSON.stringify(result, null, 2));
 
-      return { user: newUser };
+      return result;
     },
 
-    async signIn(parent, args, context) {
+    signIn: async (parent, args, context) => {
       const user = await users.findOne({ email: args.input.email });
 
       if (user && validPassword(user, args.input.password)) {
@@ -75,7 +81,7 @@ const resolvers = {
 
       throw new UserInputError('Invalid email and password combination');
     },
-    async signOut(parent, args, context) {
+    signOut: async (parent, args, context) => {
       context.res.setHeader(
         'Set-Cookie',
         cookie.serialize('token', '', {
@@ -92,6 +98,7 @@ const resolvers = {
     upsertMarkers: async (parent, args) => {
       const promises = [];
       args.markers.forEach((marker) => {
+        // TODO check that the marker doesn't already exist
         promises.push(
           maps.updateOne(
             {

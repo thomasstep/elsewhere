@@ -4,6 +4,9 @@ const usersSchema = new mongoose.Schema({
   id: String,
   email: String,
   hashedPassword: String,
+  ownedMaps: [String],
+  writableMaps: [String],
+  readableMaps: [String],
 });
 
 const mapsSchema = new mongoose.Schema({
