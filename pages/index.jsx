@@ -40,7 +40,7 @@ class Index extends React.Component {
       return (
         <Layout>
           <main className="center">
-            <Link href="/map/[id]" as="/map/1">
+            <Link href="/map/[id]" as="/map/1" passHref>
               <a>Go to a map</a>
             </Link>
           </main>

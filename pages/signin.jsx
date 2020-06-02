@@ -74,7 +74,7 @@ class SignIn extends React.Component {
           {' '}
           or
           {' '}
-          <Link href="signup">
+          <Link href="signup" passHref>
             <a>Sign up</a>
           </Link>
         </form>

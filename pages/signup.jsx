@@ -72,7 +72,7 @@ class SignUp extends React.Component {
           {' '}
           or
           {' '}
-          <Link href="signin">
+          <Link href="signin" passHref>
             <a>Sign in</a>
           </Link>
         </form>
