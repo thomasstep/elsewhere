@@ -5,7 +5,6 @@
     "env": {
       "MONGODB_URI": "@mongo-uri",
       "GOOGLE_MAPS_KEY": "@google-maps-key",
-      "JWT_SECRET": "@jwt-secret"
     }
   },
   "env": {
