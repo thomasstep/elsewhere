@@ -9,10 +9,10 @@ const layoutStyle = {
 };
 
 const Layout = (props) => {
-  const { children } = props;
+  const { children, floating } = props;
   return (
     <div style={layoutStyle}>
-      <Header />
+      <Header floating={floating} />
       {children}
       <style jsx global>
         {`
@@ -26,6 +26,12 @@ const Layout = (props) => {
 
 Layout.propTypes = {
   children: PropTypes.arrayOf(PropTypes.node).isRequired,
+  floating: PropTypes.bool,
 };
+
+Layout.defaultProps = {
+  floating: false,
+};
+
 
 export default Layout;

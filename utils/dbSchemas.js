@@ -1,7 +1,10 @@
 const mongoose = require('mongoose');
 
 const usersSchema = new mongoose.Schema({
-  id: String,
+  id: {
+    type: String,
+    unique: true,
+  },
   email: String,
   hashedPassword: String,
   ownedMaps: [String],
@@ -10,7 +13,12 @@ const usersSchema = new mongoose.Schema({
 });
 
 const mapsSchema = new mongoose.Schema({
-  map: String,
+  // The map field is a UUID used to identify the map
+  map: {
+    type: String,
+    unique: true,
+  },
+  name: String,
   markers: [
     {
       lat: Number,

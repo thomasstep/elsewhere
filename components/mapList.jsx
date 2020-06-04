@@ -6,6 +6,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Divider from '@material-ui/core/Divider';
 import Link from 'next/link';
 
+// TODO get maps, write name of map instead of ID
 export default function MapList(props) {
   const {
     mapList,

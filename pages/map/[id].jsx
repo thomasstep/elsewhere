@@ -10,13 +10,13 @@ import Layout from '../../components/layout';
 import ElsewhereInfoWindow from '../../components/infowindow';
 
 const getMarkers = (id) => `{
-  getMarkers(map: ${id}) {
+  getMarkers(map: "${id}") {
     lat
     lng
   }
 }`;
 
-const upsertMarkers = (id, markers) => {
+const createMarkers = (id, markers) => {
   let markersString = '[';
   markers.forEach((marker) => {
     markersString += `
@@ -27,7 +27,7 @@ const upsertMarkers = (id, markers) => {
   });
   markersString += ']';
   return `mutation {
-    upsertMarkers(map: ${id}, markers: ${markersString})
+    createMarkers(map: "${id}", markers: ${markersString})
   }`;
 };
 
@@ -42,7 +42,7 @@ const deleteMarkers = (id, markers) => {
   });
   markersString += ']';
   return `mutation {
-    deleteMarkers(map: ${id}, markers: ${markersString})
+    deleteMarkers(map: "${id}", markers: ${markersString})
   }`;
 };
 
@@ -86,7 +86,7 @@ class ElsewhereMap extends React.Component {
     };
 
 
-    fetcher(upsertMarkers(router.query.id, [marker])).then(({ upsertMarkers: success }) => {
+    fetcher(createMarkers(router.query.id, [marker])).then(({ createMarkers: success }) => {
       if (success) {
         this.setState({
           activeInfoWindow: false,
@@ -134,7 +134,7 @@ class ElsewhereMap extends React.Component {
     const { markers, activeInfoWindow, activeMarker } = this.state;
 
     return (
-      <Layout>
+      <Layout floating>
         <Box>
           <Map
             google={google}

@@ -1,6 +1,7 @@
 const { getMarkersAuth } = require('./auth/getMarkers');
-const { upsertMarkersAuth } = require('./auth/upsertMarkers');
+const { createMarkersAuth } = require('./auth/createMarkers');
 const { deleteMarkersAuth } = require('./auth/deleteMarkers');
+const { createMapAuth } = require('./auth/createMap');
 // const { log } = require('../utils');
 
 function handleValue(argValue, requestVariables) {
@@ -59,12 +60,16 @@ function endpointAuth(endpoint, args, user) {
       getMarkersAuth(args, user);
       break;
 
-    case 'upsertMarkers':
-      upsertMarkersAuth(args, user);
+    case 'createMarkers':
+      createMarkersAuth(args, user);
       break;
 
     case 'deleteMarkers':
       deleteMarkersAuth(args, user);
+      break;
+
+    case 'createMap':
+      createMapAuth(args, user);
       break;
 
     default:

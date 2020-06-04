@@ -35,6 +35,10 @@ Field.propTypes = {
   name: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   required: PropTypes.bool.isRequired,
-  autoComplete: PropTypes.string.isRequired,
+  autoComplete: PropTypes.string,
   type: PropTypes.string.isRequired,
+};
+
+Field.defaultProps = {
+  autoComplete: false,
 };

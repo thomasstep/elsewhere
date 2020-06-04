@@ -7,13 +7,15 @@ function deleteMarkersAuth(
     writableMaps,
   },
 ) {
-  if (
-    !ownedMaps.includes(map)
-    && !writableMaps.includes(map)
-  ) {
-    throw new AuthenticationError('You do not have access to delete markers from this map.');
+  if (ownedMaps.includes(map)) {
+    return;
   }
-  // If you have access to the map then you're good to go
+
+  if (writableMaps.includes(map)) {
+    return;
+  }
+
+  throw new AuthenticationError('You do not have access to delete markers from this map.');
 }
 
 module.exports = {

@@ -95,15 +95,13 @@ const resolvers = {
 
       return true;
     },
-    upsertMarkers: async (parent, args) => {
+    createMarkers: async (parent, args) => {
       const promises = [];
       args.markers.forEach((marker) => {
         // TODO check that the marker doesn't already exist
         promises.push(
           maps.updateOne(
-            {
-              map: args.map,
-            },
+            { map: args.map },
             {
               $push: {
                 markers: {
@@ -130,9 +128,7 @@ const resolvers = {
       args.markers.forEach((marker) => {
         promises.push(
           maps.update(
-            {
-              map: args.map,
-            },
+            { map: args.map },
             {
               $pull: {
                 markers: marker,
@@ -151,6 +147,49 @@ const resolvers = {
       }
 
       return true;
+    },
+    createMap: async (parent, args, context) => {
+      const { name } = args;
+      const newMapId = v4();
+      const { user: { id: userId } } = context;
+      try {
+        await maps.create({
+          name,
+          map: newMapId,
+        });
+      } catch (err) {
+        log.error('Error creating map.', {
+          name,
+          map: newMapId,
+        });
+        log.error(err);
+        return -1;
+      }
+
+      log.info('Map created.', {
+        name,
+        map: newMapId,
+      });
+
+      try {
+        await users.updateOne(
+          { id: userId },
+          {
+            $push: {
+              ownedMaps: newMapId,
+            },
+          },
+        );
+      } catch (err) {
+        log.error('Error adding map to user\'s ownedMaps.', {
+          name,
+          map: newMapId,
+        });
+        log.error(err);
+        return -1;
+      }
+
+      return newMapId;
     },
   },
 };

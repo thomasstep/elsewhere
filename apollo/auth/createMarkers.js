@@ -1,11 +1,10 @@
 const { AuthenticationError } = require('apollo-server-micro');
 
-function getMarkersAuth(
+function createMarkersAuth(
   { map },
   {
     ownedMaps,
     writableMaps,
-    readableMaps,
   },
 ) {
   if (ownedMaps.includes(map)) {
@@ -16,13 +15,9 @@ function getMarkersAuth(
     return;
   }
 
-  if (readableMaps.includes(map)) {
-    return;
-  }
-
-  throw new AuthenticationError('You do not have access to view this map.');
+  throw new AuthenticationError('You do not have access to create markers on this map.');
 }
 
 module.exports = {
-  getMarkersAuth,
+  createMarkersAuth,
 };

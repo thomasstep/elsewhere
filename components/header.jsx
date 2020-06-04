@@ -50,7 +50,6 @@ class Header extends React.Component {
   render() {
     const { open } = this.state;
     const { floating } = this.props;
-    console.log(floating)
 
     return floating ? (
       <React.Fragment key="top">
