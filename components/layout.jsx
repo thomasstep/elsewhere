@@ -25,7 +25,10 @@ const Layout = (props) => {
 };
 
 Layout.propTypes = {
-  children: PropTypes.arrayOf(PropTypes.node).isRequired,
+  children: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.node),
+    PropTypes.node,
+  ]).isRequired,
   floating: PropTypes.bool,
 };
 

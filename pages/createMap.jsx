@@ -1,9 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'next/router';
-import { fetcher } from '../utils/fetcher';
+
 import Field from '../components/field';
+import Layout from '../components/layout';
 import { getErrorMessage } from '../lib/form';
+import { fetcher } from '../utils/fetcher';
 
 const createMapMutation = `
   mutation CreateMapMutation($name: String!) {
@@ -44,8 +46,8 @@ class CreateMap extends React.Component {
   render() {
     const { errorMsg } = this.state;
     return (
-      <>
-        <h1>Sign In</h1>
+      <Layout>
+        <h1>Create a new map</h1>
         <form onSubmit={this.handleSubmit.bind(this)}>
           {errorMsg && <p>{errorMsg}</p>}
           <Field
@@ -56,7 +58,7 @@ class CreateMap extends React.Component {
           />
           <button type="submit">Create Map</button>
         </form>
-      </>
+      </Layout>
     );
   }
 }
