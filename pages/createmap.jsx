@@ -55,6 +55,7 @@ class CreateMap extends React.Component {
             type="text"
             required
             label="Map Name"
+            autoComplete="false"
           />
           <button type="submit">Create Map</button>
         </form>

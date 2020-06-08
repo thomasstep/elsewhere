@@ -130,11 +130,12 @@ Header.propTypes = {
   floating: PropTypes.bool,
   classes: PropTypes.shape(
     PropTypes.object,
-  ).isRequired,
+  ),
 };
 
 Header.defaultProps = {
   floating: false,
+  classes: {},
 };
 
 export default withStyles(styles, { withTheme: true })(Header);
