@@ -1,26 +1,25 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import Header from './header';
+import Box from '@material-ui/core/Box';
 
-const layoutStyle = {
-  width: '100%',
-  height: '100%',
-};
+import Header from './header';
 
 const Layout = (props) => {
   const { children, floating } = props;
   return (
-    <div style={layoutStyle}>
+    <Box>
       <Header floating={floating} />
-      {children}
-      <style jsx global>
+      <Box mt={3} px={5}>
+        {children}
+      </Box>
+      {/* <style jsx global>
         {`
         body {
           margin: 0;
       `}
-      </style>
-    </div>
+      </style> */}
+    </Box>
   );
 };
 

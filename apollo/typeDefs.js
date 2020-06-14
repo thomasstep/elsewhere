@@ -39,7 +39,8 @@ const typeDefs = gql`
 
   type Query {
     viewer: User
-    getMarkers(map: ID!): [Marker]!
+    getMarkers(mapId: ID!): [Marker]!
+    getMapName(mapId: ID!): String!
   }
 
   type Mutation {
@@ -61,29 +62,29 @@ const typeDefs = gql`
     """
     Create markers for a map given by ID.
     """
-    createMarkers(map: ID!, markers: [MarkerInput]!): Boolean!
+    createMarkers(mapId: ID!, markers: [MarkerInput]!): Boolean!
 
     """
     Delete markers from a map given by ID.
     """
-    deleteMarkers(map: ID!, markers: [MarkerInput]!): Boolean!
+    deleteMarkers(mapId: ID!, markers: [MarkerInput]!): Boolean!
 
     """
     Create a map with a given name. Returns map's ID.
     """
-    createMap(name: String): ID!
+    createMap(name: String!): ID!
 
     """
     TODO
     Creates a map with all the same markers as the given map referenced by ID.
     """
-    duplicateMap(map: ID!): ID!
+    duplicateMap(mapId: ID!): ID!
 
     """
     TODO
     Delete a map given by ID.
     """
-    deleteMap(map: ID!): Boolean!
+    deleteMap(mapId: ID!): Boolean!
   }
 `;
 

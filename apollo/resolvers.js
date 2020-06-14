@@ -37,8 +37,39 @@ const resolvers = {
       return context.user;
     },
     getMarkers: async (parent, args) => {
-      const { markers } = await maps.findOne({ map: args.map });
+      const { mapId } = args;
+      let markers;
+      try {
+        const map = await maps.findById(mapId);
+        markers = map.markers;
+      } catch (err) {
+        log.error('Error finding map markers.', {
+          mapId,
+        });
+        log.error(err);
+        return [];
+      }
       return markers;
+    },
+    getMapName: async (parent, args) => {
+      const { mapId } = args;
+      let mapName = 'Map not found';
+      try {
+        const map = await maps.findById(mapId).select('name');
+        mapName = map.name;
+      } catch (err) {
+        log.error('Error finding map name.', {
+          mapId,
+        });
+        log.error(err);
+        return 'Map not found';
+      }
+
+      log.info('Found name for map.', {
+        mapId,
+        mapName,
+      });
+      return mapName;
     },
   },
   Mutation: {
@@ -96,12 +127,13 @@ const resolvers = {
       return true;
     },
     createMarkers: async (parent, args) => {
+      const { mapId, markers } = args;
       const promises = [];
-      args.markers.forEach((marker) => {
+      markers.forEach((marker) => {
         // TODO check that the marker doesn't already exist
         promises.push(
-          maps.updateOne(
-            { map: args.map },
+          maps.findByIdAndUpdate(
+            mapId,
             {
               $push: {
                 markers: {
@@ -124,11 +156,12 @@ const resolvers = {
       return true;
     },
     deleteMarkers: async (parent, args) => {
+      const { mapId, markers } = args;
       const promises = [];
-      args.markers.forEach((marker) => {
+      markers.forEach((marker) => {
         promises.push(
-          maps.update(
-            { map: args.map },
+          maps.findByIdAndUpdate(
+            mapId,
             {
               $pull: {
                 markers: marker,
@@ -150,25 +183,23 @@ const resolvers = {
     },
     createMap: async (parent, args, context) => {
       const { name } = args;
-      const newMapId = v4();
       const { user: { id: userId } } = context;
+      let map;
       try {
-        await maps.create({
+        map = await maps.create({
           name,
-          map: newMapId,
         });
       } catch (err) {
         log.error('Error creating map.', {
           name,
-          map: newMapId,
         });
         log.error(err);
         return -1;
       }
 
+      const { _id: newMapId } = map;
       log.info('Map created.', {
-        name,
-        map: newMapId,
+        map,
       });
 
       try {
@@ -182,8 +213,7 @@ const resolvers = {
         );
       } catch (err) {
         log.error('Error adding map to user\'s ownedMaps.', {
-          name,
-          map: newMapId,
+          map,
         });
         log.error(err);
         return -1;

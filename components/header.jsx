@@ -38,10 +38,18 @@ const styles = (theme) => ({
     zIndex: theme.zIndex.drawer + 1,
     position: 'static',
   },
+  iconButton: {
+    '&:hover': {
+      backgroundColor: theme.palette.primary.dark,
+    },
+  },
+  menuIcon: {
+    color: 'white',
+  },
   typography: {
     flexGrow: 1,
     align: 'center',
-    marginTop: '6px',
+    // marginTop: '6px',
     marginLeft: theme.spacing(2),
   },
 });
@@ -109,14 +117,14 @@ class Header extends React.Component {
         <>
           <AppBar className={classes.appBar}>
             <Toolbar>
-              <IconButton onClick={this.toggleDrawer} edge="start" aria-label="menu">
-                <MenuIcon />
+              <IconButton onClick={this.toggleDrawer} className={classes.iconButton} edge="start" aria-label="menu">
+                <MenuIcon className={classes.menuIcon} />
               </IconButton>
               <Typography
                 variant="h5"
                 className={classes.typography}
               >
-                Elsewhere
+                ELSEWHERE
               </Typography>
             </Toolbar>
           </AppBar>
@@ -130,12 +138,12 @@ Header.propTypes = {
   floating: PropTypes.bool,
   classes: PropTypes.shape(
     PropTypes.object,
-  ),
+  ).isRequired,
 };
 
 Header.defaultProps = {
   floating: false,
-  classes: {},
+  // classes: {},
 };
 
 export default withStyles(styles, { withTheme: true })(Header);

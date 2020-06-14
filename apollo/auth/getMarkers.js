@@ -1,22 +1,22 @@
 const { AuthenticationError } = require('apollo-server-micro');
 
 function getMarkersAuth(
-  { map },
+  { mapId },
   {
     ownedMaps,
     writableMaps,
     readableMaps,
   },
 ) {
-  if (ownedMaps.includes(map)) {
+  if (ownedMaps.includes(mapId)) {
     return;
   }
 
-  if (writableMaps.includes(map)) {
+  if (writableMaps.includes(mapId)) {
     return;
   }
 
-  if (readableMaps.includes(map)) {
+  if (readableMaps.includes(mapId)) {
     return;
   }
 

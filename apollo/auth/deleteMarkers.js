@@ -1,17 +1,17 @@
 const { AuthenticationError } = require('apollo-server-micro');
 
 function deleteMarkersAuth(
-  { map },
+  { mapId },
   {
     ownedMaps,
     writableMaps,
   },
 ) {
-  if (ownedMaps.includes(map)) {
+  if (ownedMaps.includes(mapId)) {
     return;
   }
 
-  if (writableMaps.includes(map)) {
+  if (writableMaps.includes(mapId)) {
     return;
   }
 

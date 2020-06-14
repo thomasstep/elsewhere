@@ -1,6 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'next/router';
+import { withStyles } from '@material-ui/core/styles';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
 import Layout from '../components/layout';
 import MapList from '../components/mapList';
 import { fetcher } from '../utils/fetcher';
@@ -14,6 +17,12 @@ const viewerQuery = `{
       writableMaps
     }
   }`;
+
+const styles = {
+  gridItem: {
+    textAlign: 'center',
+  },
+};
 
 class Profile extends React.Component {
   constructor(props) {
@@ -52,33 +61,43 @@ class Profile extends React.Component {
         writableMaps,
       },
     } = this.state;
+    const { classes } = this.props;
 
     if (id) {
       const sharedMaps = [...writableMaps, ...readableMaps];
       return (
         <Layout>
-          <h1>Profile</h1>
-          <h3>{email}</h3>
+          <Grid container>
+            <Grid item xs={12} />
+            <Grid item xs={12} className={classes.gridItem}>
+              <Typography variant="h5"> Profile </Typography>
+            </Grid>
+            <Grid item xs={12} className={classes.gridItem}>
+              <h3>{email}</h3>
+            </Grid>
 
-          {
-          ownedMaps.length ? (
-            <>
-              <h1>Your maps</h1>
-              <MapList mapList={ownedMaps} />
-            </>
-          )
-            : null
-          }
+            <Grid item xs={12}>
+              {
+              ownedMaps.length ? (
+                <>
+                  <h1>Your maps</h1>
+                  <MapList mapList={ownedMaps} />
+                </>
+              )
+                : null
+              }
 
-          {
-          sharedMaps.length ? (
-            <>
-              <h1>Maps shared with you</h1>
-              <MapList mapList={sharedMaps} />
-            </>
-          )
-            : null
-          }
+              {
+              sharedMaps.length ? (
+                <>
+                  <h1>Maps shared with you</h1>
+                  <MapList mapList={sharedMaps} />
+                </>
+              )
+                : null
+              }
+            </Grid>
+          </Grid>
         </Layout>
       );
     }
@@ -91,6 +110,9 @@ Profile.propTypes = {
   router: PropTypes.shape({
     push: PropTypes.func.isRequired,
   }).isRequired,
+  classes: PropTypes.shape(
+    PropTypes.object,
+  ).isRequired,
 };
 
-export default withRouter(Profile);
+export default withRouter(withStyles(styles, { withTheme: true })(Profile));
