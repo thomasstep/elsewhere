@@ -6,19 +6,22 @@ import Box from '@material-ui/core/Box';
 import Header from './header';
 
 const Layout = (props) => {
-  const { children, floating } = props;
+  const { children, mapPage } = props;
   return (
     <Box>
-      <Header floating={floating} />
-      <Box mt={3} px={5}>
-        {children}
-      </Box>
-      {/* <style jsx global>
-        {`
-        body {
-          margin: 0;
-      `}
-      </style> */}
+      <Header mapPage={mapPage} />
+      {
+        mapPage ? (
+          <Box>
+            {children}
+          </Box>
+        )
+          : (
+            <Box mt={3} px={5}>
+              {children}
+            </Box>
+          )
+      }
     </Box>
   );
 };
@@ -28,11 +31,11 @@ Layout.propTypes = {
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node,
   ]).isRequired,
-  floating: PropTypes.bool,
+  mapPage: PropTypes.bool,
 };
 
 Layout.defaultProps = {
-  floating: false,
+  mapPage: false,
 };
 
 

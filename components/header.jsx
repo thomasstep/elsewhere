@@ -29,9 +29,9 @@ const styles = (theme) => ({
     left: '50%',
     position: 'fixed',
     zIndex: 100,
-    backgroundColor: theme.palette.primary.main,
+    backgroundColor: theme.palette.background.default,
     '&:hover': {
-      backgroundColor: theme.palette.primary.main,
+      backgroundColor: theme.palette.background.default,
     },
   },
   appBar: {
@@ -75,7 +75,7 @@ class Header extends React.Component {
 
   render() {
     const { open } = this.state;
-    const { floating, classes } = this.props;
+    const { mapPage, classes } = this.props;
     const navigationDrawer = (
       <Drawer anchor="top" open={open} onClose={this.toggleDrawer}>
         <div
@@ -107,7 +107,7 @@ class Header extends React.Component {
       </Drawer>
     );
 
-    return floating ? (
+    return mapPage ? (
       <React.Fragment key="top">
         <Fab onClick={this.toggleDrawer} className={classes.fab}><ExpandMoreIcon /></Fab>
         {navigationDrawer}
@@ -135,14 +135,14 @@ class Header extends React.Component {
 }
 
 Header.propTypes = {
-  floating: PropTypes.bool,
+  mapPage: PropTypes.bool,
   classes: PropTypes.shape(
     PropTypes.object,
   ).isRequired,
 };
 
 Header.defaultProps = {
-  floating: false,
+  mapPage: false,
   // classes: {},
 };
 

@@ -51,25 +51,32 @@ const resolvers = {
       }
       return markers;
     },
-    getMapName: async (parent, args) => {
+    getMap: async (parent, args) => {
       const { mapId } = args;
-      let mapName = 'Map not found';
+      let map = {
+        mapName: 'Map not found.',
+        mapId: -1,
+      };
+
       try {
-        const map = await maps.findById(mapId).select('name');
-        mapName = map.name;
+        map = await maps.findById(mapId);
+        map = {
+          // eslint-disable-next-line no-underscore-dangle
+          mapId: map._id,
+          mapName: map.name,
+        };
       } catch (err) {
-        log.error('Error finding map name.', {
+        log.error('Error finding map.', {
           mapId,
         });
         log.error(err);
-        return 'Map not found';
+        return map;
       }
 
-      log.info('Found name for map.', {
-        mapId,
-        mapName,
+      log.info('Found map.', {
+        map,
       });
-      return mapName;
+      return map;
     },
   },
   Mutation: {
@@ -220,6 +227,42 @@ const resolvers = {
       }
 
       return newMapId;
+    },
+    deleteMap: async (parent, args, context) => {
+      const { mapId } = args;
+      const { user: { id: userId } } = context;
+      try {
+        await maps.findByIdAndDelete(mapId);
+      } catch (err) {
+        log.error('Error deleting map.', {
+          mapId,
+        });
+        log.error(err);
+        return false;
+      }
+
+      log.info('Map deleted.', {
+        mapId,
+      });
+
+      try {
+        await users.updateOne(
+          { id: userId },
+          {
+            $pull: {
+              ownedMaps: mapId,
+            },
+          },
+        );
+      } catch (err) {
+        log.error('Error removing map to user\'s ownedMaps.', {
+          mapId,
+        });
+        log.error(err);
+        return false;
+      }
+
+      return true;
     },
   },
 };

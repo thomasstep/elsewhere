@@ -1,7 +1,10 @@
+const { AuthenticationError } = require('apollo-server-micro');
 const { getMarkersAuth } = require('./auth/getMarkers');
+const { getMapAuth } = require('./auth/getMap');
 const { createMarkersAuth } = require('./auth/createMarkers');
 const { deleteMarkersAuth } = require('./auth/deleteMarkers');
 const { createMapAuth } = require('./auth/createMap');
+const { deleteMapAuth } = require('./auth/deleteMap');
 // const { log } = require('../utils');
 
 function handleValue(argValue, requestVariables) {
@@ -56,8 +59,24 @@ function flattenArgs(apolloArgs, requestVariables) {
 
 function endpointAuth(endpoint, args, user) {
   switch (endpoint) {
+    case 'viewer':
+      break;
+
+    case 'signUp':
+      break;
+
+    case 'signIn':
+      break;
+
+    case 'signOut':
+      break;
+
     case 'getMarkers':
       getMarkersAuth(args, user);
+      break;
+
+    case 'getMap':
+      getMapAuth(args, user);
       break;
 
     case 'createMarkers':
@@ -72,8 +91,12 @@ function endpointAuth(endpoint, args, user) {
       createMapAuth(args, user);
       break;
 
-    default:
+    case 'deleteMap':
+      deleteMapAuth(args, user);
       break;
+
+    default:
+      throw new AuthenticationError('You are not able to access this endpoint.');
   }
 }
 

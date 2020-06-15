@@ -10,7 +10,7 @@ import Layout from '../../components/layout';
 import ElsewhereInfoWindow from '../../components/infowindow';
 
 const getMarkers = (id) => `{
-  getMarkers(map: "${id}") {
+  getMarkers(mapId: "${id}") {
     lat
     lng
   }
@@ -27,7 +27,7 @@ const createMarkers = (id, markers) => {
   });
   markersString += ']';
   return `mutation {
-    createMarkers(map: "${id}", markers: ${markersString})
+    createMarkers(mapId: "${id}", markers: ${markersString})
   }`;
 };
 
@@ -42,7 +42,7 @@ const deleteMarkers = (id, markers) => {
   });
   markersString += ']';
   return `mutation {
-    deleteMarkers(map: "${id}", markers: ${markersString})
+    deleteMarkers(mapId: "${id}", markers: ${markersString})
   }`;
 };
 
@@ -134,7 +134,7 @@ class ElsewhereMap extends React.Component {
     const { markers, activeInfoWindow, activeMarker } = this.state;
 
     return (
-      <Layout floating>
+      <Layout mapPage>
         <Box>
           <Map
             google={google}

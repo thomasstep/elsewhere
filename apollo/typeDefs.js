@@ -9,6 +9,14 @@ const typeDefs = gql`
     writableMaps: [ID]!
   }
 
+  type Map {
+    mapName: String!
+    mapId: ID!
+    # owner
+    # writers
+    # readers
+  }
+
   input SignUpInput {
     email: String!
     password: String!
@@ -40,7 +48,7 @@ const typeDefs = gql`
   type Query {
     viewer: User
     getMarkers(mapId: ID!): [Marker]!
-    getMapName(mapId: ID!): String!
+    getMap(mapId: ID!): Map!
   }
 
   type Mutation {
@@ -81,7 +89,6 @@ const typeDefs = gql`
     duplicateMap(mapId: ID!): ID!
 
     """
-    TODO
     Delete a map given by ID.
     """
     deleteMap(mapId: ID!): Boolean!
