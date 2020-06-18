@@ -5,8 +5,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Divider from '@material-ui/core/Divider';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
+import SettingsIcon from '@material-ui/icons/Settings';
 import { fetcher } from '../utils/fetcher';
 
 const getMapNameQuery = (id) => `{
@@ -16,21 +15,12 @@ const getMapNameQuery = (id) => `{
   }
 }`;
 
-const deleteMapMutation = `mutation deleteMap (
-  $mapId: ID!
-){
-  deleteMap(mapId: $mapId)
-}`;
-
-// TODO get maps, write name of map instead of ID
 class MapList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       maps: [],
     };
-
-    this.deleteMap = this.deleteMap.bind(this);
   }
 
   componentDidMount() {
@@ -52,21 +42,6 @@ class MapList extends React.Component {
       });
   }
 
-  async deleteMap(event, mapId) {
-    event.preventDefault();
-    const { deleteMap: success } = await fetcher(deleteMapMutation, { mapId });
-    if (!success) return;
-
-    const { maps } = this.state;
-    const index = maps.findIndex((map) => map.mapId === mapId);
-    if (index > -1) {
-      maps.splice(index, 1);
-      this.setState({
-        maps,
-      });
-    }
-  }
-
   render() {
     const {
       maps,
@@ -80,9 +55,9 @@ class MapList extends React.Component {
               <Link href="/map/[id]" as={`/map/${mapId}`}>
                 <ListItemText primary={mapName} />
               </Link>
-              <IconButton onClick={(event) => this.deleteMap(event, mapId)} edge="start" aria-label="menu">
-                <DeleteIcon />
-              </IconButton>
+              <Link href="/map/[id]/settings" as={`/map/${mapId}/settings`}>
+                <SettingsIcon />
+              </Link>
             </ListItem>
             <Divider />
           </React.Fragment>

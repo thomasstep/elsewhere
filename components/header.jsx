@@ -29,9 +29,9 @@ const styles = (theme) => ({
     left: '50%',
     position: 'fixed',
     zIndex: 100,
-    backgroundColor: theme.palette.background.default,
+    backgroundColor: theme.palette.primary.main,
     '&:hover': {
-      backgroundColor: theme.palette.background.default,
+      backgroundColor: theme.palette.primary.dark,
     },
   },
   appBar: {
@@ -109,7 +109,7 @@ class Header extends React.Component {
 
     return mapPage ? (
       <React.Fragment key="top">
-        <Fab onClick={this.toggleDrawer} className={classes.fab}><ExpandMoreIcon /></Fab>
+        <Fab onClick={this.toggleDrawer} className={classes.fab}><MenuIcon className={classes.menuIcon} /></Fab>
         {navigationDrawer}
       </React.Fragment>
     )

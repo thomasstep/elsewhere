@@ -13,11 +13,6 @@ const usersSchema = new mongoose.Schema({
 });
 
 const mapsSchema = new mongoose.Schema({
-  // The map field is a UUID used to identify the map
-  map: {
-    type: String,
-    unique: true,
-  },
   name: String,
   markers: [
     {
