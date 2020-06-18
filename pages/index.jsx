@@ -39,7 +39,7 @@ class Index extends React.Component {
       return (
         <Layout>
           <main className="center">
-            Let's go Elsewhere.
+            Let&apos;s go Elsewhere.
           </main>
         </Layout>
       );

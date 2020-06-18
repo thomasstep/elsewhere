@@ -17,7 +17,6 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import HomeIcon from '@material-ui/icons/Home';
 import AccountBoxIcon from '@material-ui/icons/AccountBox';
 import MapIcon from '@material-ui/icons/Map';
@@ -109,7 +108,9 @@ class Header extends React.Component {
 
     return mapPage ? (
       <React.Fragment key="top">
-        <Fab onClick={this.toggleDrawer} className={classes.fab}><MenuIcon className={classes.menuIcon} /></Fab>
+        <Fab onClick={this.toggleDrawer} className={classes.fab}>
+          <MenuIcon className={classes.menuIcon} />
+        </Fab>
         {navigationDrawer}
       </React.Fragment>
     )
