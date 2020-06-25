@@ -4,6 +4,7 @@ const { getMapAuth } = require('./auth/getMap');
 const { createMarkersAuth } = require('./auth/createMarkers');
 const { deleteMarkersAuth } = require('./auth/deleteMarkers');
 const { createMapAuth } = require('./auth/createMap');
+const { updateMapAuth } = require('./auth/updateMap');
 const { deleteMapAuth } = require('./auth/deleteMap');
 // const { log } = require('../utils');
 
@@ -89,6 +90,10 @@ function endpointAuth(endpoint, args, user) {
 
     case 'createMap':
       createMapAuth(args, user);
+      break;
+
+    case 'updateMap':
+      updateMapAuth(args, user);
       break;
 
     case 'deleteMap':

@@ -1,6 +1,34 @@
 import gql from 'graphql-tag';
 
 const typeDefs = gql`
+  input SignUpInput {
+    email: String!
+    password: String!
+  }
+
+  input SignInInput {
+    email: String!
+    password: String!
+  }
+
+  input MarkerInput {
+    lat: Float!
+    lng: Float!
+  }
+
+  input MapUpdateInput {
+    mapName: String
+    mapId: ID!
+    owners: MapUserListInput
+    writers: MapUserListInput
+    readers: MapUserListInput
+  }
+
+  input MapUserListInput {
+    push: [String]
+    pull: [String]
+  }
+
   type User {
     id: ID!
     email: String!
@@ -12,19 +40,16 @@ const typeDefs = gql`
   type Map {
     mapName: String!
     mapId: ID!
-    # owner
-    # writers
-    # readers
+    owners: [String]!
+    writers: [String]!
+    readers: [String]!
   }
 
-  input SignUpInput {
-    email: String!
-    password: String!
-  }
-
-  input SignInInput {
-    email: String!
-    password: String!
+  type MapUpdate {
+    mapName: Boolean
+    owners: Boolean
+    writers: Boolean
+    readers: Boolean
   }
 
   type SignUpPayload {
@@ -36,11 +61,6 @@ const typeDefs = gql`
   }
 
   type Marker {
-    lat: Float!
-    lng: Float!
-  }
-
-  input MarkerInput {
     lat: Float!
     lng: Float!
   }
@@ -81,6 +101,11 @@ const typeDefs = gql`
     Create a map with a given name. Returns map's ID.
     """
     createMap(name: String!): ID!
+
+    """
+    Update a map with a given by ID.
+    """
+    updateMap(updates: MapUpdateInput!): MapUpdate!
 
     """
     TODO

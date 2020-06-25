@@ -20,6 +20,9 @@ const mapsSchema = new mongoose.Schema({
       lng: Number,
     },
   ],
+  owners: [String],
+  writers: [String],
+  readers: [String],
 });
 
 const maps = mongoose.models.maps || mongoose.model('maps', mapsSchema);

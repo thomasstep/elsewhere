@@ -36,6 +36,7 @@ const resolvers = {
       }
       return context.user;
     },
+
     getMarkers: async (parent, args) => {
       const { mapId } = args;
       let markers;
@@ -51,6 +52,7 @@ const resolvers = {
       }
       return markers;
     },
+
     getMap: async (parent, args) => {
       const { mapId } = args;
       let map = {
@@ -64,6 +66,9 @@ const resolvers = {
           // eslint-disable-next-line no-underscore-dangle
           mapId: map._id,
           mapName: map.name,
+          owners: map.owners || [],
+          writers: map.writers || [],
+          readers: map.readers || [],
         };
       } catch (err) {
         log.error('Error finding map.', {
@@ -119,6 +124,7 @@ const resolvers = {
 
       throw new UserInputError('Invalid email and password combination');
     },
+
     signOut: async (parent, args, context) => {
       context.res.setHeader(
         'Set-Cookie',
@@ -133,27 +139,21 @@ const resolvers = {
 
       return true;
     },
+
     createMarkers: async (parent, args) => {
       const { mapId, markers } = args;
-      const promises = [];
-      markers.forEach((marker) => {
-        // TODO check that the marker doesn't already exist
-        promises.push(
-          maps.findByIdAndUpdate(
-            mapId,
-            {
-              $push: {
-                markers: {
-                  ...marker,
-                },
-              },
-            },
-          ),
-        );
-      });
 
       try {
-        await Promise.all(promises);
+        await maps.findByIdAndUpdate(
+          mapId,
+          {
+            $push: {
+              markers: {
+                $each: markers,
+              },
+            },
+          },
+        );
       } catch (err) {
         log.error('Error upserting markers.');
         log.error(err);
@@ -162,9 +162,11 @@ const resolvers = {
 
       return true;
     },
+
     deleteMarkers: async (parent, args) => {
       const { mapId, markers } = args;
       const promises = [];
+      // For some reason $pull $in does not work with an array of objects
       markers.forEach((marker) => {
         promises.push(
           maps.findByIdAndUpdate(
@@ -188,17 +190,26 @@ const resolvers = {
 
       return true;
     },
+
     createMap: async (parent, args, context) => {
       const { name } = args;
-      const { user: { id: userId } } = context;
+      const {
+        user:
+        {
+          id: userId,
+          email,
+        },
+      } = context;
       let map;
       try {
         map = await maps.create({
           name,
+          owners: [email],
         });
       } catch (err) {
         log.error('Error creating map.', {
           name,
+          owners: [email],
         });
         log.error(err);
         return -1;
@@ -228,6 +239,9 @@ const resolvers = {
 
       return newMapId;
     },
+
+    updateMap: (parent, args) => args.updates,
+
     deleteMap: async (parent, args, context) => {
       const { mapId } = args;
       const { user: { id: userId } } = context;
@@ -264,6 +278,121 @@ const resolvers = {
 
       return true;
     },
+  },
+
+  MapUpdate: {
+    mapName: async (parent) => {
+      const { mapId, mapName } = parent;
+
+      try {
+        await maps.findByIdAndUpdate(
+          mapId,
+          {
+            $set: {
+              name: mapName,
+            },
+          },
+        );
+      } catch (err) {
+        log.error('Error updating map name.', {
+          mapId,
+          mapName,
+        });
+        log.error(err);
+        return false;
+      }
+
+      return true;
+    },
+
+    owners: async (parent) => {
+      const { mapId, owners = {} } = parent;
+      const { push = [], pull = [] } = owners;
+      // TODO check that users exist and have accounts, then push/pull this map on their account
+      const promises = [];
+      promises.push(
+        maps.findByIdAndUpdate(
+          mapId,
+          {
+            $addToSet: {
+              owners: {
+                $each: push,
+              },
+            },
+          },
+        ),
+      );
+      promises.push(
+        maps.findByIdAndUpdate(
+          mapId,
+          {
+            $pull: {
+              owners: {
+                $in: pull,
+              },
+            },
+          },
+        ),
+      );
+
+      try {
+        await Promise.all(promises);
+      } catch (err) {
+        log.error('Error updating owners.', {
+          mapId,
+          owners,
+        });
+        log.error(err);
+        return false;
+      }
+
+      return true;
+    },
+
+    writers: async (parent) => {
+      const { mapId, writers = {} } = parent;
+      const { push = [], pull = [] } = writers;
+      const promises = [];
+      promises.push(
+        maps.findByIdAndUpdate(
+          mapId,
+          {
+            $addToSet: {
+              writers: {
+                $each: push,
+              },
+            },
+          },
+        ),
+      );
+      promises.push(
+        maps.findByIdAndUpdate(
+          mapId,
+          {
+            $pull: {
+              writers: {
+                $in: pull,
+              },
+            },
+          },
+        ),
+      );
+
+      try {
+        await Promise.all(promises);
+      } catch (err) {
+        log.error('Error updating writers.', {
+          mapId,
+          writers,
+        });
+        log.error(err);
+        return false;
+      }
+
+      return true;
+    },
+
+    readers: () => true,
   },
 };
 

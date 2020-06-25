@@ -70,17 +70,17 @@ class Profile extends React.Component {
           <Grid container>
             <Grid item xs={12} />
             <Grid item xs={12} className={classes.gridItem}>
-              <Typography variant="h5"> Profile </Typography>
+              <Typography variant="h3">Profile</Typography>
             </Grid>
             <Grid item xs={12} className={classes.gridItem}>
-              <h3>{email}</h3>
+              <Typography variant="h5">{email}</Typography>
             </Grid>
 
             <Grid item xs={12}>
               {
               ownedMaps.length ? (
                 <>
-                  <h1>Your maps</h1>
+                  <Typography variant="h5">Your maps</Typography>
                   <MapList mapList={ownedMaps} />
                 </>
               )
@@ -90,7 +90,7 @@ class Profile extends React.Component {
               {
               sharedMaps.length ? (
                 <>
-                  <h1>Maps shared with you</h1>
+                  <Typography variant="h5">Maps shared with you</Typography>
                   <MapList mapList={sharedMaps} />
                 </>
               )
