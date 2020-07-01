@@ -7,14 +7,26 @@ import Button from '@material-ui/core/Button';
 import DeleteIcon from '@material-ui/icons/Delete';
 import TextField from '@material-ui/core/TextField';
 import AddIcon from '@material-ui/icons/Add';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import Divider from '@material-ui/core/Divider';
+import IconButton from '@material-ui/core/IconButton';
 
 import { fetcher } from '../../../utils/fetcher';
 import Layout from '../../../components/layout';
-import TravelPartnerList from '../../../components/travelPartnerList';
 
 const styles = (theme) => ({
   deleteButton: {
     backgroundColor: theme.palette.error.main,
+    '&:hover': {
+      backgroundColor: theme.palette.error.main,
+    },
+  },
+  deleteTravelPartnerButton: {
+    '&:hover': {
+      backgroundColor: theme.palette.error.main,
+    },
   },
 });
 
@@ -42,28 +54,45 @@ const addTravelPartnerMutation = `mutation addTravelPartner (
   }
 }`;
 
+const removeTravelPartnerMutation = `mutation removeTravelPartner(
+  $map: MapUpdateInput!
+) {
+  updateMap(updates: $map) {
+    writers
+  }
+}`;
+
 
 class ElsewhereMapSettings extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       mapId: props.router.query.id,
-      map: {
-        owners: [],
-        writers: [],
-        readers: [],
-      },
+      // owners: [],
+      writers: [],
+      // readers: [],
+      travelPartnerTextField: '',
     };
 
     this.deleteMap = this.deleteMap.bind(this);
+    this.handleTravelBuddyTextFieldChange = this.handleTravelBuddyTextFieldChange.bind(this);
     this.addTravelPartner = this.addTravelPartner.bind(this);
+    this.removeTravelPartner = this.removeTravelPartner.bind(this);
   }
 
   componentDidMount() {
     const { router } = this.props;
-    fetcher(getMapQuery, { mapId: router.query.id }).then(({ getMap: map }) => {
+    fetcher(getMapQuery, { mapId: router.query.id }).then(({
+      getMap: {
+        // owners,
+        writers,
+        // readers,
+      },
+    }) => {
       this.setState({
-        map,
+        // owners,
+        writers,
+        // readers,
       });
     });
   }
@@ -79,13 +108,23 @@ class ElsewhereMapSettings extends React.Component {
     router.push('/profile');
   }
 
+  handleTravelBuddyTextFieldChange(event) {
+    this.setState({
+      travelPartnerTextField: event.target.value,
+    });
+  }
+
   async addTravelPartner(event) {
     event.preventDefault();
-    const { mapId } = this.state;
+    const {
+      mapId,
+      writers,
+      travelPartnerTextField,
+    } = this.state;
     const updates = {
       mapId,
       writers: {
-        push: 'person',
+        push: travelPartnerTextField,
       },
     };
 
@@ -96,21 +135,63 @@ class ElsewhereMapSettings extends React.Component {
     } = await fetcher(addTravelPartnerMutation, { map: updates });
     if (!success) return;
 
-    this.componentDidMount();
+    writers.push(travelPartnerTextField);
+    this.setState({
+      writers,
+      travelPartnerTextField: '',
+    });
   }
 
+  async removeTravelPartner(event, email) {
+    event.preventDefault();
+    const {
+      writers,
+    } = this.state;
+    const {
+      router: {
+        query: {
+          id: mapId,
+        },
+      },
+    } = this.props;
+
+    const updates = {
+      mapId,
+      writers: {
+        pull: email,
+      },
+    };
+
+    const {
+      updateMap: {
+        writers: success,
+      },
+    } = await fetcher(removeTravelPartnerMutation, { map: updates });
+    if (!success) return;
+
+    // Remove writer from list if the API call was successful
+    const index = writers.indexOf(email);
+    if (index > -1) {
+      writers.splice(index, 1);
+    }
+
+    this.setState({
+      writers,
+    });
+  }
 
   render() {
     const {
-      map: {
-        writers,
-        readers, // This should always be an empty array until read and write is created
-      },
+      writers,
+      // readers will not be used until read and write permissions are created
+      // as of 30 June 2020 it's only write
+      // readers,
+      travelPartnerTextField,
     } = this.state;
 
     const { router, classes } = this.props;
 
-    const travelPartners = [...writers, ...readers];
+    // const travelPartners = [...writers, ...readers];
 
     return (
       <Layout>
@@ -128,14 +209,36 @@ class ElsewhereMapSettings extends React.Component {
           writers.length ? (
             <>
               <Typography variant="h5">Travel Partners</Typography>
-              <TravelPartnerList partners={travelPartners} />
+              <List component="nav">
+                {writers.map((email) => (
+                  <React.Fragment key={email}>
+                    <ListItem button>
+                      <ListItemText primary={email} />
+                      <IconButton
+                        aria-label="delete"
+                        className={classes.deleteTravelPartnerButton}
+                        onClick={(e) => this.removeTravelPartner(e, email)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </ListItem>
+                    <Divider />
+                  </React.Fragment>
+                ))}
+              </List>
             </>
           )
             : (
               null
             )
         }
-        <TextField id="filled-basic" label="Email" variant="filled" />
+        <TextField
+          id="filled-basic"
+          value={travelPartnerTextField}
+          label="Email"
+          variant="filled"
+          onChange={(e) => this.handleTravelBuddyTextFieldChange(e)}
+        />
         <Button
           variant="contained"
           startIcon={<AddIcon />}
