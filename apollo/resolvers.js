@@ -308,7 +308,10 @@ const resolvers = {
     owners: async (parent) => {
       const { mapId, owners = {} } = parent;
       const { push = [], pull = [] } = owners;
-      // TODO check that users exist and have accounts, then push/pull this map on their account
+      /**
+       * TODO check that users exist and have accounts, then push/pull this map on their account
+       * This functionality is currently not supported in the UI.
+       */
       const promises = [];
       promises.push(
         maps.findByIdAndUpdate(
@@ -352,7 +355,38 @@ const resolvers = {
     writers: async (parent) => {
       const { mapId, writers = {} } = parent;
       const { push = [], pull = [] } = writers;
-      const promises = [];
+      let promises = [];
+      /**
+       * Find users by email before adding them to a map.
+       * Allow non-users to be removed though in case the account was deleted
+       * after being added.
+       */
+      push.forEach((email) => {
+        promises.push(users.findOneAndUpdate(
+          { email },
+          {
+            $addToSet: {
+              writableMaps: mapId,
+            },
+          },
+        ));
+      });
+
+      const userUpdates = await Promise.all(promises);
+      let index = 0;
+      userUpdates.forEach((update) => {
+        if (!update) {
+          log.error('Could not find user to update writableMaps.', {
+            email: push[index],
+            mapId,
+          });
+          push.splice(index, 1);
+        }
+
+        index += 1;
+      });
+
+      promises = [];
       promises.push(
         maps.findByIdAndUpdate(
           mapId,
