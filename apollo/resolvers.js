@@ -355,14 +355,15 @@ const resolvers = {
     writers: async (parent) => {
       const { mapId, writers = {} } = parent;
       const { push = [], pull = [] } = writers;
-      let promises = [];
+      const pushUserPromises = [];
+      const pullUserPromises = [];
       /**
        * Find users by email before adding them to a map.
        * Allow non-users to be removed though in case the account was deleted
        * after being added.
        */
       push.forEach((email) => {
-        promises.push(users.findOneAndUpdate(
+        pushUserPromises.push(users.findOneAndUpdate(
           { email },
           {
             $addToSet: {
@@ -371,8 +372,18 @@ const resolvers = {
           },
         ));
       });
+      pull.forEach((email) => {
+        pullUserPromises.push(users.findOneAndUpdate(
+          { email },
+          {
+            $pull: {
+              writableMaps: mapId,
+            },
+          },
+        ));
+      });
 
-      const userUpdates = await Promise.all(promises);
+      const userUpdates = await Promise.all(pushUserPromises);
       let index = 0;
       userUpdates.forEach((update) => {
         if (!update) {
@@ -386,7 +397,10 @@ const resolvers = {
         index += 1;
       });
 
-      promises = [];
+      // Don't care about user validity for pulls
+      await Promise.all(pullUserPromises);
+
+      const promises = [];
       promises.push(
         maps.findByIdAndUpdate(
           mapId,
