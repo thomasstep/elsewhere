@@ -1,7 +1,7 @@
-import { withRouter } from 'next/router';
+import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
-import React from 'react';
-import { withStyles } from '@material-ui/core/styles';
+import React, { useState, useEffect } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -12,11 +12,10 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
-
 import { fetcher } from '../../../utils/fetcher';
 import Layout from '../../../components/layout';
 
-const styles = (theme) => ({
+const useStyles = makeStyles((theme) => ({
   deleteButton: {
     backgroundColor: theme.palette.error.main,
     '&:hover': {
@@ -28,7 +27,7 @@ const styles = (theme) => ({
       backgroundColor: theme.palette.error.main,
     },
   },
-});
+}));
 
 const getMapQuery = `query getMap (
   $mapId: ID!
@@ -63,64 +62,40 @@ const removeTravelPartnerMutation = `mutation removeTravelPartner(
 }`;
 
 
-class ElsewhereMapSettings extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      mapId: props.router.query.id,
-      // owners: [],
-      writers: [],
-      // readers: [],
-      travelPartnerTextField: '',
-    };
+function ElsewhereMapSettings(props) {
+  const router = useRouter();
+  const [mapId] = useState(router.query.id);
+  const [writers, setWriters] = useState([]);
+  const [travelPartnerTextField, setTravelPartnerTextField] = useState('');
+  const classes = useStyles(props);
 
-    this.deleteMap = this.deleteMap.bind(this);
-    this.handleTravelBuddyTextFieldChange = this.handleTravelBuddyTextFieldChange.bind(this);
-    this.addTravelPartner = this.addTravelPartner.bind(this);
-    this.removeTravelPartner = this.removeTravelPartner.bind(this);
-  }
-
-  componentDidMount() {
-    const { router } = this.props;
+  useEffect(() => {
     fetcher(getMapQuery, { mapId: router.query.id }).then(({
       getMap: {
         // owners,
-        writers,
+        writers: mapWriters,
         // readers,
       },
     }) => {
-      this.setState({
-        // owners,
-        writers,
-        // readers,
-      });
+      setWriters(mapWriters);
     });
-  }
+  }, []);
 
-  async deleteMap(event) {
+  async function deleteMap(event) {
     event.preventDefault();
-    const { mapId } = this.state;
 
     const { deleteMap: success } = await fetcher(deleteMapMutation, { mapId });
     if (!success) return;
 
-    const { router } = this.props;
     router.push('/profile');
   }
 
-  handleTravelBuddyTextFieldChange(event) {
-    this.setState({
-      travelPartnerTextField: event.target.value,
-    });
+  function handleTravelBuddyTextFieldChange(event) {
+    setTravelPartnerTextField(event.target.value);
   }
 
-  async addTravelPartner(event) {
+  async function addTravelPartner(event) {
     event.preventDefault();
-    const {
-      mapId,
-      writers,
-      travelPartnerTextField,
-    } = this.state;
     const updates = {
       mapId,
       writers: {
@@ -136,27 +111,20 @@ class ElsewhereMapSettings extends React.Component {
     if (!success) return;
 
     writers.push(travelPartnerTextField);
-    this.setState({
-      writers,
-      travelPartnerTextField: '',
-    });
+    // setWriters(writers); Do I need to do this?
+    setTravelPartnerTextField('');
   }
 
-  async removeTravelPartner(event, email) {
+  async function removeTravelPartner(event, email) {
     event.preventDefault();
     const {
-      writers,
-    } = this.state;
-    const {
-      router: {
-        query: {
-          id: mapId,
-        },
+      query: {
+        id: queryMapId,
       },
-    } = this.props;
+    } = router;
 
     const updates = {
-      mapId,
+      queryMapId,
       writers: {
         pull: email,
       },
@@ -175,92 +143,64 @@ class ElsewhereMapSettings extends React.Component {
       writers.splice(index, 1);
     }
 
-    this.setState({
-      writers,
-    });
+    // setWriters(writers); Do I need to do this?
   }
 
-  render() {
-    const {
-      writers,
-      // readers will not be used until read and write permissions are created
-      // as of 30 June 2020 it's only write
-      // readers,
-      travelPartnerTextField,
-    } = this.state;
-
-    const { router, classes } = this.props;
-
-    // const travelPartners = [...writers, ...readers];
-
-    return (
-      <Layout>
-        <Typography variant="h3">Settings</Typography>
-        <Typography variant="h5">{`Map ID: ${router.query.id}`}</Typography>
-        <Button
-          variant="contained"
-          className={classes.deleteButton}
-          startIcon={<DeleteIcon />}
-          onClick={(e) => this.deleteMap(e)}
-        >
-          Delete Map
-        </Button>
-        {
-          writers.length ? (
-            <>
-              <Typography variant="h5">Travel Partners</Typography>
-              <List component="nav">
-                {writers.map((email) => (
-                  <React.Fragment key={email}>
-                    <ListItem button>
-                      <ListItemText primary={email} />
-                      <IconButton
-                        aria-label="delete"
-                        className={classes.deleteTravelPartnerButton}
-                        onClick={(e) => this.removeTravelPartner(e, email)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </ListItem>
-                    <Divider />
-                  </React.Fragment>
-                ))}
-              </List>
-            </>
+  return (
+    <Layout>
+      <Typography variant="h3">Settings</Typography>
+      <Typography variant="h5">{`Map ID: ${router.query.id}`}</Typography>
+      <Button
+        variant="contained"
+        className={classes.deleteButton}
+        startIcon={<DeleteIcon />}
+        onClick={(e) => deleteMap(e)}
+      >
+        Delete Map
+      </Button>
+      {
+        writers.length ? (
+          <>
+            <Typography variant="h5">Travel Partners</Typography>
+            <List component="nav">
+              {writers.map((email) => (
+                <React.Fragment key={email}>
+                  <ListItem button>
+                    <ListItemText primary={email} />
+                    <IconButton
+                      aria-label="delete"
+                      className={classes.deleteTravelPartnerButton}
+                      onClick={(e) => removeTravelPartner(e, email)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </ListItem>
+                  <Divider />
+                </React.Fragment>
+              ))}
+            </List>
+          </>
+        )
+          : (
+            null
           )
-            : (
-              null
-            )
-        }
-        <TextField
-          id="filled-basic"
-          value={travelPartnerTextField}
-          label="Email"
-          variant="filled"
-          onChange={(e) => this.handleTravelBuddyTextFieldChange(e)}
-        />
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={(e) => this.addTravelPartner(e)}
-        >
-          Add Travel Partner
-        </Button>
-      </Layout>
-    );
-  }
+      }
+      <TextField
+        id="filled-basic"
+        value={travelPartnerTextField}
+        label="Email"
+        variant="filled"
+        onChange={(e) => handleTravelBuddyTextFieldChange(e)}
+      />
+      <Button
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={(e) => addTravelPartner(e)}
+      >
+        Add Travel Partner
+      </Button>
+    </Layout>
+  );
 }
 
-ElsewhereMapSettings.propTypes = {
-  router: PropTypes.shape({
-    push: PropTypes.func.isRequired,
-    query: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-    }).isRequired,
-  }).isRequired,
-  classes: PropTypes.shape(
-    PropTypes.object,
-  ).isRequired,
-};
-
-export default withStyles(styles, { withTheme: true })(withRouter(ElsewhereMapSettings));
+export default ElsewhereMapSettings;

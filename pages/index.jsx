@@ -1,6 +1,5 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { withRouter } from 'next/router';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import Layout from '../components/layout';
 import { fetcher } from '../utils/fetcher';
 
@@ -11,48 +10,31 @@ const viewerQuery = `{
     }
   }`;
 
-class Index extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      email: '',
-    };
-  }
+function Index() {
+  const [email, setEmail] = useState('');
+  const router = useRouter();
 
-  componentDidMount() {
-    const { router } = this.props;
+  useEffect(() => {
     fetcher(viewerQuery)
-      .then(({ viewer: { email } }) => {
-        this.setState({
-          email,
-        });
+      .then(({ viewer: { email: userEmail } }) => {
+        setEmail(userEmail);
       })
       .catch(() => {
         router.push('/signin');
       });
+  });
+
+  if (email) {
+    return (
+      <Layout>
+        <main className="center">
+          Let&apos;s go Elsewhere.
+        </main>
+      </Layout>
+    );
   }
 
-  render() {
-    const { email } = this.state;
-
-    if (email) {
-      return (
-        <Layout>
-          <main className="center">
-            Let&apos;s go Elsewhere.
-          </main>
-        </Layout>
-      );
-    }
-
-    return <p>Loading...</p>;
-  }
+  return <p>Loading...</p>;
 }
 
-Index.propTypes = {
-  router: PropTypes.shape({
-    push: PropTypes.func.isRequired,
-  }).isRequired,
-};
-
-export default withRouter(Index);
+export default Index;

@@ -4,7 +4,8 @@
   "build": {
     "env": {
       "MONGODB_URI": "@mongo-uri",
-      "GOOGLE_MAPS_KEY": "@google-maps-key"
+      "GOOGLE_MAPS_KEY": "@google-maps-key",
+      "SITE": "https://elsewhere.now.sh"
     }
   },
   "env": {
