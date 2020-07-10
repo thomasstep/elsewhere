@@ -4,11 +4,14 @@
   "build": {
     "env": {
       "MONGODB_URI": "@mongo-uri",
-      "GOOGLE_MAPS_KEY": "@google-maps-key",
-      "SITE": "https://elsewhere.now.sh"
+      "GOOGLE_MAPS_KEY": "@google-maps-key"
     }
   },
   "env": {
-    "JWT_SECRET": "@jwt-secret"
+    "JWT_SECRET": "@jwt-secret",
+    "SITE": "https://elsewhere-git-nextauth.thomasstep.now.sh",
+    "GOOGLE_OAUTH_CLIENT_ID": "@google-oath-client-id",
+    "GOOGLE_OAUTH_CLIENT_SECRET": "@google-oath-client-secret",
+    "MONGODB_FOR_AUTH": "@mongo-for-auth"
   }
 }
