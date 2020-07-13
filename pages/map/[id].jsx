@@ -72,7 +72,6 @@ function ElsewhereMap(props) {
       lng: clickEvent.latLng.lng(),
     };
 
-
     fetcher(createMarkers(router.query.id, [marker])).then(({ createMarkers: success }) => {
       if (success) {
         setActiveMarker({});
@@ -90,12 +89,15 @@ function ElsewhereMap(props) {
       lat: activeMarker.position.lat(),
       lng: activeMarker.position.lng(),
     };
+    console.log('FUCK FACE')
 
     fetcher(deleteMarkers(router.query.id, [marker])).then(({ deleteMarkers: success }) => {
       if (success) {
         fetcher(getMarkers(router.query.id)).then(({
           getMarkers: mapMarkers,
         }) => {
+          console.log('HEY')
+          console.log(mapMarkers)
           setActiveInfoWindow(false);
           setActiveMarker({});
           setMarkers(mapMarkers);

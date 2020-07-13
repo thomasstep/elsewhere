@@ -1,24 +1,15 @@
-const cookie = require('cookie');
-const jwt = require('jsonwebtoken');
-const { log, users } = require('../utils');
+const { getSession, setOptions } = require('next-auth/client');
+const { users } = require('../utils');
 
-const { JWT_SECRET } = process.env;
+setOptions({ site: process.env.SITE });
 
 async function context(ctx) {
   const { req } = ctx;
-
-  const { token } = cookie.parse(req.headers.cookie ?? '');
-  if (token) {
-    try {
-      const { id, email } = jwt.verify(token, JWT_SECRET);
-      const user = await users.findOne({ id, email });
-
-      ctx.user = user;
-    } catch (err) {
-      log.error(err);
-    }
-  } else {
-    log.info('No token found.');
+  const { user } = await getSession({ req });
+  if (user && user.email) {
+    const foundUser = await users.findOne({ email: user.email });
+    ctx.user = foundUser;
+    ctx.user.id = foundUser.uuid;
   }
 
   return ctx;

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useRouter } from 'next/router';
+import { getSession } from 'next-auth/client';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
@@ -23,7 +25,7 @@ const useStyles = makeStyles({
   },
 });
 
-function Profile() {
+function Profile({ session }) {
   const [id, setId] = useState('');
   const [email, setEmail] = useState('');
   const [ownedMaps, setOwnedMap] = useState([]);
@@ -49,8 +51,8 @@ function Profile() {
         setReadableMaps(viewerReadableMaps);
         setWritableMaps(viewerWritableMaps);
       })
-      .catch(() => {
-        router.push('/signin');
+      .catch((err) => {
+        console.log(err)
       });
   }, []);
 
@@ -95,5 +97,16 @@ function Profile() {
 
   return <p>Loading...</p>;
 }
+
+Profile.getInitialProps = async (context) => {
+  return {
+    session: await getSession(context),
+  };
+};
+
+Profile.propTypes = {
+  // eslint-disable-next-line react/forbid-prop-types
+  session: PropTypes.object.isRequired,
+};
 
 export default Profile;

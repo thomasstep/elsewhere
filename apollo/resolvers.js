@@ -37,11 +37,15 @@ const resolvers = {
       return context.user;
     },
 
+    // getUser: async (parent, args) => {
+
+    // },
+
     getMarkers: async (parent, args) => {
       const { mapId } = args;
       let markers;
       try {
-        const map = await maps.findById(mapId);
+        const map = await maps.findOne({ uuid: mapId });
         markers = map.markers;
       } catch (err) {
         log.error('Error finding map markers.', {
@@ -61,10 +65,10 @@ const resolvers = {
       };
 
       try {
-        map = await maps.findById(mapId);
+        map = await maps.findOne({ uuid: mapId });
         map = {
           // eslint-disable-next-line no-underscore-dangle
-          mapId: map._id,
+          mapId: map.uuid,
           mapName: map.name,
           owners: map.owners || [],
           writers: map.writers || [],
@@ -144,8 +148,8 @@ const resolvers = {
       const { mapId, markers } = args;
 
       try {
-        await maps.findByIdAndUpdate(
-          mapId,
+        await maps.findOneAndUpdate(
+          { uuid: mapId },
           {
             $push: {
               markers: {
@@ -169,8 +173,8 @@ const resolvers = {
       // For some reason $pull $in does not work with an array of objects
       markers.forEach((marker) => {
         promises.push(
-          maps.findByIdAndUpdate(
-            mapId,
+          maps.findOneAndUpdate(
+            { uuid: mapId },
             {
               $pull: {
                 markers: marker,
@@ -196,18 +200,22 @@ const resolvers = {
       const {
         user:
         {
-          id: userId,
+          uuid: userId,
           email,
         },
       } = context;
+      // TODO check for uuid already in use
+      const uuid = v4();
       let map;
       try {
         map = await maps.create({
+          uuid,
           name,
           owners: [email],
         });
       } catch (err) {
         log.error('Error creating map.', {
+          uuid,
           name,
           owners: [email],
         });
@@ -215,17 +223,16 @@ const resolvers = {
         return -1;
       }
 
-      const { _id: newMapId } = map;
       log.info('Map created.', {
         map,
       });
 
       try {
         await users.updateOne(
-          { id: userId },
+          { uuid: userId },
           {
             $push: {
-              ownedMaps: newMapId,
+              ownedMaps: uuid,
             },
           },
         );
@@ -237,16 +244,16 @@ const resolvers = {
         return -1;
       }
 
-      return newMapId;
+      return uuid;
     },
 
     updateMap: (parent, args) => args.updates,
 
     deleteMap: async (parent, args, context) => {
       const { mapId } = args;
-      const { user: { id: userId } } = context;
+      const { user: { uuid: userId } } = context;
       try {
-        await maps.findByIdAndDelete(mapId);
+        await maps.findOneAndDelete({ uuid: mapId });
       } catch (err) {
         log.error('Error deleting map.', {
           mapId,
@@ -261,7 +268,7 @@ const resolvers = {
 
       try {
         await users.updateOne(
-          { id: userId },
+          { uuid: userId },
           {
             $pull: {
               ownedMaps: mapId,
@@ -285,8 +292,8 @@ const resolvers = {
       const { mapId, mapName } = parent;
 
       try {
-        await maps.findByIdAndUpdate(
-          mapId,
+        await maps.findOneAndUpdate(
+          { uuid: mapId },
           {
             $set: {
               name: mapName,
@@ -314,8 +321,8 @@ const resolvers = {
        */
       const promises = [];
       promises.push(
-        maps.findByIdAndUpdate(
-          mapId,
+        maps.findOneAndUpdate(
+          { uuid: mapId },
           {
             $addToSet: {
               owners: {
@@ -326,8 +333,8 @@ const resolvers = {
         ),
       );
       promises.push(
-        maps.findByIdAndUpdate(
-          mapId,
+        maps.findOneAndUpdate(
+          { uuid: mapId },
           {
             $pull: {
               owners: {
@@ -402,8 +409,8 @@ const resolvers = {
 
       const promises = [];
       promises.push(
-        maps.findByIdAndUpdate(
-          mapId,
+        maps.findOneAndUpdate(
+          { uuid: mapId },
           {
             $addToSet: {
               writers: {
@@ -414,8 +421,8 @@ const resolvers = {
         ),
       );
       promises.push(
-        maps.findByIdAndUpdate(
-          mapId,
+        maps.findOneAndUpdate(
+          { uuid: mapId },
           {
             $pull: {
               writers: {

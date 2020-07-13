@@ -19,7 +19,7 @@ export default function MyApp(props) {
   }, []);
 
   return (
-    <Provider options={{ site: process.env.SITE }} session={session}>
+    <Provider options={{ }} session={session}>
       <Head>
         <title>Elsewhere</title>
         <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
