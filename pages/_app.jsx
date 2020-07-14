@@ -1,12 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Head from 'next/head';
+import { Provider } from 'next-auth/client';
 import { ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import theme from '../lib/theme';
 
 export default function MyApp(props) {
   const { Component, pageProps } = props;
+  const { session } = pageProps;
 
   React.useEffect(() => {
     // Remove the server-side injected CSS.
@@ -17,7 +19,7 @@ export default function MyApp(props) {
   }, []);
 
   return (
-    <>
+    <Provider options={{ site: process.env.SITE }} session={session}>
       <Head>
         <title>Elsewhere</title>
         <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
@@ -27,7 +29,7 @@ export default function MyApp(props) {
         <CssBaseline />
         <Component {...pageProps} />
       </ThemeProvider>
-    </>
+    </Provider>
   );
 }
 

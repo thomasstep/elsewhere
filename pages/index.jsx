@@ -1,58 +1,33 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { withRouter } from 'next/router';
+import { useRouter } from 'next/router';
+import { getSession } from 'next-auth/client';
 import Layout from '../components/layout';
-import { fetcher } from '../utils/fetcher';
 
-const viewerQuery = `{
-    viewer {
-      id
-      email
-    }
-  }`;
+function Index({ session }) {
+  const router = useRouter();
+  useEffect(() => {
+    if (!session) router.push('/api/auth/signin');
+  });
 
-class Index extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      email: '',
-    };
-  }
+  console.log(process.env)
 
-  componentDidMount() {
-    const { router } = this.props;
-    fetcher(viewerQuery)
-      .then(({ viewer: { email } }) => {
-        this.setState({
-          email,
-        });
-      })
-      .catch(() => {
-        router.push('/signin');
-      });
-  }
-
-  render() {
-    const { email } = this.state;
-
-    if (email) {
-      return (
-        <Layout>
-          <main className="center">
-            Let&apos;s go Elsewhere.
-          </main>
-        </Layout>
-      );
-    }
-
-    return <p>Loading...</p>;
-  }
+  return (
+    <Layout>
+      <main className="center">
+        Let&apos;s go Elsewhere.
+      </main>
+    </Layout>
+  );
 }
 
+Index.getInitialProps = async (context) => ({
+  session: await getSession(context),
+});
+
 Index.propTypes = {
-  router: PropTypes.shape({
-    push: PropTypes.func.isRequired,
-  }).isRequired,
+  // eslint-disable-next-line react/forbid-prop-types
+  session: PropTypes.object.isRequired,
 };
 
-export default withRouter(Index);
+export default Index;

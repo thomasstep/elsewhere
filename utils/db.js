@@ -13,6 +13,7 @@ if (!mongoose.connection.readyStates) {
     bufferCommands: false,
     dbName: 'elsewhere',
     w: 'majority',
+    useFindAndModify: false,
   };
 
   try {
