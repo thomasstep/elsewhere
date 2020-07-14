@@ -35,6 +35,8 @@ function Profile({ session }) {
   const classes = useStyles();
 
   useEffect(() => {
+    if (!session) router.push('/api/auth/signin');
+
     fetcher(viewerQuery)
       .then(({
         viewer: {

@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useRouter } from 'next/router';
+import { getSession } from 'next-auth/client';
 import Field from '../components/field';
 import Layout from '../components/layout';
 import { getErrorMessage } from '../lib/form';
@@ -11,10 +13,13 @@ const createMapMutation = `
   }
 `;
 
-
-function CreateMap() {
+function CreateMap({ session }) {
   const [errorMsg, setErrorMsg] = useState('');
   const router = useRouter();
+
+  useEffect(() => {
+    if (!session) router.push('/api/auth/signin');
+  });
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -53,5 +58,14 @@ function CreateMap() {
     </Layout>
   );
 }
+
+CreateMap.getInitialProps = async (context) => ({
+  session: await getSession(context),
+});
+
+CreateMap.propTypes = {
+  // eslint-disable-next-line react/forbid-prop-types
+  session: PropTypes.object.isRequired,
+};
 
 export default CreateMap;

@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
+import { getSession } from 'next-auth/client';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import React, { useState, useEffect } from 'react';
@@ -7,7 +8,6 @@ import { Map, GoogleApiWrapper, Marker } from 'google-maps-react';
 import { fetcher } from '../../utils/fetcher';
 import Layout from '../../components/layout';
 import ElsewhereInfoWindow from '../../components/infowindow';
-
 
 const getMarkers = (id) => `{
   getMarkers(mapId: "${id}") {
@@ -51,9 +51,11 @@ function ElsewhereMap(props) {
   const [activeMarker, setActiveMarker] = useState({});
   const [activeInfoWindow, setActiveInfoWindow] = useState(false);
   const [markers, setMarkers] = useState([]);
-  const { google } = props;
+  const { google, session } = props;
 
   useEffect(() => {
+    if (!session) router.push('/api/auth/signin');
+
     fetcher(getMarkers(router.query.id)).then(({
       getMarkers: mapMarkers,
     }) => {
@@ -151,9 +153,15 @@ function ElsewhereMap(props) {
   );
 }
 
+ElsewhereMap.getInitialProps = async (context) => ({
+  session: await getSession(context),
+});
+
 ElsewhereMap.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   google: PropTypes.object.isRequired,
+  // eslint-disable-next-line react/forbid-prop-types
+  session: PropTypes.object.isRequired,
 };
 
 export default GoogleApiWrapper({

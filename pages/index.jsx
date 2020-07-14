@@ -10,8 +10,6 @@ function Index({ session }) {
     if (!session) router.push('/api/auth/signin');
   });
 
-  console.log(process.env)
-
   return (
     <Layout>
       <main className="center">

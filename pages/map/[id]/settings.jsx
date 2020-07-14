@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
+import { getSession } from 'next-auth/client';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
@@ -61,15 +62,17 @@ const removeTravelPartnerMutation = `mutation removeTravelPartner(
   }
 }`;
 
-
 function ElsewhereMapSettings(props) {
   const router = useRouter();
   const [mapId] = useState(router.query.id);
   const [writers, setWriters] = useState([]);
   const [travelPartnerTextField, setTravelPartnerTextField] = useState('');
+  const { session } = props;
   const classes = useStyles(props);
 
   useEffect(() => {
+    if (!session) router.push('/api/auth/signin');
+
     fetcher(getMapQuery, { mapId: router.query.id }).then(({
       getMap: {
         // owners,
@@ -202,5 +205,14 @@ function ElsewhereMapSettings(props) {
     </Layout>
   );
 }
+
+ElsewhereMapSettings.getInitialProps = async (context) => ({
+  session: await getSession(context),
+});
+
+ElsewhereMapSettings.propTypes = {
+  // eslint-disable-next-line react/forbid-prop-types
+  session: PropTypes.object.isRequired,
+};
 
 export default ElsewhereMapSettings;
