@@ -1,4 +1,4 @@
-import { AuthenticationError, UserInputError } from 'apollo-server-micro';
+import { AuthenticationError, UserInputError, ApolloError } from 'apollo-server-micro';
 import cookie from 'cookie';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
@@ -9,6 +9,7 @@ import { log } from '../utils/log';
 
 const { maps, users } = require('../utils/db');
 
+const RETRIES = 3;
 const { JWT_SECRET } = process.env;
 
 function createUser(data) {
@@ -204,8 +205,23 @@ const resolvers = {
           email,
         },
       } = context;
-      // TODO check for uuid already in use
-      const uuid = v4();
+
+      let uuid = v4();
+      let existingMap;
+      for (let i = 0; i < RETRIES; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        existingMap = await maps.findOne({ uuid });
+        if (!existingMap) {
+          break;
+        } else {
+          uuid = v4();
+        }
+
+        if (i === (RETRIES - 1)) {
+          throw new ApolloError('Too many uuid collisions', 'MAX_UUID_COLLISIONS');
+        }
+      }
+
       let map;
       try {
         map = await maps.create({
