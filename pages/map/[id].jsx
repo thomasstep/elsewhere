@@ -4,10 +4,10 @@ import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import React, { useState, useEffect } from 'react';
 import { Map, GoogleApiWrapper, Marker } from 'google-maps-react';
-
 import { fetcher } from '../../utils/fetcher';
 import Layout from '../../components/layout';
 import ElsewhereInfoWindow from '../../components/infowindow';
+
 
 const getMarkers = (id) => `{
   getMarkers(mapId: "${id}") {
@@ -62,11 +62,17 @@ function ElsewhereMap(props) {
   }, []);
 
   function onInfoWindowClose() {
-    setActiveMarker({});
     setActiveInfoWindow(false);
+    setActiveMarker({});
   }
 
   function onMapClick(mapProps, map, clickEvent) {
+    if (activeInfoWindow) {
+      setActiveInfoWindow(false);
+      setActiveMarker({});
+      return;
+    }
+
     const marker = {
       lat: clickEvent.latLng.lat(),
       lng: clickEvent.latLng.lng(),
@@ -74,12 +80,12 @@ function ElsewhereMap(props) {
 
     fetcher(createMarkers(router.query.id, [marker])).then(({ createMarkers: success }) => {
       if (success) {
-        setActiveMarker({});
         setActiveInfoWindow(false);
+        setActiveMarker({});
         setMarkers([...markers, marker]);
       } else {
-        setActiveMarker({});
         setActiveInfoWindow(false);
+        setActiveMarker({});
       }
     });
   }
@@ -89,22 +95,19 @@ function ElsewhereMap(props) {
       lat: activeMarker.position.lat(),
       lng: activeMarker.position.lng(),
     };
-    console.log('FUCK FACE')
 
     fetcher(deleteMarkers(router.query.id, [marker])).then(({ deleteMarkers: success }) => {
       if (success) {
         fetcher(getMarkers(router.query.id)).then(({
           getMarkers: mapMarkers,
         }) => {
-          console.log('HEY')
-          console.log(mapMarkers)
           setActiveInfoWindow(false);
           setActiveMarker({});
           setMarkers(mapMarkers);
         });
       } else {
-        setActiveMarker({});
         setActiveInfoWindow(false);
+        setActiveMarker({});
       }
     });
   }
@@ -152,7 +155,6 @@ ElsewhereMap.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   google: PropTypes.object.isRequired,
 };
-
 
 export default GoogleApiWrapper({
   apiKey: process.env.GOOGLE_MAPS_KEY,
