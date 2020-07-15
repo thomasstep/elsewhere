@@ -1,13 +1,31 @@
 import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import { getSession } from 'next-auth/client';
+import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
 import React, { useState, useEffect } from 'react';
 import { Map, GoogleApiWrapper, Marker } from 'google-maps-react';
 import { fetcher } from '../../utils/fetcher';
 import Layout from '../../components/layout';
 import ElsewhereInfoWindow from '../../components/infowindow';
+
+const useStyles = makeStyles((theme) => ({
+  searchBox: {
+    margin: 0,
+    left: 10,
+    top: '80%',
+    position: 'fixed',
+    zIndex: theme.zIndex.appBar,
+  },
+  searchTextField: {
+    backgroundColor: 'white',
+  },
+  searchButton: {
+    backgroundColor: 'white',
+  },
+}));
 
 const getMarkers = (id) => `{
   getMarkers(mapId: "${id}") {
@@ -51,10 +69,17 @@ function ElsewhereMap(props) {
   const [activeMarker, setActiveMarker] = useState({});
   const [activeInfoWindow, setActiveInfoWindow] = useState(false);
   const [markers, setMarkers] = useState([]);
+  const [searchFieldText, setSearchFieldText] = useState('');
+  const [northEastLat, setNorthEastLat] = useState(0);
+  const [northEastLng, setNorthEastLng] = useState(0);
+  const [southWestLat, setSouthWestLat] = useState(0);
+  const [southWestLng, setSouthWestLng] = useState(0);
   const { google, session } = props;
+  const classes = useStyles(props);
 
   useEffect(() => {
-    if (!session) router.push('/api/auth/signin');
+    // TODO fix this
+    // if (!session) router.push('/api/auth/signin');
 
     fetcher(getMarkers(router.query.id)).then(({
       getMarkers: mapMarkers,
@@ -92,6 +117,13 @@ function ElsewhereMap(props) {
     });
   }
 
+  function onBoundsChanged(mapProps, map) {
+    setNorthEastLat(map.getBounds().getNorthEast().lat());
+    setNorthEastLng(map.getBounds().getNorthEast().lng());
+    setSouthWestLat(map.getBounds().getSouthWest().lat());
+    setSouthWestLng(map.getBounds().getSouthWest().lng());
+  }
+
   function deleteMarker() {
     const marker = {
       lat: activeMarker.position.lat(),
@@ -114,13 +146,47 @@ function ElsewhereMap(props) {
     });
   }
 
+  function handleSearchFieldTextChange(event) {
+    setSearchFieldText(event.target.value);
+  }
+
+  function searchForPlace(event) {
+    // make google api call
+    // use bounds latlng from state
+    // Display marker(s) for place
+    // ask if they want to save it
+  }
+
   return (
     <Layout mapPage>
+      <Box
+        className={classes.searchBox}
+      >
+
+        <TextField
+          id="outlined-basic"
+          value={searchFieldText}
+          label="Search for a place"
+          variant="outlined"
+          onChange={(e) => handleSearchFieldTextChange(e)}
+          className={classes.searchTextField}
+        />
+
+        <Button
+          variant="contained"
+          onClick={(e) => searchForPlace(e)}
+          className={classes.searchButton}
+        >
+          Search
+        </Button>
+
+      </Box>
       <Box>
         <Map
           google={google}
           zoom={14}
           onClick={onMapClick}
+          onBoundsChanged={onBoundsChanged}
         >
 
           {markers.length ? markers.map((marker) => (
