@@ -3,12 +3,14 @@ import cookie from 'cookie';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { v4 } from 'uuid';
+import { Client, Status } from "@googlemaps/google-maps-services-js";
 
 import { log } from '../utils/log';
 
 
 const { maps, users } = require('../utils/db');
 
+const mapsClient = new Client({});
 const RETRIES = 3;
 const { JWT_SECRET } = process.env;
 
@@ -87,6 +89,64 @@ const resolvers = {
         map,
       });
       return map;
+    },
+
+    getPlace: async (parent, args) => {
+      const {
+        query,
+        locationBias = {}
+      } = args;
+      const {
+        point = null,
+        rectangle = null,
+      } = locationBias;
+
+      const placeSearchParameters = {
+        key: process.env.GOOGLE_PLACES_KEY,
+        input: query,
+        inputtype: 'textquery',
+        fields: 'geometry',
+      };
+
+      if (point) {
+        const {
+          lat,
+          lng,
+        } = point;
+        placeSearchParameters.locationbias = `point:${lat},${lng}`;
+      }
+
+      // TODO test rectangle
+      if (rectangle) {
+        const {
+          northeast: {
+            lat: nelat,
+            lng: nelng,
+          },
+          southwest: {
+            lat: swlat,
+            lng: swlng,
+          },
+        } = rectangle;
+        placeSearchParameters.locationbias = `rectangle:${swlat.toString()},${swlng.toString()}|${nelat.toString()},${nelng.toString()}`;
+      }
+
+      let res;
+      console.log(placeSearchParameters)
+      try {
+        res = await mapsClient.findPlaceFromText({
+          params: placeSearchParameters,
+        });
+      } catch (err) {
+        console.error(err)
+        console.error(err.response.data.error_message)
+      }
+      console.log(res)
+      console.log(res.data.candidates[0]);
+      const places = [];
+      places.push(res.data.candidates[0].geometry.location)
+
+      return places;
     },
   },
   Mutation: {

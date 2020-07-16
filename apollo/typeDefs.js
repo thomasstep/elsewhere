@@ -29,6 +29,21 @@ const typeDefs = gql`
     pull: [String]
   }
 
+  input LocationBiasInput {
+    point: LatLngInput
+    rectangle: RectangleInput
+  }
+
+  input RectangleInput {
+    northeast: LatLngInput
+    southwest: LatLngInput
+  }
+
+  input LatLngInput {
+    lat: Float!
+    lng: Float!
+  }
+
   type User {
     id: ID!
     email: String!
@@ -60,15 +75,22 @@ const typeDefs = gql`
     user: User!
   }
 
+  type LatLng {
+    lat: Float!
+    lng: Float!
+  }
+
   type Marker {
     lat: Float!
     lng: Float!
+    coordinates: LatLng # TODO implement this
   }
 
   type Query {
     viewer: User
     getMarkers(mapId: ID!): [Marker]!
     getMap(mapId: ID!): Map!
+    getPlace(query: String!, locationBias: LocationBiasInput): [LatLng]!
   }
 
   type Mutation {
