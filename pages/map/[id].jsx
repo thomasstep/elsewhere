@@ -1,13 +1,31 @@
 import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import { getSession } from 'next-auth/client';
+import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
 import React, { useState, useEffect } from 'react';
 import { Map, GoogleApiWrapper, Marker } from 'google-maps-react';
 import { fetcher } from '../../utils/fetcher';
 import Layout from '../../components/layout';
 import ElsewhereInfoWindow from '../../components/infowindow';
+
+const useStyles = makeStyles((theme) => ({
+  searchBox: {
+    margin: 0,
+    left: 10,
+    top: '80%',
+    position: 'fixed',
+    zIndex: theme.zIndex.appBar,
+  },
+  searchTextField: {
+    backgroundColor: 'white',
+  },
+  searchButton: {
+    backgroundColor: 'white',
+  },
+}));
 
 const getMarkers = (id) => `{
   getMarkers(mapId: "${id}") {
@@ -46,15 +64,30 @@ const deleteMarkers = (id, markers) => {
   }`;
 };
 
+const getPlace = `query getPlace(
+  $query: String!
+  $locationBias: LocationBiasInput
+) {
+  getPlace(query: $query, locationBias: $locationBias) {
+    lat
+    lng
+  }
+}`;
+
 function ElsewhereMap(props) {
   const router = useRouter();
   const [activeMarker, setActiveMarker] = useState({});
   const [activeInfoWindow, setActiveInfoWindow] = useState(false);
   const [markers, setMarkers] = useState([]);
+  const [searchFieldText, setSearchFieldText] = useState('');
+  const [mapCenterLat, setMapCenterLat] = useState(0); // TODO use map's initial center
+  const [mapCenterLng, setMapCenterLng] = useState(0);
   const { google, session } = props;
+  const classes = useStyles(props);
 
   useEffect(() => {
-    if (!session) router.push('/api/auth/signin');
+    // TODO fix this
+    // if (!session) router.push('/api/auth/signin');
 
     fetcher(getMarkers(router.query.id)).then(({
       getMarkers: mapMarkers,
@@ -92,6 +125,11 @@ function ElsewhereMap(props) {
     });
   }
 
+  function changeMapCenter(mapProps, map) {
+    setMapCenterLat(map.center.lat());
+    setMapCenterLng(map.center.lng());
+  }
+
   function deleteMarker() {
     const marker = {
       lat: activeMarker.position.lat(),
@@ -114,13 +152,57 @@ function ElsewhereMap(props) {
     });
   }
 
+  function handleSearchFieldTextChange(event) {
+    setSearchFieldText(event.target.value);
+  }
+
+  // function searchForPlace(event) {
+  //   const query = searchFieldText;
+  //   const locationBias = {
+  //     point: {
+  //       lat: mapCenterLat,
+  //       lng: mapCenterLng,
+  //     },
+  //   };
+
+  //   fetcher(getPlace, { query, locationBias })
+  //     .then(({ getPlace: places }) => {
+  //       const [coordinates] = places;
+  //       setMarkers([...markers, coordinates]);
+  //       setActiveMarker(coordinates);
+  //     });
+  // }
+
   return (
     <Layout mapPage>
+      <Box
+        className={classes.searchBox}
+      >
+
+        <TextField
+          id="outlined-basic"
+          value={searchFieldText}
+          label="Search for a place"
+          variant="outlined"
+          onChange={(e) => handleSearchFieldTextChange(e)}
+          className={classes.searchTextField}
+        />
+
+        <Button
+          variant="contained"
+          // onClick={(e) => searchForPlace(e)}
+          className={classes.searchButton}
+        >
+          Search
+        </Button>
+
+      </Box>
       <Box>
         <Map
           google={google}
           zoom={14}
           onClick={onMapClick}
+          onRecenter={changeMapCenter}
         >
 
           {markers.length ? markers.map((marker) => (

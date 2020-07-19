@@ -27,7 +27,7 @@ const styles = (theme) => ({
     top: 10,
     left: '50%',
     position: 'fixed',
-    zIndex: 100,
+    zIndex: theme.zIndex.drawer + 1,
     backgroundColor: theme.palette.primary.main,
     '&:hover': {
       backgroundColor: theme.palette.primary.dark,

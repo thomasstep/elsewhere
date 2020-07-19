@@ -80,6 +80,9 @@ function endpointAuth(endpoint, args, user) {
       getMapAuth(args, user);
       break;
 
+    case 'getPlace':
+      break;
+
     case 'createMarkers':
       createMarkersAuth(args, user);
       break;
