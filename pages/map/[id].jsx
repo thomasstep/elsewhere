@@ -64,16 +64,24 @@ const deleteMarkers = (id, markers) => {
   }`;
 };
 
+const getPlace = `query getPlace(
+  $query: String!
+  $locationBias: LocationBiasInput
+) {
+  getPlace(query: $query, locationBias: $locationBias) {
+    lat
+    lng
+  }
+}`;
+
 function ElsewhereMap(props) {
   const router = useRouter();
   const [activeMarker, setActiveMarker] = useState({});
   const [activeInfoWindow, setActiveInfoWindow] = useState(false);
   const [markers, setMarkers] = useState([]);
   const [searchFieldText, setSearchFieldText] = useState('');
-  const [northEastLat, setNorthEastLat] = useState(0);
-  const [northEastLng, setNorthEastLng] = useState(0);
-  const [southWestLat, setSouthWestLat] = useState(0);
-  const [southWestLng, setSouthWestLng] = useState(0);
+  const [mapCenterLat, setMapCenterLat] = useState(0); // TODO use map's initial center
+  const [mapCenterLng, setMapCenterLng] = useState(0);
   const { google, session } = props;
   const classes = useStyles(props);
 
@@ -117,11 +125,9 @@ function ElsewhereMap(props) {
     });
   }
 
-  function onBoundsChanged(mapProps, map) {
-    setNorthEastLat(map.getBounds().getNorthEast().lat());
-    setNorthEastLng(map.getBounds().getNorthEast().lng());
-    setSouthWestLat(map.getBounds().getSouthWest().lat());
-    setSouthWestLng(map.getBounds().getSouthWest().lng());
+  function changeMapCenter(mapProps, map) {
+    setMapCenterLat(map.center.lat());
+    setMapCenterLng(map.center.lng());
   }
 
   function deleteMarker() {
@@ -150,12 +156,22 @@ function ElsewhereMap(props) {
     setSearchFieldText(event.target.value);
   }
 
-  function searchForPlace(event) {
-    // make google api call
-    // use bounds latlng from state
-    // Display marker(s) for place
-    // ask if they want to save it
-  }
+  // function searchForPlace(event) {
+  //   const query = searchFieldText;
+  //   const locationBias = {
+  //     point: {
+  //       lat: mapCenterLat,
+  //       lng: mapCenterLng,
+  //     },
+  //   };
+
+  //   fetcher(getPlace, { query, locationBias })
+  //     .then(({ getPlace: places }) => {
+  //       const [coordinates] = places;
+  //       setMarkers([...markers, coordinates]);
+  //       setActiveMarker(coordinates);
+  //     });
+  // }
 
   return (
     <Layout mapPage>
@@ -174,7 +190,7 @@ function ElsewhereMap(props) {
 
         <Button
           variant="contained"
-          onClick={(e) => searchForPlace(e)}
+          // onClick={(e) => searchForPlace(e)}
           className={classes.searchButton}
         >
           Search
@@ -186,7 +202,7 @@ function ElsewhereMap(props) {
           google={google}
           zoom={14}
           onClick={onMapClick}
-          onBoundsChanged={onBoundsChanged}
+          onRecenter={changeMapCenter}
         >
 
           {markers.length ? markers.map((marker) => (
