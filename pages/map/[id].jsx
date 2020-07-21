@@ -5,11 +5,11 @@ import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
+import Drawer from '@material-ui/core/Drawer';
 import React, { useState, useEffect } from 'react';
 import { Map, GoogleApiWrapper, Marker } from 'google-maps-react';
 import { fetcher } from '../../utils/fetcher';
 import Layout from '../../components/layout';
-import ElsewhereInfoWindow from '../../components/infowindow';
 
 const useStyles = makeStyles((theme) => ({
   searchBox: {
@@ -82,7 +82,8 @@ function ElsewhereMap(props) {
   const [searchFieldText, setSearchFieldText] = useState('');
   const [mapCenterLat, setMapCenterLat] = useState(0); // TODO use map's initial center
   const [mapCenterLng, setMapCenterLng] = useState(0);
-  const { google, session } = props;
+  const { google } = props;
+  // const { session } = props;
   const classes = useStyles(props);
 
   useEffect(() => {
@@ -131,12 +132,7 @@ function ElsewhereMap(props) {
   }
 
   function deleteMarker() {
-    const marker = {
-      lat: activeMarker.position.lat(),
-      lng: activeMarker.position.lng(),
-    };
-
-    fetcher(deleteMarkers(router.query.id, [marker])).then(({ deleteMarkers: success }) => {
+    fetcher(deleteMarkers(router.query.id, [activeMarker])).then(({ deleteMarkers: success }) => {
       if (success) {
         fetcher(getMarkers(router.query.id)).then(({
           getMarkers: mapMarkers,
@@ -156,22 +152,23 @@ function ElsewhereMap(props) {
     setSearchFieldText(event.target.value);
   }
 
-  // function searchForPlace(event) {
-  //   const query = searchFieldText;
-  //   const locationBias = {
-  //     point: {
-  //       lat: mapCenterLat,
-  //       lng: mapCenterLng,
-  //     },
-  //   };
+  function searchForPlace() {
+    const query = searchFieldText;
+    const locationBias = {
+      point: {
+        lat: mapCenterLat,
+        lng: mapCenterLng,
+      },
+    };
 
-  //   fetcher(getPlace, { query, locationBias })
-  //     .then(({ getPlace: places }) => {
-  //       const [coordinates] = places;
-  //       setMarkers([...markers, coordinates]);
-  //       setActiveMarker(coordinates);
-  //     });
-  // }
+    fetcher(getPlace, { query, locationBias })
+      .then(({ getPlace: places }) => {
+        const [coordinates] = places;
+        setMarkers([...markers, coordinates]);
+        setActiveMarker(coordinates);
+        setActiveInfoWindow(true);
+      });
+  }
 
   return (
     <Layout mapPage>
@@ -190,7 +187,7 @@ function ElsewhereMap(props) {
 
         <Button
           variant="contained"
-          // onClick={(e) => searchForPlace(e)}
+          onClick={(e) => searchForPlace(e)}
           className={classes.searchButton}
         >
           Search
@@ -209,25 +206,33 @@ function ElsewhereMap(props) {
             <Marker
               position={marker}
               onClick={(smth, clickedMarker) => {
-                setActiveMarker(clickedMarker);
+                setActiveMarker({
+                  lat: clickedMarker.position.lat(),
+                  lng: clickedMarker.position.lng(),
+                });
                 setActiveInfoWindow(true);
               }}
               key={marker.lat.toString().concat(marker.lng.toString())}
             />
           )) : null}
 
-          <ElsewhereInfoWindow
-            visible={activeInfoWindow}
-            marker={activeMarker}
+          <Drawer
+            anchor="right"
+            open={activeInfoWindow}
             onClose={onInfoWindowClose}
           >
             <div>
-              <p>I&apos;m here</p>
+              Latitude:
+              {activeMarker.lat}
+              <br />
+              Longitude:
+              {activeMarker.lng}
+              <br />
               <Button onClick={deleteMarker}>
-                Delete this marker
+                Delete
               </Button>
             </div>
-          </ElsewhereInfoWindow>
+          </Drawer>
 
         </Map>
       </Box>
@@ -243,7 +248,7 @@ ElsewhereMap.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   google: PropTypes.object.isRequired,
   // eslint-disable-next-line react/forbid-prop-types
-  session: PropTypes.object.isRequired,
+  // session: PropTypes.object.isRequired,
 };
 
 export default GoogleApiWrapper({

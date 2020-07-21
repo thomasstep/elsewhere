@@ -28,5 +28,7 @@ module.exports = {
       'custom': 'ignore',
     }],
     'jsx-a11y/anchor-is-valid': 'off',
+    'linebreak-style': 'off',
+    'no-multiple-empty-lines': 'off',
   },
 };

@@ -3,7 +3,7 @@ import cookie from 'cookie';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { v4 } from 'uuid';
-import { Client, Status } from "@googlemaps/google-maps-services-js";
+import { Client } from '@googlemaps/google-maps-services-js';
 
 import { log } from '../utils/log';
 
@@ -94,7 +94,7 @@ const resolvers = {
     getPlace: async (parent, args) => {
       const {
         query,
-        locationBias = {}
+        locationBias = {},
       } = args;
       const {
         point = null,
@@ -132,19 +132,16 @@ const resolvers = {
       }
 
       let res;
-      console.log(placeSearchParameters)
       try {
         res = await mapsClient.findPlaceFromText({
           params: placeSearchParameters,
         });
       } catch (err) {
-        console.error(err)
-        console.error(err.response.data.error_message)
+        log.error(err);
+        log.error(err.response.data.error_message);
       }
-      console.log(res)
-      console.log(res.data.candidates[0]);
       const places = [];
-      places.push(res.data.candidates[0].geometry.location)
+      places.push(res.data.candidates[0].geometry.location);
 
       return places;
     },

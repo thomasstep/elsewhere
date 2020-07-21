@@ -54,7 +54,7 @@ function Profile({ session }) {
         setWritableMaps(viewerWritableMaps);
       })
       .catch((err) => {
-        console.log(err)
+        console.log(err);
       });
   }, []);
 
@@ -100,11 +100,9 @@ function Profile({ session }) {
   return <p>Loading...</p>;
 }
 
-Profile.getInitialProps = async (context) => {
-  return {
-    session: await getSession(context),
-  };
-};
+Profile.getInitialProps = async (context) => ({
+  session: await getSession(context),
+});
 
 Profile.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
