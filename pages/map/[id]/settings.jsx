@@ -15,6 +15,7 @@ import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import { fetcher } from '../../../utils/fetcher';
 import Layout from '../../../components/layout';
+import LoadingPage from '../../../components/loadingPage';
 
 const useStyles = makeStyles((theme) => ({
   deleteButton: {
@@ -65,7 +66,7 @@ const removeTravelPartnerMutation = `mutation removeTravelPartner(
 function ElsewhereMapSettings(props) {
   const router = useRouter();
   const [mapId] = useState(router.query.id);
-  const [writers, setWriters] = useState([]);
+  const [writers, setWriters] = useState(null);
   const [travelPartnerTextField, setTravelPartnerTextField] = useState('');
   const { session } = props;
   const classes = useStyles(props);
@@ -149,61 +150,65 @@ function ElsewhereMapSettings(props) {
     // setWriters(writers); Do I need to do this?
   }
 
-  return (
-    <Layout>
-      <Typography variant="h3">Settings</Typography>
-      <Typography variant="h5">{`Map ID: ${router.query.id}`}</Typography>
-      <Button
-        variant="contained"
-        className={classes.deleteButton}
-        startIcon={<DeleteIcon />}
-        onClick={(e) => deleteMap(e)}
-      >
-        Delete Map
-      </Button>
-      {
-        writers.length ? (
-          <>
-            <Typography variant="h5">Travel Partners</Typography>
-            <List component="nav">
-              {writers.map((email) => (
-                <React.Fragment key={email}>
-                  <ListItem button>
-                    <ListItemText primary={email} />
-                    <IconButton
-                      aria-label="delete"
-                      className={classes.deleteTravelPartnerButton}
-                      onClick={(e) => removeTravelPartner(e, email)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </ListItem>
-                  <Divider />
-                </React.Fragment>
-              ))}
-            </List>
-          </>
-        )
-          : (
-            null
+  if (writers) {
+    return (
+      <Layout>
+        <Typography variant="h3">Settings</Typography>
+        <Typography variant="h5">{`Map ID: ${router.query.id}`}</Typography>
+        <Button
+          variant="contained"
+          className={classes.deleteButton}
+          startIcon={<DeleteIcon />}
+          onClick={(e) => deleteMap(e)}
+        >
+          Delete Map
+        </Button>
+        {
+          writers.length ? (
+            <>
+              <Typography variant="h5">Travel Partners</Typography>
+              <List component="nav">
+                {writers.map((email) => (
+                  <React.Fragment key={email}>
+                    <ListItem button>
+                      <ListItemText primary={email} />
+                      <IconButton
+                        aria-label="delete"
+                        className={classes.deleteTravelPartnerButton}
+                        onClick={(e) => removeTravelPartner(e, email)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </ListItem>
+                    <Divider />
+                  </React.Fragment>
+                ))}
+              </List>
+            </>
           )
-      }
-      <TextField
-        id="filled-basic"
-        value={travelPartnerTextField}
-        label="Email"
-        variant="filled"
-        onChange={(e) => handleTravelBuddyTextFieldChange(e)}
-      />
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={(e) => addTravelPartner(e)}
-      >
-        Add Travel Partner
-      </Button>
-    </Layout>
-  );
+            : (
+              null
+            )
+        }
+        <TextField
+          id="filled-basic"
+          value={travelPartnerTextField}
+          label="Email"
+          variant="filled"
+          onChange={(e) => handleTravelBuddyTextFieldChange(e)}
+        />
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={(e) => addTravelPartner(e)}
+        >
+          Add Travel Partner
+        </Button>
+      </Layout>
+    );
+  }
+
+  return <LoadingPage />;
 }
 
 ElsewhereMapSettings.getInitialProps = async (context) => ({

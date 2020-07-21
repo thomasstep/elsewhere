@@ -7,6 +7,7 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Layout from '../components/layout';
 import MapList from '../components/mapList';
+import LoadingPage from '../components/loadingPage';
 import { fetcher } from '../utils/fetcher';
 
 const viewerQuery = `{
@@ -97,7 +98,7 @@ function Profile({ session }) {
     );
   }
 
-  return <p>Loading...</p>;
+  return <LoadingPage />;
 }
 
 Profile.getInitialProps = async (context) => ({

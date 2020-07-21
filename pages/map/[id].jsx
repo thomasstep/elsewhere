@@ -10,6 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { Map, GoogleApiWrapper, Marker } from 'google-maps-react';
 import { fetcher } from '../../utils/fetcher';
 import Layout from '../../components/layout';
+import LoadingPage from '../../components/loadingPage';
 
 const useStyles = makeStyles((theme) => ({
   searchBox: {
@@ -78,7 +79,7 @@ function ElsewhereMap(props) {
   const router = useRouter();
   const [activeMarker, setActiveMarker] = useState({});
   const [activeInfoWindow, setActiveInfoWindow] = useState(false);
-  const [markers, setMarkers] = useState([]);
+  const [markers, setMarkers] = useState(null);
   const [searchFieldText, setSearchFieldText] = useState('');
   const [mapCenterLat, setMapCenterLat] = useState(0); // TODO use map's initial center
   const [mapCenterLng, setMapCenterLng] = useState(0);
@@ -170,74 +171,78 @@ function ElsewhereMap(props) {
       });
   }
 
-  return (
-    <Layout mapPage>
-      <Box
-        className={classes.searchBox}
-      >
-
-        <TextField
-          id="outlined-basic"
-          value={searchFieldText}
-          label="Search for a place"
-          variant="outlined"
-          onChange={(e) => handleSearchFieldTextChange(e)}
-          className={classes.searchTextField}
-        />
-
-        <Button
-          variant="contained"
-          onClick={(e) => searchForPlace(e)}
-          className={classes.searchButton}
-        >
-          Search
-        </Button>
-
-      </Box>
-      <Box>
-        <Map
-          google={google}
-          zoom={14}
-          onClick={onMapClick}
-          onRecenter={changeMapCenter}
+  if (markers) {
+    return (
+      <Layout mapPage>
+        <Box
+          className={classes.searchBox}
         >
 
-          {markers.length ? markers.map((marker) => (
-            <Marker
-              position={marker}
-              onClick={(smth, clickedMarker) => {
-                setActiveMarker({
-                  lat: clickedMarker.position.lat(),
-                  lng: clickedMarker.position.lng(),
-                });
-                setActiveInfoWindow(true);
-              }}
-              key={marker.lat.toString().concat(marker.lng.toString())}
-            />
-          )) : null}
+          <TextField
+            id="outlined-basic"
+            value={searchFieldText}
+            label="Search for a place"
+            variant="outlined"
+            onChange={(e) => handleSearchFieldTextChange(e)}
+            className={classes.searchTextField}
+          />
 
-          <Drawer
-            anchor="right"
-            open={activeInfoWindow}
-            onClose={onInfoWindowClose}
+          <Button
+            variant="contained"
+            onClick={(e) => searchForPlace(e)}
+            className={classes.searchButton}
           >
-            <div>
-              Latitude:
-              {activeMarker.lat}
-              <br />
-              Longitude:
-              {activeMarker.lng}
-              <br />
-              <Button onClick={deleteMarker}>
-                Delete
-              </Button>
-            </div>
-          </Drawer>
+            Search
+          </Button>
 
-        </Map>
-      </Box>
-    </Layout>
-  );
+        </Box>
+        <Box>
+          <Map
+            google={google}
+            zoom={14}
+            onClick={onMapClick}
+            onRecenter={changeMapCenter}
+          >
+
+            {markers.length ? markers.map((marker) => (
+              <Marker
+                position={marker}
+                onClick={(smth, clickedMarker) => {
+                  setActiveMarker({
+                    lat: clickedMarker.position.lat(),
+                    lng: clickedMarker.position.lng(),
+                  });
+                  setActiveInfoWindow(true);
+                }}
+                key={marker.lat.toString().concat(marker.lng.toString())}
+              />
+            )) : null}
+
+            <Drawer
+              anchor="right"
+              open={activeInfoWindow}
+              onClose={onInfoWindowClose}
+            >
+              <div>
+                Latitude:
+                {activeMarker.lat}
+                <br />
+                Longitude:
+                {activeMarker.lng}
+                <br />
+                <Button onClick={deleteMarker}>
+                  Delete
+                </Button>
+              </div>
+            </Drawer>
+
+          </Map>
+        </Box>
+      </Layout>
+    );
+  }
+
+  return <LoadingPage />;
 }
 
 ElsewhereMap.getInitialProps = async (context) => ({
