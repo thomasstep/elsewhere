@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const usersSchema = new mongoose.Schema({
   uuid: String,
   email: String,
-  hashedPassword: String,
+  // hashedPassword: String,
   ownedMaps: [String],
   writableMaps: [String],
   readableMaps: [String],

@@ -33,7 +33,7 @@ const options = {
     entityPrefix: 'nextauth_',
     // synchronize: true,
   },
-  debug: true,
+  // debug: true,
   events: {
     createUser: async (message) => {
       const { id: userId, email } = message;

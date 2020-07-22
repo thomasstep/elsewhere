@@ -31,6 +31,7 @@ async function context(ctx) {
           email: user.email,
         });
         log.error(err);
+        log.error(err.message)
       }
     }
 
