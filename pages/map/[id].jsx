@@ -90,12 +90,6 @@ function ElsewhereMap(props) {
   }
 
   function onMapClick(mapProps, map, clickEvent) {
-    if (activeInfoWindow) {
-      setActiveInfoWindow(false);
-      setActiveMarker({});
-      return;
-    }
-
     const marker = {
       lat: clickEvent.latLng.lat(),
       lng: clickEvent.latLng.lng(),
@@ -123,6 +117,29 @@ function ElsewhereMap(props) {
   function changeMapCenter(mapProps, map) {
     setMapCenterLat(map.center.lat());
     setMapCenterLng(map.center.lng());
+  }
+
+  function createMarker() {
+    const variables = {
+      mapId: router.query.id,
+      markers: [
+        {
+          lat: activeMarker.lat,
+          lng: activeMarker.lng,
+        },
+      ],
+    };
+
+    fetcher(createMarkers, variables).then(({ createMarkers: success }) => {
+      if (success) {
+        setActiveInfoWindow(false);
+        setActiveMarker({});
+        setMarkers([...markers, activeMarker]);
+      } else {
+        setActiveInfoWindow(false);
+        setActiveMarker({});
+      }
+    });
   }
 
   function deleteMarker() {
@@ -165,8 +182,12 @@ function ElsewhereMap(props) {
     fetcher(getPlace, { query, locationBias })
       .then(({ getPlace: places }) => {
         const [coordinates] = places;
-        setMarkers([...markers, coordinates]);
-        setActiveMarker(coordinates);
+        const searchMarker = {
+          ...coordinates,
+          notSaved: true,
+        };
+        setMarkers([...markers, searchMarker]);
+        setActiveMarker(searchMarker);
         setActiveInfoWindow(true);
       });
   }
@@ -207,11 +228,8 @@ function ElsewhereMap(props) {
             {markers.length ? markers.map((marker) => (
               <Marker
                 position={marker}
-                onClick={(smth, clickedMarker) => {
-                  setActiveMarker({
-                    lat: clickedMarker.position.lat(),
-                    lng: clickedMarker.position.lng(),
-                  });
+                onClick={() => {
+                  setActiveMarker(marker);
                   setActiveInfoWindow(true);
                 }}
                 key={marker.lat.toString().concat(marker.lng.toString())}
@@ -230,9 +248,16 @@ function ElsewhereMap(props) {
                 Longitude:
                 {activeMarker.lng}
                 <br />
-                <Button onClick={deleteMarker}>
-                  Delete
-                </Button>
+                {activeMarker.notSaved ? (
+                  <Button onClick={createMarker}>
+                    Save
+                  </Button>
+                )
+                  : (
+                    <Button onClick={deleteMarker}>
+                      Delete
+                    </Button>
+                  )}
               </div>
             </Drawer>
 
