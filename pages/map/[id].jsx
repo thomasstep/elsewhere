@@ -28,42 +28,28 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const getMarkers = (id) => `{
-  getMarkers(mapId: "${id}") {
+const getMarkers = `query getMarkers (
+    $mapId: ID!
+  ) {
+  getMarkers(mapId: $mapId) {
     lat
     lng
   }
 }`;
 
-const createMarkers = (id, markers) => {
-  let markersString = '[';
-  markers.forEach((marker) => {
-    markersString += `
-    {
-      lat: ${marker.lat}
-      lng: ${marker.lng}
-    }`;
-  });
-  markersString += ']';
-  return `mutation {
-    createMarkers(mapId: "${id}", markers: ${markersString})
-  }`;
-};
+const createMarkers = `mutation createMarkers(
+  $mapId: ID!
+  $markers: [MarkerInput]!
+) {
+  createMarkers(mapId: $mapId, markers: $markers)
+}`;
 
-const deleteMarkers = (id, markers) => {
-  let markersString = '[';
-  markers.forEach((marker) => {
-    markersString += `
-    {
-      lat: ${marker.lat}
-      lng: ${marker.lng}
-    }`;
-  });
-  markersString += ']';
-  return `mutation {
-    deleteMarkers(mapId: "${id}", markers: ${markersString})
-  }`;
-};
+const deleteMarkers = `mutation deleteMarkers(
+  $mapId: ID!
+  $markers: [MarkerInput]!
+) {
+  deleteMarkers(mapId: $mapId, markers: $markers)
+}`;
 
 const getPlace = `query getPlace(
   $query: String!
@@ -91,7 +77,7 @@ function ElsewhereMap(props) {
     // TODO fix this
     // if (!session) router.push('/api/auth/signin');
 
-    fetcher(getMarkers(router.query.id)).then(({
+    fetcher(getMarkers, { mapId: router.query.id }).then(({
       getMarkers: mapMarkers,
     }) => {
       setMarkers(mapMarkers);
@@ -115,7 +101,14 @@ function ElsewhereMap(props) {
       lng: clickEvent.latLng.lng(),
     };
 
-    fetcher(createMarkers(router.query.id, [marker])).then(({ createMarkers: success }) => {
+    const variables = {
+      mapId: router.query.id,
+      markers: [
+        marker,
+      ],
+    };
+
+    fetcher(createMarkers, variables).then(({ createMarkers: success }) => {
       if (success) {
         setActiveInfoWindow(false);
         setActiveMarker({});
@@ -133,9 +126,16 @@ function ElsewhereMap(props) {
   }
 
   function deleteMarker() {
-    fetcher(deleteMarkers(router.query.id, [activeMarker])).then(({ deleteMarkers: success }) => {
+    const variables = {
+      mapId: router.query.id,
+      markers: [
+        activeMarker,
+      ],
+    };
+
+    fetcher(deleteMarkers, variables).then(({ deleteMarkers: success }) => {
       if (success) {
-        fetcher(getMarkers(router.query.id)).then(({
+        fetcher(getMarkers, { mapId: router.query.id }).then(({
           getMarkers: mapMarkers,
         }) => {
           setActiveInfoWindow(false);
