@@ -70,12 +70,12 @@ function ElsewhereMap(props) {
   const [mapCenterLat, setMapCenterLat] = useState(0); // TODO use map's initial center
   const [mapCenterLng, setMapCenterLng] = useState(0);
   const { google } = props;
-  // const { session } = props;
   const classes = useStyles(props);
 
   useEffect(() => {
-    // TODO fix this
-    // if (!session) router.push('/api/auth/signin');
+    getSession().then((session) => {
+      if (!session) router.push('/api/auth/signin');
+    });
 
     fetcher(getMarkers, { mapId: router.query.id }).then(({
       getMarkers: mapMarkers,
@@ -245,15 +245,9 @@ function ElsewhereMap(props) {
   return <LoadingPage />;
 }
 
-ElsewhereMap.getInitialProps = async (context) => ({
-  session: await getSession(context),
-});
-
 ElsewhereMap.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   google: PropTypes.object.isRequired,
-  // eslint-disable-next-line react/forbid-prop-types
-  // session: PropTypes.object.isRequired,
 };
 
 export default GoogleApiWrapper({
