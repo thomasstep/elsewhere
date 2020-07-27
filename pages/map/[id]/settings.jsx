@@ -72,7 +72,7 @@ function ElsewhereMapSettings(props) {
   const classes = useStyles(props);
 
   useEffect(() => {
-    if (!session) router.push('/api/auth/signin');
+    if (!session) router.push('/signin');
 
     fetcher(getMapQuery, { mapId: router.query.id }).then(({
       getMap: {
@@ -152,7 +152,7 @@ function ElsewhereMapSettings(props) {
 
   if (writers) {
     return (
-      <Layout>
+      <Layout session>
         <Typography variant="h3">Settings</Typography>
         <Typography variant="h5">{`Map ID: ${router.query.id}`}</Typography>
         <Button

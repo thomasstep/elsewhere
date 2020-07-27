@@ -1,24 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { fetcher } from '../utils/fetcher';
-
-const signOutMutation = `
-  mutation SignOutMutation {
-    signOut
-  }
-`;
+import { signOut } from 'next-auth/client';
+import LoadingPage from '../components/loadingPage';
 
 function SignOut() {
   const router = useRouter();
 
-  React.useEffect(() => {
-    fetcher(signOutMutation)
+  useEffect(() => {
+    signOut()
       .then(() => {
-        router.push('/signin');
+        router.push('/');
       });
-  }, [router]);
+  }, []);
 
-  return <p>Signing out...</p>;
+  return <LoadingPage />;
 }
 
 export default SignOut;

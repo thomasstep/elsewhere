@@ -20,6 +20,9 @@ import ListItemText from '@material-ui/core/ListItemText';
 import HomeIcon from '@material-ui/icons/Home';
 import AccountBoxIcon from '@material-ui/icons/AccountBox';
 import MapIcon from '@material-ui/icons/Map';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+
+import { signout } from 'next-auth/client';
 
 const styles = (theme) => ({
   fab: {
@@ -74,7 +77,7 @@ class Header extends React.Component {
 
   render() {
     const { open } = this.state;
-    const { mapPage, classes } = this.props;
+    const { mapPage, classes, session } = this.props;
     const navigationDrawer = (
       <Drawer anchor="top" open={open} onClose={this.toggleDrawer}>
         <div
@@ -101,6 +104,15 @@ class Header extends React.Component {
                 <ListItemText primary="Create Map" />
               </ListItem>
             </Link>
+            {
+              session
+                ? (
+                  <ListItem button key="Sign Out" onClick={signout}>
+                    <ListItemIcon><ExitToAppIcon /></ListItemIcon>
+                    <ListItemText primary="Sign Out" />
+                  </ListItem>
+                ) : null
+            }
           </List>
         </div>
       </Drawer>
@@ -125,7 +137,7 @@ class Header extends React.Component {
                 variant="h5"
                 className={classes.typography}
               >
-                ELSEWHERE
+                Elsewhere
               </Typography>
             </Toolbar>
           </AppBar>

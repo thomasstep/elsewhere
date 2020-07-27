@@ -59,6 +59,10 @@ const options = {
       }
     },
   },
+  pages: {
+    signIn: '/signin',
+    signOut: '/signout',
+  }
 };
 
 export default (req, res) => NextAuth(req, res, options);

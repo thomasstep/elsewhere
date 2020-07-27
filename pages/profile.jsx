@@ -36,7 +36,7 @@ function Profile({ session }) {
   const classes = useStyles();
 
   useEffect(() => {
-    if (!session) router.push('/api/auth/signin');
+    if (!session) router.push('/signin');
 
     fetcher(viewerQuery)
       .then(({
@@ -62,7 +62,7 @@ function Profile({ session }) {
   if (id) {
     const sharedMaps = [...writableMaps, ...readableMaps];
     return (
-      <Layout>
+      <Layout session={session}>
         <Grid container>
           <Grid item xs={12} />
           <Grid item xs={12} className={classes.gridItem}>

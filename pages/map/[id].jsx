@@ -74,7 +74,7 @@ function ElsewhereMap(props) {
 
   useEffect(() => {
     getSession().then((session) => {
-      if (!session) router.push('/api/auth/signin');
+      if (!session) router.push('/signin');
     });
 
     fetcher(getMarkers, { mapId: router.query.id }).then(({
