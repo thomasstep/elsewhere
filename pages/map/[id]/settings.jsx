@@ -154,7 +154,7 @@ function ElsewhereMapSettings(props) {
 
   if (writers) {
     return (
-      <Layout session>
+      <Layout session={session}>
         <Grid
           container
           direction="column"
@@ -217,7 +217,7 @@ function ElsewhereMapSettings(props) {
               alignItems="flex-start"
               spacing={2}
             >
-              <Grid item xs={12} spacing={5}>
+              <Grid item xs={12}>
                 <TextField
                   id="filled-basic"
                   value={travelPartnerTextField}

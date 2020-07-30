@@ -5,7 +5,7 @@ import Box from '@material-ui/core/Box';
 
 import Header from './header';
 
-const Layout = (props) => {
+function Layout(props) {
   const { children, mapPage, session } = props;
   return (
     <Box>
@@ -24,7 +24,7 @@ const Layout = (props) => {
       }
     </Box>
   );
-};
+}
 
 Layout.propTypes = {
   children: PropTypes.oneOfType([

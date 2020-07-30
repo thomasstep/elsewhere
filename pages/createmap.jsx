@@ -68,7 +68,7 @@ function CreateMap({ session }) {
             alignItems="flex-start"
             spacing={2}
           >
-            <Grid item xs={12} spacing={5}>
+            <Grid item xs={12}>
               <TextField
                 id="filled-basic"
                 value={newMapNameField}
