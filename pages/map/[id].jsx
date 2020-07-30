@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { getSession } from 'next-auth/client';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Drawer from '@material-ui/core/Drawer';
@@ -16,7 +17,7 @@ const useStyles = makeStyles((theme) => ({
   searchBox: {
     margin: 0,
     left: 10,
-    top: '80%',
+    bottom: '5%',
     position: 'fixed',
     zIndex: theme.zIndex.appBar,
   },
@@ -24,7 +25,11 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: 'white',
   },
   searchButton: {
-    backgroundColor: 'white',
+    color: 'white',
+    backgroundColor: theme.palette.primary.main,
+    '&:hover': {
+      backgroundColor: theme.palette.primary.dark,
+    },
   },
 }));
 
@@ -198,24 +203,43 @@ function ElsewhereMap(props) {
         <Box
           className={classes.searchBox}
         >
-
-          <TextField
-            id="outlined-basic"
-            value={searchFieldText}
-            label="Search for a place"
-            variant="outlined"
-            onChange={(e) => handleSearchFieldTextChange(e)}
-            className={classes.searchTextField}
-          />
-
-          <Button
-            variant="contained"
-            onClick={(e) => searchForPlace(e)}
-            className={classes.searchButton}
+          <Grid
+            container
+            direction="column"
+            justify="space-evenly"
+            alignItems="flex-start"
+            spacing={3}
           >
-            Search
-          </Button>
-
+            <Grid item xs={12}>
+              <Grid
+                container
+                direction="column"
+                justify="space-evenly"
+                alignItems="flex-start"
+                spacing={2}
+              >
+                <Grid item xs={12}>
+                  <TextField
+                    id="outlined-basic"
+                    value={searchFieldText}
+                    label="Search for a place"
+                    variant="outlined"
+                    onChange={(e) => handleSearchFieldTextChange(e)}
+                    className={classes.searchTextField}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Button
+                    variant="contained"
+                    onClick={(e) => searchForPlace(e)}
+                    className={classes.searchButton}
+                  >
+                    Search
+                  </Button>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
         </Box>
         <Box>
           <Map

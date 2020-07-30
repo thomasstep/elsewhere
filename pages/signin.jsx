@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import { providers, csrfToken, signin } from 'next-auth/client';
@@ -15,44 +16,64 @@ function SignIn({ elsewhereProviders }) {
 
   return (
     <Layout>
-      {Object.values(elsewhereProviders).map((provider) => {
-        if (provider.id === 'email') {
+      <Grid
+        container
+        direction="column"
+        justify="space-evenly"
+        alignItems="center"
+        spacing={5}
+      >
+        {Object.values(elsewhereProviders).map((provider) => {
+          if (provider.id === 'email') {
+            return (
+              <Grid item xs={12}>
+                <Grid
+                  container
+                  direction="column"
+                  justify="space-evenly"
+                  alignItems="center"
+                  spacing={2}
+                >
+                  <Grid item xs={12}>
+                    <TextField
+                      id="filled-basic"
+                      value={signInEmail}
+                      label="Email address"
+                      variant="filled"
+                      onChange={(e) => handleSignInEmailFieldChange(e)}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Button
+                      variant="contained"
+                      onClick={() => signin(
+                        'email',
+                        {
+                          email: signInEmail,
+                          callbackUrl: `${process.env.SITE}/profile`,
+                        },
+                      )}
+                    >
+                      Sign in with Email
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Grid>
+            );
+          }
+
           return (
-            <>
-              <TextField
-                id="filled-basic"
-                value={signInEmail}
-                label="Email address"
-                variant="filled"
-                onChange={(e) => handleSignInEmailFieldChange(e)}
-              />
+            <Grid item xs={12}>
               <Button
                 variant="contained"
-                onClick={() => signin(
-                  'email',
-                  {
-                    email: signInEmail,
-                    callbackUrl: `${process.env.SITE}/profile`,
-                  },
-                )}
+                onClick={() => signin(provider.id, { callbackUrl: `${process.env.SITE}/profile` })}
               >
-                Sign in with Email
+                {`Sign in with ${provider.name}`}
               </Button>
-            </>
+            </Grid>
           );
-        }
-
-        return (
-          <>
-            <Button
-              variant="contained"
-              onClick={() => signin(provider.id, { callbackUrl: `${process.env.SITE}/profile` })}
-            >
-              {`Sign in with ${provider.name}`}
-            </Button>
-          </>
-        );
-      })}
+        })}
+      </Grid>
     </Layout>
   );
 }

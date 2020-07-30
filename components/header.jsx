@@ -101,7 +101,14 @@ function Header(props) {
                   <ListItemIcon><ExitToAppIcon /></ListItemIcon>
                   <ListItemText primary="Sign Out" />
                 </ListItem>
-              ) : null
+              ) : (
+                <Link href="/signin">
+                  <ListItem button key="Sign In">
+                    <ListItemIcon><ExitToAppIcon /></ListItemIcon>
+                    <ListItemText primary="Sign In" />
+                  </ListItem>
+                </Link>
+              )
           }
         </List>
       </div>
