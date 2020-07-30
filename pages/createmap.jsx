@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -49,21 +50,45 @@ function CreateMap({ session }) {
 
   return (
     <Layout session={session}>
-      <Typography variant="h3">Create a new map</Typography>
-      <TextField
-        id="filled-basic"
-        value={newMapNameField}
-        label="New map name"
-        variant="filled"
-        onChange={(e) => handleNewMapNameFieldChange(e)}
-      />
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={(e) => addNewMap(e)}
+      <Grid
+        container
+        direction="column"
+        justify="space-evenly"
+        alignItems="flex-start"
+        spacing={3}
       >
-        Add New Map
-      </Button>
+        <Grid item xs={12}>
+          <Typography variant="h3">Create a new map</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <Grid
+            container
+            direction="column"
+            justify="space-evenly"
+            alignItems="flex-start"
+            spacing={2}
+          >
+            <Grid item xs={12} spacing={5}>
+              <TextField
+                id="filled-basic"
+                value={newMapNameField}
+                label="New map name"
+                variant="filled"
+                onChange={(e) => handleNewMapNameFieldChange(e)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={(e) => addNewMap(e)}
+              >
+                Add New Map
+              </Button>
+            </Grid>
+          </Grid>
+        </Grid>
+      </Grid>
     </Layout>
   );
 }
