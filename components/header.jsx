@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 
 // Menu bar
 import AppBar from '@material-ui/core/AppBar';
@@ -20,8 +20,11 @@ import ListItemText from '@material-ui/core/ListItemText';
 import HomeIcon from '@material-ui/icons/Home';
 import AccountBoxIcon from '@material-ui/icons/AccountBox';
 import MapIcon from '@material-ui/icons/Map';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
-const styles = (theme) => ({
+import { signout } from 'next-auth/client';
+
+const useStyles = makeStyles((theme) => ({
   fab: {
     margin: 0,
     top: 10,
@@ -48,103 +51,106 @@ const styles = (theme) => ({
   typography: {
     flexGrow: 1,
     align: 'center',
-    // marginTop: '6px',
     marginLeft: theme.spacing(2),
   },
-});
+}));
 
-class Header extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      open: false,
-    };
-    this.toggleDrawer = this.toggleDrawer.bind(this);
-  }
+function Header(props) {
+  const [open, setOpen] = useState(false);
+  const { mapPage, session } = props;
+  const classes = useStyles(props);
 
-  toggleDrawer(event) {
+  function toggleDrawer(event) {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
       return;
     }
 
-    const { open } = this.state;
-
-    this.setState({ open: !open });
+    setOpen(!open);
   }
 
-  render() {
-    const { open } = this.state;
-    const { mapPage, classes } = this.props;
-    const navigationDrawer = (
-      <Drawer anchor="top" open={open} onClose={this.toggleDrawer}>
-        <div
-          role="presentation"
-          onClick={this.toggleDrawer}
-          onKeyDown={this.toggleDrawer}
-        >
-          <List>
-            <Link href="/">
-              <ListItem button key="Home">
-                <ListItemIcon><HomeIcon /></ListItemIcon>
-                <ListItemText primary="Home" />
-              </ListItem>
-            </Link>
-            <Link href="/profile">
-              <ListItem button key="Profile">
-                <ListItemIcon><AccountBoxIcon /></ListItemIcon>
-                <ListItemText primary="Profile" />
-              </ListItem>
-            </Link>
-            <Link href="/createmap">
-              <ListItem button key="Create Map">
-                <ListItemIcon><MapIcon /></ListItemIcon>
-                <ListItemText primary="Create Map" />
-              </ListItem>
-            </Link>
-          </List>
-        </div>
-      </Drawer>
-    );
+  const navigationDrawer = (
+    <Drawer anchor="top" open={open} onClose={(e) => toggleDrawer(e)}>
+      <div
+        role="presentation"
+        onClick={(e) => toggleDrawer(e)}
+        onKeyDown={(e) => toggleDrawer(e)}
+      >
+        <List>
+          <Link href="/">
+            <ListItem button key="Home">
+              <ListItemIcon><HomeIcon /></ListItemIcon>
+              <ListItemText primary="Home" />
+            </ListItem>
+          </Link>
+          <Link href="/profile">
+            <ListItem button key="Profile">
+              <ListItemIcon><AccountBoxIcon /></ListItemIcon>
+              <ListItemText primary="Profile" />
+            </ListItem>
+          </Link>
+          <Link href="/createmap">
+            <ListItem button key="Create Map">
+              <ListItemIcon><MapIcon /></ListItemIcon>
+              <ListItemText primary="Create Map" />
+            </ListItem>
+          </Link>
+          {
+            session
+              ? (
+                <ListItem button key="Sign Out" onClick={signout}>
+                  <ListItemIcon><ExitToAppIcon /></ListItemIcon>
+                  <ListItemText primary="Sign Out" />
+                </ListItem>
+              ) : (
+                <Link href="/signin">
+                  <ListItem button key="Sign In">
+                    <ListItemIcon><ExitToAppIcon /></ListItemIcon>
+                    <ListItemText primary="Sign In" />
+                  </ListItem>
+                </Link>
+              )
+          }
+        </List>
+      </div>
+    </Drawer>
+  );
 
-    return mapPage ? (
-      <React.Fragment key="top">
-        <Fab onClick={this.toggleDrawer} className={classes.fab}>
-          <MenuIcon className={classes.menuIcon} />
-        </Fab>
+  return mapPage ? (
+    <React.Fragment key="top">
+      <Fab onClick={(e) => toggleDrawer(e)} className={classes.fab}>
+        <MenuIcon className={classes.menuIcon} />
+      </Fab>
+      {navigationDrawer}
+    </React.Fragment>
+  )
+    : (
+      <>
+        <AppBar className={classes.appBar}>
+          <Toolbar>
+            <IconButton onClick={(e) => toggleDrawer(e)} className={classes.iconButton} edge="start" aria-label="menu">
+              <MenuIcon className={classes.menuIcon} />
+            </IconButton>
+            <Typography
+              variant="h5"
+              className={classes.typography}
+            >
+              Elsewhere
+            </Typography>
+          </Toolbar>
+        </AppBar>
         {navigationDrawer}
-      </React.Fragment>
-    )
-      : (
-        <>
-          <AppBar className={classes.appBar}>
-            <Toolbar>
-              <IconButton onClick={this.toggleDrawer} className={classes.iconButton} edge="start" aria-label="menu">
-                <MenuIcon className={classes.menuIcon} />
-              </IconButton>
-              <Typography
-                variant="h5"
-                className={classes.typography}
-              >
-                ELSEWHERE
-              </Typography>
-            </Toolbar>
-          </AppBar>
-          {navigationDrawer}
-        </>
-      );
-  }
+      </>
+    );
 }
 
 Header.propTypes = {
   mapPage: PropTypes.bool,
-  classes: PropTypes.shape(
-    PropTypes.object,
-  ).isRequired,
+  // eslint-disable-next-line react/forbid-prop-types
+  session: PropTypes.object.isRequired,
 };
 
 Header.defaultProps = {
   mapPage: false,
-  // classes: {},
 };
 
-export default withStyles(styles, { withTheme: true })(Header);
+export default Header;

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
 import { getSession } from 'next-auth/client';
 import { makeStyles } from '@material-ui/core/styles';
+import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -19,9 +20,10 @@ import LoadingPage from '../../../components/loadingPage';
 
 const useStyles = makeStyles((theme) => ({
   deleteButton: {
+    color: 'white',
     backgroundColor: theme.palette.error.main,
     '&:hover': {
-      backgroundColor: theme.palette.error.main,
+      backgroundColor: theme.palette.error.dark,
     },
   },
   deleteTravelPartnerButton: {
@@ -72,7 +74,7 @@ function ElsewhereMapSettings(props) {
   const classes = useStyles(props);
 
   useEffect(() => {
-    if (!session) router.push('/api/auth/signin');
+    if (!session) router.push('/signin');
 
     fetcher(getMapQuery, { mapId: router.query.id }).then(({
       getMap: {
@@ -152,58 +154,110 @@ function ElsewhereMapSettings(props) {
 
   if (writers) {
     return (
-      <Layout>
-        <Typography variant="h3">Settings</Typography>
-        <Typography variant="h5">{`Map ID: ${router.query.id}`}</Typography>
-        <Button
-          variant="contained"
-          className={classes.deleteButton}
-          startIcon={<DeleteIcon />}
-          onClick={(e) => deleteMap(e)}
+      <Layout session={session}>
+        <Grid
+          container
+          direction="column"
+          justify="space-evenly"
+          alignItems="stretch"
+          spacing={3}
         >
-          Delete Map
-        </Button>
-        {
-          writers.length ? (
-            <>
-              <Typography variant="h5">Travel Partners</Typography>
-              <List component="nav">
-                {writers.map((email) => (
-                  <React.Fragment key={email}>
-                    <ListItem button>
-                      <ListItemText primary={email} />
-                      <IconButton
-                        aria-label="delete"
-                        className={classes.deleteTravelPartnerButton}
-                        onClick={(e) => removeTravelPartner(e, email)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </ListItem>
-                    <Divider />
-                  </React.Fragment>
-                ))}
-              </List>
-            </>
-          )
-            : (
-              null
+
+          <Grid item xs={12}>
+            <Grid
+              container
+              direction="column"
+              justify="space-evenly"
+              alignItems="center"
+            >
+              <Grid item xs={12}>
+                <Typography variant="h3">Settings</Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="body1">{`Map ID: ${router.query.id}`}</Typography>
+              </Grid>
+            </Grid>
+          </Grid>
+
+          <Grid item xs={12}>
+            {
+            writers.length ? (
+              <>
+                <Typography variant="h5">Travel Partners</Typography>
+                <List component="nav">
+                  {writers.map((email) => (
+                    <React.Fragment key={email}>
+                      <ListItem button>
+                        <ListItemText primary={email} />
+                        <IconButton
+                          aria-label="delete"
+                          className={classes.deleteTravelPartnerButton}
+                          onClick={(e) => removeTravelPartner(e, email)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </ListItem>
+                      <Divider />
+                    </React.Fragment>
+                  ))}
+                </List>
+              </>
             )
-        }
-        <TextField
-          id="filled-basic"
-          value={travelPartnerTextField}
-          label="Email"
-          variant="filled"
-          onChange={(e) => handleTravelBuddyTextFieldChange(e)}
-        />
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={(e) => addTravelPartner(e)}
-        >
-          Add Travel Partner
-        </Button>
+              : (
+                null
+              )
+            }
+          </Grid>
+
+          <Grid item xs={12}>
+            <Grid
+              container
+              direction="column"
+              justify="space-evenly"
+              alignItems="flex-start"
+              spacing={2}
+            >
+              <Grid item xs={12}>
+                <TextField
+                  id="filled-basic"
+                  value={travelPartnerTextField}
+                  label="Email"
+                  variant="filled"
+                  onChange={(e) => handleTravelBuddyTextFieldChange(e)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={(e) => addTravelPartner(e)}
+                >
+                  Add Travel Partner
+                </Button>
+              </Grid>
+            </Grid>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Grid
+              container
+              direction="column"
+              justify="space-evenly"
+              alignItems="center"
+            >
+              <Grid item xs={12}>
+                <Button
+                  variant="contained"
+                  className={classes.deleteButton}
+                  startIcon={<DeleteIcon />}
+                  onClick={(e) => deleteMap(e)}
+                >
+                  Delete Map
+                </Button>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Grid>
       </Layout>
     );
   }

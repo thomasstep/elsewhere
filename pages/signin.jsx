@@ -1,77 +1,98 @@
 import React, { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { fetcher } from '../utils/fetcher';
-import Field from '../components/field';
-import { getErrorMessage } from '../lib/form';
+import PropTypes from 'prop-types';
+import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import { providers, csrfToken, signin } from 'next-auth/client';
+import Layout from '../components/layout';
 
-const signInMutation = `
-  mutation SignInMutation($email: String!, $password: String!) {
-    signIn(input: { email: $email, password: $password }) {
-      user {
-        id
-        email
-      }
-    }
-  }
-`;
+function SignIn({ elsewhereProviders }) {
+  const [signInEmail, setSignInEmail] = useState('');
 
-
-function SignIn() {
-  const [errorMsg, setErrorMsg] = useState('');
-  const router = useRouter();
-
-  async function handleSubmit(event) {
+  function handleSignInEmailFieldChange(event) {
     event.preventDefault();
-
-    const emailElement = event.currentTarget.elements.email;
-    const passwordElement = event.currentTarget.elements.password;
-
-    const vars = {
-      email: emailElement.value,
-      password: passwordElement.value,
-    };
-
-    fetcher(signInMutation, vars)
-      .then(({ signIn: { user } }) => {
-        if (user) {
-          router.push('/');
-        }
-      })
-      .catch((error) => {
-        setErrorMsg(getErrorMessage(error));
-      });
+    setSignInEmail(event.target.value);
   }
 
   return (
-    <>
-      <h1>Sign In</h1>
-      <form onSubmit={handleSubmit}>
-        {errorMsg && <p>{errorMsg}</p>}
-        <Field
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          label="Email"
-        />
-        <Field
-          name="password"
-          type="password"
-          autoComplete="password"
-          required
-          label="Password"
-        />
-        <button type="submit">Sign in</button>
-        {' '}
-        or
-        {' '}
-        <Link href="signup" passHref>
-          <a>Sign up</a>
-        </Link>
-      </form>
-    </>
+    <Layout>
+      <Grid
+        container
+        direction="column"
+        justify="space-evenly"
+        alignItems="center"
+        spacing={5}
+      >
+        {Object.values(elsewhereProviders).map((provider) => {
+          if (provider.id === 'email') {
+            return (
+              <Grid item xs={12}>
+                <Grid
+                  container
+                  direction="column"
+                  justify="space-evenly"
+                  alignItems="center"
+                  spacing={2}
+                >
+                  <Grid item xs={12}>
+                    <TextField
+                      id="filled-basic"
+                      value={signInEmail}
+                      label="Email address"
+                      variant="filled"
+                      onChange={(e) => handleSignInEmailFieldChange(e)}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Button
+                      variant="contained"
+                      onClick={() => signin(
+                        'email',
+                        {
+                          email: signInEmail,
+                          callbackUrl: `${process.env.SITE}/profile`,
+                        },
+                      )}
+                    >
+                      Sign in with Email
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Grid>
+            );
+          }
+
+          return (
+            <Grid item xs={12}>
+              <Button
+                variant="contained"
+                onClick={() => signin(provider.id, { callbackUrl: `${process.env.SITE}/profile` })}
+              >
+                {`Sign in with ${provider.name}`}
+              </Button>
+            </Grid>
+          );
+        })}
+      </Grid>
+    </Layout>
   );
 }
+
+SignIn.getInitialProps = async (context) => {
+  const props = {
+    elsewhereProviders: await providers(context),
+  };
+
+  if (process.env.NODE_ENV === 'development') {
+    props.csrfToken = await csrfToken(context);
+  }
+
+  return props;
+};
+
+SignIn.propTypes = {
+  elsewhereProviders: PropTypes.shape.isRequired,
+};
+
 
 export default SignIn;

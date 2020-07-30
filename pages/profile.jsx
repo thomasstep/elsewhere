@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useRouter } from 'next/router';
 import { getSession } from 'next-auth/client';
-import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Layout from '../components/layout';
@@ -20,12 +19,6 @@ const viewerQuery = `{
     }
   }`;
 
-const useStyles = makeStyles({
-  gridItem: {
-    textAlign: 'center',
-  },
-});
-
 function Profile({ session }) {
   const [id, setId] = useState('');
   const [email, setEmail] = useState('');
@@ -33,10 +26,9 @@ function Profile({ session }) {
   const [readableMaps, setReadableMaps] = useState([]);
   const [writableMaps, setWritableMaps] = useState([]);
   const router = useRouter();
-  const classes = useStyles();
 
   useEffect(() => {
-    if (!session) router.push('/api/auth/signin');
+    if (!session) router.push('/signin');
 
     fetcher(viewerQuery)
       .then(({
@@ -62,14 +54,25 @@ function Profile({ session }) {
   if (id) {
     const sharedMaps = [...writableMaps, ...readableMaps];
     return (
-      <Layout>
-        <Grid container>
-          <Grid item xs={12} />
-          <Grid item xs={12} className={classes.gridItem}>
-            <Typography variant="h3">Profile</Typography>
-          </Grid>
-          <Grid item xs={12} className={classes.gridItem}>
-            <Typography variant="h5">{email}</Typography>
+      <Layout session={session}>
+        <Grid
+          container
+          direction="column"
+          justify="space-evenly"
+          alignItems="stretch"
+        >
+          <Grid
+            container
+            direction="column"
+            justify="space-evenly"
+            alignItems="center"
+          >
+            <Grid item xs={12}>
+              <Typography variant="h3">Profile</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="h5">{email}</Typography>
+            </Grid>
           </Grid>
 
           <Grid item xs={12}>

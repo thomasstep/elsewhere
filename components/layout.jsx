@@ -5,11 +5,11 @@ import Box from '@material-ui/core/Box';
 
 import Header from './header';
 
-const Layout = (props) => {
-  const { children, mapPage } = props;
+function Layout(props) {
+  const { children, mapPage, session } = props;
   return (
     <Box>
-      <Header mapPage={mapPage} />
+      <Header mapPage={mapPage} session={session} />
       {
         mapPage ? (
           <Box>
@@ -24,7 +24,7 @@ const Layout = (props) => {
       }
     </Box>
   );
-};
+}
 
 Layout.propTypes = {
   children: PropTypes.oneOfType([
@@ -32,6 +32,8 @@ Layout.propTypes = {
     PropTypes.node,
   ]).isRequired,
   mapPage: PropTypes.bool,
+  // eslint-disable-next-line react/forbid-prop-types
+  session: PropTypes.object.isRequired,
 };
 
 Layout.defaultProps = {
