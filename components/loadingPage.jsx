@@ -12,7 +12,7 @@ function LoadingPage() {
       justify="center"
       style={{ minHeight: '100vh' }}
     >
-      <CircularProgress color="secondary" />
+      <CircularProgress />
     </Grid>
   );
 }

@@ -146,11 +146,12 @@ function Header(props) {
 Header.propTypes = {
   mapPage: PropTypes.bool,
   // eslint-disable-next-line react/forbid-prop-types
-  session: PropTypes.object.isRequired,
+  session: PropTypes.object,
 };
 
 Header.defaultProps = {
   mapPage: false,
+  session: null,
 };
 
 export default Header;

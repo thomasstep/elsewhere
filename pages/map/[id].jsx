@@ -70,7 +70,7 @@ function ElsewhereMap(props) {
   const router = useRouter();
   const [activeMarker, setActiveMarker] = useState({});
   const [activeInfoWindow, setActiveInfoWindow] = useState(false);
-  const [markers, setMarkers] = useState(null);
+  const [markers, setMarkers] = useState([]);
   const [searchFieldText, setSearchFieldText] = useState('');
   const [mapCenterLat, setMapCenterLat] = useState(0); // TODO use map's initial center
   const [mapCenterLng, setMapCenterLng] = useState(0);
@@ -120,8 +120,10 @@ function ElsewhereMap(props) {
   }
 
   function changeMapCenter(mapProps, map) {
+    console.log('JASLK:FJLIASDJJKL:DSAJF')
     setMapCenterLat(map.center.lat());
     setMapCenterLng(map.center.lng());
+    console.log(map.center)
   }
 
   function createMarker() {
@@ -197,101 +199,113 @@ function ElsewhereMap(props) {
       });
   }
 
-  if (markers) {
-    return (
-      <Layout mapPage>
-        <Box
-          className={classes.searchBox}
+  const bounds = new google.maps.LatLngBounds();
+  markers.forEach((marker) => {
+    bounds.extend({
+      lat: marker.lat,
+      lng: marker.lng,
+    });
+  });
+  const boundsCenter = bounds.getCenter();
+  const initialCenter = {
+    lat: boundsCenter.lat(),
+    lng: boundsCenter.lng(),
+  };
+
+  return (
+    <Layout mapPage>
+      <Box
+        className={classes.searchBox}
+      >
+        <Grid
+          container
+          direction="column"
+          justify="space-evenly"
+          alignItems="flex-start"
+          spacing={3}
         >
-          <Grid
-            container
-            direction="column"
-            justify="space-evenly"
-            alignItems="flex-start"
-            spacing={3}
-          >
-            <Grid item xs={12}>
-              <Grid
-                container
-                direction="column"
-                justify="space-evenly"
-                alignItems="flex-start"
-                spacing={2}
-              >
-                <Grid item xs={12}>
-                  <TextField
-                    id="outlined-basic"
-                    value={searchFieldText}
-                    label="Search for a place"
-                    variant="outlined"
-                    onChange={(e) => handleSearchFieldTextChange(e)}
-                    className={classes.searchTextField}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Button
-                    variant="contained"
-                    onClick={(e) => searchForPlace(e)}
-                    className={classes.searchButton}
-                  >
-                    Search
-                  </Button>
-                </Grid>
+          <Grid item xs={12}>
+            <Grid
+              container
+              direction="column"
+              justify="space-evenly"
+              alignItems="flex-start"
+              spacing={2}
+            >
+              <Grid item xs={12}>
+                <TextField
+                  id="outlined-basic"
+                  value={searchFieldText}
+                  label="Search for a place"
+                  variant="outlined"
+                  onChange={(e) => handleSearchFieldTextChange(e)}
+                  className={classes.searchTextField}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Button
+                  variant="contained"
+                  onClick={(e) => searchForPlace(e)}
+                  className={classes.searchButton}
+                >
+                  Search
+                </Button>
               </Grid>
             </Grid>
           </Grid>
-        </Box>
-        <Box>
-          <Map
-            google={google}
-            zoom={14}
-            onClick={onMapClick}
-            onRecenter={changeMapCenter}
+        </Grid>
+      </Box>
+
+      <Box>
+        <Map
+          google={google}
+          // zoom={14}
+          initialCenter={initialCenter}
+          bounds={bounds}
+          onClick={onMapClick}
+          onRecenter={changeMapCenter}
+        >
+
+          {markers.length ? markers.map((marker) => (
+            <Marker
+              position={marker}
+              onClick={() => {
+                setActiveMarker(marker);
+                setActiveInfoWindow(true);
+              }}
+              key={marker.lat.toString().concat(marker.lng.toString())}
+            />
+          )) : null}
+
+          <Drawer
+            anchor="right"
+            open={activeInfoWindow}
+            onClose={onInfoWindowClose}
           >
-
-            {markers.length ? markers.map((marker) => (
-              <Marker
-                position={marker}
-                onClick={() => {
-                  setActiveMarker(marker);
-                  setActiveInfoWindow(true);
-                }}
-                key={marker.lat.toString().concat(marker.lng.toString())}
-              />
-            )) : null}
-
-            <Drawer
-              anchor="right"
-              open={activeInfoWindow}
-              onClose={onInfoWindowClose}
-            >
-              <div>
-                Latitude:
-                {activeMarker.lat}
-                <br />
-                Longitude:
-                {activeMarker.lng}
-                <br />
-                {activeMarker.notSaved ? (
-                  <Button onClick={createMarker}>
-                    Save
+            <div>
+              Latitude:
+              {activeMarker.lat}
+              <br />
+              Longitude:
+              {activeMarker.lng}
+              <br />
+              {activeMarker.notSaved ? (
+                <Button onClick={createMarker}>
+                  Save
+                </Button>
+              )
+                : (
+                  <Button onClick={deleteMarker}>
+                    Delete
                   </Button>
-                )
-                  : (
-                    <Button onClick={deleteMarker}>
-                      Delete
-                    </Button>
-                  )}
-              </div>
-            </Drawer>
+                )}
+            </div>
+          </Drawer>
 
-          </Map>
-        </Box>
-      </Layout>
-    );
-  }
-
-  return <LoadingPage />;
+        </Map>
+      </Box>
+    </Layout>
+  );
 }
 
 ElsewhereMap.propTypes = {
