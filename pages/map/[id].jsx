@@ -81,17 +81,27 @@ function ElsewhereMap(props) {
     getSession().then((session) => {
       if (!session) router.push('/signin');
     });
-
-    fetcher(getMarkers, { mapId: router.query.id }).then(({
-      getMarkers: mapMarkers,
-    }) => {
-      setMarkers(mapMarkers);
-    });
   }, []);
 
   function onInfoWindowClose() {
     setActiveInfoWindow(false);
     setActiveMarker({});
+  }
+
+  function onMapReady(mapProps, map) {
+    fetcher(getMarkers, { mapId: router.query.id }).then(({
+      getMarkers: mapMarkers,
+    }) => {
+      setMarkers(mapMarkers);
+      const bounds = new google.maps.LatLngBounds();
+      mapMarkers.forEach((marker) => {
+        bounds.extend({
+          lat: marker.lat,
+          lng: marker.lng,
+        });
+      });
+      map.fitBounds(bounds);
+    });
   }
 
   function onMapClick(mapProps, map, clickEvent) {
@@ -119,11 +129,9 @@ function ElsewhereMap(props) {
     });
   }
 
-  function changeMapCenter(mapProps, map) {
-    console.log('JASLK:FJLIASDJJKL:DSAJF')
+  function onMapCenterChanged(mapProps, map) {
     setMapCenterLat(map.center.lat());
     setMapCenterLng(map.center.lng());
-    console.log(map.center)
   }
 
   function createMarker() {
@@ -199,19 +207,6 @@ function ElsewhereMap(props) {
       });
   }
 
-  const bounds = new google.maps.LatLngBounds();
-  markers.forEach((marker) => {
-    bounds.extend({
-      lat: marker.lat,
-      lng: marker.lng,
-    });
-  });
-  const boundsCenter = bounds.getCenter();
-  const initialCenter = {
-    lat: boundsCenter.lat(),
-    lng: boundsCenter.lng(),
-  };
-
   return (
     <Layout mapPage>
       <Box
@@ -259,11 +254,10 @@ function ElsewhereMap(props) {
       <Box>
         <Map
           google={google}
-          // zoom={14}
-          initialCenter={initialCenter}
-          bounds={bounds}
+          zoom={14}
           onClick={onMapClick}
-          onRecenter={changeMapCenter}
+          onCenterChanged={onMapCenterChanged}
+          onReady={onMapReady}
         >
 
           {markers.length ? markers.map((marker) => (
