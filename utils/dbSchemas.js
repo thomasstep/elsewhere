@@ -14,8 +14,10 @@ const mapsSchema = new mongoose.Schema({
   name: String,
   markers: [
     {
-      lat: Number,
-      lng: Number,
+      coordinates: {
+        lat: Number,
+        lng: Number,
+      },
     },
   ],
   owners: [String],

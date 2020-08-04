@@ -37,8 +37,10 @@ const getMarkers = `query getMarkers (
     $mapId: ID!
   ) {
   getMarkers(mapId: $mapId) {
-    lat
-    lng
+    coordinates {
+      lat
+      lng
+    }
   }
 }`;
 
@@ -96,8 +98,8 @@ function ElsewhereMap(props) {
       const bounds = new google.maps.LatLngBounds();
       mapMarkers.forEach((marker) => {
         bounds.extend({
-          lat: marker.lat,
-          lng: marker.lng,
+          lat: marker.coordinates.lat,
+          lng: marker.coordinates.lng,
         });
       });
       map.fitBounds(bounds);
@@ -106,8 +108,10 @@ function ElsewhereMap(props) {
 
   function onMapClick(mapProps, map, clickEvent) {
     const marker = {
-      lat: clickEvent.latLng.lat(),
-      lng: clickEvent.latLng.lng(),
+      coordinates: {
+        lat: clickEvent.latLng.lat(),
+        lng: clickEvent.latLng.lng(),
+      },
     };
 
     const variables = {
@@ -139,8 +143,7 @@ function ElsewhereMap(props) {
       mapId: router.query.id,
       markers: [
         {
-          lat: activeMarker.lat,
-          lng: activeMarker.lng,
+          coordinates: activeMarker.coordinates,
         },
       ],
     };
@@ -198,7 +201,7 @@ function ElsewhereMap(props) {
       .then(({ getPlace: places }) => {
         const [coordinates] = places;
         const searchMarker = {
-          ...coordinates,
+          coordinates,
           notSaved: true,
         };
         setMarkers([...markers, searchMarker]);
@@ -262,12 +265,12 @@ function ElsewhereMap(props) {
 
           {markers.length ? markers.map((marker) => (
             <Marker
-              position={marker}
+              key={marker.coordinates.lat.toString().concat(marker.coordinates.lng.toString())}
+              position={marker.coordinates}
               onClick={() => {
                 setActiveMarker(marker);
                 setActiveInfoWindow(true);
               }}
-              key={marker.lat.toString().concat(marker.lng.toString())}
             />
           )) : null}
 
@@ -278,10 +281,10 @@ function ElsewhereMap(props) {
           >
             <div>
               Latitude:
-              {activeMarker.lat}
+              {activeMarker.coordinates ? activeMarker.coordinates.lat : null}
               <br />
               Longitude:
-              {activeMarker.lng}
+              {activeMarker.coordinates ? activeMarker.coordinates.lng : null}
               <br />
               {activeMarker.notSaved ? (
                 <Button onClick={createMarker}>

@@ -12,8 +12,8 @@ const typeDefs = gql`
   }
 
   input MarkerInput {
-    lat: Float!
-    lng: Float!
+    coordinates: LatLngInput!
+    name: String
   }
 
   input MapUpdateInput {
@@ -81,9 +81,8 @@ const typeDefs = gql`
   }
 
   type Marker {
-    lat: Float!
-    lng: Float!
-    coordinates: LatLng # TODO implement this
+    coordinates: LatLng!
+    name: String
   }
 
   type Query {
@@ -91,6 +90,7 @@ const typeDefs = gql`
     getMarkers(mapId: ID!): [Marker]!
     getMap(mapId: ID!): Map!
     getPlace(query: String!, locationBias: LocationBiasInput): [LatLng]!
+    nearbySearch(location: LatLngInput!): [Marker]!
   }
 
   type Mutation {

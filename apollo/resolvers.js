@@ -145,6 +145,40 @@ const resolvers = {
 
       return places;
     },
+
+    nearbySearch: async (parent, args) => {
+      const {
+        location,
+      } = args;
+      const {
+        lat,
+        lng,
+      } = location;
+
+      const placeSearchParameters = {
+        key: process.env.GOOGLE_PLACES_KEY,
+        location: `${lat},${lng}`,
+        rankby: 'distance',
+      };
+
+      let res;
+      try {
+        res = await mapsClient.placesNearby({
+          params: placeSearchParameters,
+        });
+      } catch (err) {
+        log.error(err);
+        log.error(err.response.data.error_message);
+        return [];
+      }
+      const places = [];
+      places.push({
+        name: res.data.results[0].name,
+        coordinates: res.data.results[0].geometry.location,
+      });
+
+      return places;
+    },
   },
   Mutation: {
     signUp: async (parent, args) => {

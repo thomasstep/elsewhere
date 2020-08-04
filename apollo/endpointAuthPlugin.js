@@ -6,6 +6,8 @@ const { deleteMarkersAuth } = require('./auth/deleteMarkers');
 const { createMapAuth } = require('./auth/createMap');
 const { updateMapAuth } = require('./auth/updateMap');
 const { deleteMapAuth } = require('./auth/deleteMap');
+const { getPlaceAuth } = require('./auth/getPlace');
+const { nearbySearchAuth } = require('./auth/nearbySearch');
 // const { log } = require('../utils');
 
 function handleValue(argValue, requestVariables) {
@@ -81,6 +83,11 @@ function endpointAuth(endpoint, args, user) {
       break;
 
     case 'getPlace':
+      getPlaceAuth(user);
+      break;
+
+    case 'nearbySearch':
+      nearbySearchAuth(user);
       break;
 
     case 'createMarkers':
