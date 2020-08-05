@@ -41,6 +41,7 @@ const getMarkers = `query getMarkers (
       lat
       lng
     }
+    name
   }
 }`;
 
@@ -68,6 +69,18 @@ const getPlace = `query getPlace(
   }
 }`;
 
+const nearbyPlaces = `query nearbySearch(
+  $location: LatLngInput!
+) {
+  nearbySearch(location: $location) {
+    name
+    coordinates {
+      lat
+      lng
+    }
+  }
+}`;
+
 function ElsewhereMap(props) {
   const router = useRouter();
   const [activeMarker, setActiveMarker] = useState({});
@@ -86,6 +99,16 @@ function ElsewhereMap(props) {
   }, []);
 
   function onInfoWindowClose() {
+    if (activeMarker.notSaved) {
+      const index = markers.findIndex(
+        (marker) => marker.coordinates.lat === activeMarker.coordinates.lat
+          && marker.coordinates.lng === activeMarker.coordinates.lng,
+      );
+      if (index !== -1) {
+        markers.splice(index, 1);
+      }
+    }
+
     setActiveInfoWindow(false);
     setActiveMarker({});
   }
@@ -107,25 +130,54 @@ function ElsewhereMap(props) {
   }
 
   function onMapClick(mapProps, map, clickEvent) {
-    const marker = {
-      coordinates: {
+    // const marker = {
+    //   coordinates: {
+    //     lat: clickEvent.latLng.lat(),
+    //     lng: clickEvent.latLng.lng(),
+    //   },
+    // };
+
+    // const variables = {
+    //   mapId: router.query.id,
+    //   markers: [
+    //     marker,
+    //   ],
+    // };
+
+    // fetcher(createMarkers, variables).then(({ createMarkers: success }) => {
+    //   if (success) {
+    //     setActiveInfoWindow(false);
+    //     setActiveMarker({});
+    //     setMarkers([...markers, marker]);
+    //   } else {
+    //     setActiveInfoWindow(false);
+    //     setActiveMarker({});
+    //   }
+    // });
+
+    const nearbyPlacesVars = {
+      location: {
         lat: clickEvent.latLng.lat(),
         lng: clickEvent.latLng.lng(),
       },
     };
 
-    const variables = {
-      mapId: router.query.id,
-      markers: [
-        marker,
-      ],
-    };
-
-    fetcher(createMarkers, variables).then(({ createMarkers: success }) => {
-      if (success) {
-        setActiveInfoWindow(false);
-        setActiveMarker({});
-        setMarkers([...markers, marker]);
+    fetcher(nearbyPlaces, nearbyPlacesVars).then(({
+      nearbySearch: foundNearbyPlaces,
+    }) => {
+      const [nearbyPlace] = foundNearbyPlaces;
+      nearbyPlace.notSaved = true;
+      const {
+        name,
+        coordinates: {
+          lat,
+          lng,
+        },
+      } = nearbyPlace;
+      if (name && lat && lng) {
+        setActiveInfoWindow(true);
+        setActiveMarker(nearbyPlace);
+        setMarkers([...markers, nearbyPlace]);
       } else {
         setActiveInfoWindow(false);
         setActiveMarker({});
@@ -138,21 +190,29 @@ function ElsewhereMap(props) {
     setMapCenterLng(map.center.lng());
   }
 
-  function createMarker() {
+  function saveMarker() {
     const variables = {
       mapId: router.query.id,
       markers: [
         {
           coordinates: activeMarker.coordinates,
+          name: activeMarker.name,
         },
       ],
     };
 
     fetcher(createMarkers, variables).then(({ createMarkers: success }) => {
       if (success) {
+        markers.forEach((marker) => {
+          if (marker.coordinates.lat === activeMarker.coordinates.lat
+            && marker.coordinates.lng === activeMarker.coordinates.lng) {
+            // eslint-disable-next-line no-param-reassign
+            marker.notSaved = false;
+          }
+        });
         setActiveInfoWindow(false);
         setActiveMarker({});
-        setMarkers([...markers, activeMarker]);
+        // setMarkers([...markers, activeMarker]);
       } else {
         setActiveInfoWindow(false);
         setActiveMarker({});
@@ -164,7 +224,10 @@ function ElsewhereMap(props) {
     const variables = {
       mapId: router.query.id,
       markers: [
-        activeMarker,
+        {
+          coordinates: activeMarker.coordinates,
+          name: activeMarker.name,
+        },
       ],
     };
 
@@ -280,6 +343,9 @@ function ElsewhereMap(props) {
             onClose={onInfoWindowClose}
           >
             <div>
+              Name:
+              {activeMarker.name}
+              <br />
               Latitude:
               {activeMarker.coordinates ? activeMarker.coordinates.lat : null}
               <br />
@@ -287,7 +353,7 @@ function ElsewhereMap(props) {
               {activeMarker.coordinates ? activeMarker.coordinates.lng : null}
               <br />
               {activeMarker.notSaved ? (
-                <Button onClick={createMarker}>
+                <Button onClick={saveMarker}>
                   Save
                 </Button>
               )

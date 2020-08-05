@@ -2,9 +2,6 @@ const mongoose = require('mongoose');
 const schemas = require('./dbSchemas');
 const { log } = require('./log');
 
-
-log.info('Mongoose ready state:');
-log.info(mongoose.connection.readyState);
 if (!mongoose.connection.readyStates) {
   mongoose.Promise = global.Promise;
   const options = {

@@ -171,6 +171,7 @@ const resolvers = {
         log.error(err.response.data.error_message);
         return [];
       }
+      // log.info('Found places.', res.data.results)
       const places = [];
       places.push({
         name: res.data.results[0].name,

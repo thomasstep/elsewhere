@@ -18,6 +18,7 @@ const mapsSchema = new mongoose.Schema({
         lat: Number,
         lng: Number,
       },
+      name: String,
     },
   ],
   owners: [String],
