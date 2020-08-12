@@ -9,6 +9,8 @@ import Button from '@material-ui/core/Button';
 import DeleteIcon from '@material-ui/icons/Delete';
 import TextField from '@material-ui/core/TextField';
 import AddIcon from '@material-ui/icons/Add';
+import EditIcon from '@material-ui/icons/Edit';
+import SaveIcon from '@material-ui/icons/Save';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -37,9 +39,19 @@ const getMapQuery = `query getMap (
   $mapId: ID!
 ){
   getMap(mapId: $mapId) {
+    mapName
     owners
     writers
     readers
+  }
+}`;
+
+// TODO consolidate all of the updateMap mutations
+const updateMapMutation = `mutation updateMapName (
+  $map: MapUpdateInput!
+) {
+  updateMap(updates: $map) {
+    mapName
   }
 }`;
 
@@ -68,6 +80,9 @@ const removeTravelPartnerMutation = `mutation removeTravelPartner(
 function ElsewhereMapSettings(props) {
   const router = useRouter();
   const [mapId] = useState(router.query.id);
+  const [mapName, setMapName] = useState('');
+  const [mapNameEditMode, setMapNameEditMode] = useState(false);
+  const [editedMapName, setEditedMapName] = useState('');
   const [writers, setWriters] = useState(null);
   const [travelPartnerTextField, setTravelPartnerTextField] = useState('');
   const { session } = props;
@@ -78,14 +93,41 @@ function ElsewhereMapSettings(props) {
 
     fetcher(getMapQuery, { mapId: router.query.id }).then(({
       getMap: {
+        mapName: retrievedName,
         // owners,
         writers: mapWriters,
         // readers,
       },
     }) => {
       setWriters(mapWriters);
+      setMapName(retrievedName);
+      // Initialize this so it doesn't automatically change map name to ''
+      setEditedMapName(retrievedName);
     });
   }, []);
+
+  async function toggleMapNameEditMode() {
+    if (mapNameEditMode) {
+      if (mapName !== editedMapName) {
+        const updates = {
+          mapId,
+          mapName: editedMapName,
+        };
+
+        const {
+          updateMap: {
+            mapName: success,
+          },
+        } = await fetcher(updateMapMutation, { map: updates });
+        if (!success) return;
+
+        setMapName(editedMapName);
+        setEditedMapName(editedMapName);
+      }
+    }
+
+    setMapNameEditMode(!mapNameEditMode);
+  }
 
   async function deleteMap(event) {
     event.preventDefault();
@@ -98,6 +140,10 @@ function ElsewhereMapSettings(props) {
 
   function handleTravelBuddyTextFieldChange(event) {
     setTravelPartnerTextField(event.target.value);
+  }
+
+  function handleMapNameTextFieldChange(event) {
+    setEditedMapName(event.target.value);
   }
 
   async function addTravelPartner(event) {
@@ -172,6 +218,54 @@ function ElsewhereMapSettings(props) {
             >
               <Grid item xs={12}>
                 <Typography variant="h3">Settings</Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Grid
+                  container
+                  direction="row"
+                  justify="center"
+                  alignItems="center"
+                  spacing={2}
+                >
+                  {
+                    mapNameEditMode ? (
+                      <>
+                        <Grid item>
+                          <TextField
+                            id="filled-basic"
+                            value={editedMapName}
+                            label="Map Name"
+                            variant="filled"
+                            onChange={(e) => handleMapNameTextFieldChange(e)}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <IconButton
+                            aria-label="save"
+                            onClick={toggleMapNameEditMode}
+                          >
+                            <SaveIcon />
+                          </IconButton>
+                        </Grid>
+                      </>
+                    )
+                      : (
+                        <>
+                          <Grid item>
+                            <Typography variant="h3">{mapName}</Typography>
+                          </Grid>
+                          <Grid item>
+                            <IconButton
+                              aria-label="edit"
+                              onClick={toggleMapNameEditMode}
+                            >
+                              <EditIcon />
+                            </IconButton>
+                          </Grid>
+                        </>
+                      )
+                  }
+                </Grid>
               </Grid>
               <Grid item xs={12}>
                 <Typography variant="body1">{`Map ID: ${router.query.id}`}</Typography>
