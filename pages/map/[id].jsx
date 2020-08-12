@@ -4,14 +4,16 @@ import { getSession } from 'next-auth/client';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Drawer from '@material-ui/core/Drawer';
+import DeleteIcon from '@material-ui/icons/Delete';
+import SaveIcon from '@material-ui/icons/Save';
 import React, { useState, useEffect } from 'react';
 import { Map, GoogleApiWrapper, Marker } from 'google-maps-react';
 import { fetcher } from '../../utils/fetcher';
 import Layout from '../../components/layout';
-import LoadingPage from '../../components/loadingPage';
 
 const useStyles = makeStyles((theme) => ({
   searchBox: {
@@ -29,6 +31,20 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.primary.main,
     '&:hover': {
       backgroundColor: theme.palette.primary.dark,
+    },
+  },
+  deleteButton: {
+    color: 'white',
+    backgroundColor: theme.palette.error.main,
+    '&:hover': {
+      backgroundColor: theme.palette.error.dark,
+    },
+  },
+  saveButton: {
+    color: 'white',
+    backgroundColor: theme.palette.success.main,
+    '&:hover': {
+      backgroundColor: theme.palette.success.dark,
     },
   },
 }));
@@ -343,23 +359,33 @@ function ElsewhereMap(props) {
             onClose={onInfoWindowClose}
           >
             <div>
-              Name:
-              {activeMarker.name}
+              <Typography variant="body1">Name:</Typography>
+              <Typography variant="body1">{activeMarker.name || 'Click the edit icon to add a name.'}</Typography>
               <br />
-              Latitude:
-              {activeMarker.coordinates ? activeMarker.coordinates.lat : null}
+              <Typography variant="body1">Latitude:</Typography>
+              <Typography variant="body1">{activeMarker.coordinates ? activeMarker.coordinates.lat : null}</Typography>
               <br />
-              Longitude:
-              {activeMarker.coordinates ? activeMarker.coordinates.lng : null}
+              <Typography variant="body1">Longitude:</Typography>
+              <Typography variant="body1">{activeMarker.coordinates ? activeMarker.coordinates.lng : null}</Typography>
               <br />
               {activeMarker.notSaved ? (
-                <Button onClick={saveMarker}>
-                  Save
+                <Button
+                  variant="contained"
+                  className={classes.saveButton}
+                  startIcon={<SaveIcon />}
+                  onClick={saveMarker}
+                >
+                  Save Marker
                 </Button>
               )
                 : (
-                  <Button onClick={deleteMarker}>
-                    Delete
+                  <Button
+                    variant="contained"
+                    className={classes.deleteButton}
+                    startIcon={<DeleteIcon />}
+                    onClick={deleteMarker}
+                  >
+                    Delete Marker
                   </Button>
                 )}
             </div>
