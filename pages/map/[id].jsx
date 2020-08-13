@@ -2,15 +2,15 @@ import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import { getSession } from 'next-auth/client';
 import { makeStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
-import Card from '@material-ui/core/Card';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Drawer from '@material-ui/core/Drawer';
+import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
 import React, { useState, useEffect } from 'react';
 import { Map, GoogleApiWrapper, Marker } from 'google-maps-react';
@@ -49,14 +49,6 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: theme.palette.success.dark,
     },
   },
-  infoWindowPaper: {},
-  infoWindowGrid: {
-    // margin: 20,
-    position: 'fixed',
-    minHeight: '100vh',
-    zIndex: theme.zIndex.appBar + 1,
-  },
-  infoWindowDrawer: {},
   infoWindowDrawerPaper: {
     width: '80%',
     padding: theme.spacing(3),
@@ -114,6 +106,8 @@ const nearbyPlaces = `query nearbySearch(
 function ElsewhereMap(props) {
   const router = useRouter();
   const [activeMarker, setActiveMarker] = useState({});
+  const [activeMarkerEditMode, setActiveMarkerEditMode] = useState(false);
+  const [editedActiveMarkerName, setEditedActiveMarkerName] = useState('');
   const [activeInfoWindow, setActiveInfoWindow] = useState(false);
   const [markers, setMarkers] = useState([]);
   const [searchFieldText, setSearchFieldText] = useState('');
@@ -143,6 +137,21 @@ function ElsewhereMap(props) {
     setActiveMarker({});
   }
 
+  async function toggleActiveMarkerNameEditMode() {
+    if (activeMarkerEditMode) {
+      if (activeMarker.name !== editedActiveMarkerName) {
+        // TODO add mutation to handle this
+        console.log(`Changing marker name to ${editedActiveMarkerName}`);
+      }
+    }
+
+    setActiveMarkerEditMode(!activeMarkerEditMode);
+  }
+
+  function handleMapNameTextFieldChange(event) {
+    setEditedActiveMarkerName(event.target.value);
+  }
+
   function onMapReady(mapProps, map) {
     fetcher(getMarkers, { mapId: router.query.id }).then(({
       getMarkers: mapMarkers,
@@ -160,31 +169,6 @@ function ElsewhereMap(props) {
   }
 
   function onMapClick(mapProps, map, clickEvent) {
-    // const marker = {
-    //   coordinates: {
-    //     lat: clickEvent.latLng.lat(),
-    //     lng: clickEvent.latLng.lng(),
-    //   },
-    // };
-
-    // const variables = {
-    //   mapId: router.query.id,
-    //   markers: [
-    //     marker,
-    //   ],
-    // };
-
-    // fetcher(createMarkers, variables).then(({ createMarkers: success }) => {
-    //   if (success) {
-    //     setActiveInfoWindow(false);
-    //     setActiveMarker({});
-    //     setMarkers([...markers, marker]);
-    //   } else {
-    //     setActiveInfoWindow(false);
-    //     setActiveMarker({});
-    //   }
-    // });
-
     const nearbyPlacesVars = {
       location: {
         lat: clickEvent.latLng.lat(),
@@ -305,69 +289,6 @@ function ElsewhereMap(props) {
 
   return (
     <Layout mapPage>
-      {/* <Grid
-        container
-        direction="column"
-        justify="center"
-        alignItems="center"
-        className={classes.infoWindowGrid}
-      >
-        <Grid item xs={8}>
-          <Card
-            hidden={!activeInfoWindow}
-          >
-            <Grid
-              container
-              direction="column"
-              justify="center"
-              alignItems="flex-start"
-              spacing={3}
-            >
-              <Grid item xs={12}>
-                <Typography variant="h5">Name</Typography>
-                {
-                  activeMarker.name ? (
-                    <Typography variant="body1">{activeMarker.name}</Typography>
-                  )
-                    : (
-                      <Typography variant="body1" fontStyle="italic">_____</Typography>
-                    )
-                }
-              </Grid>
-              <Grid item xs={12}>
-                <Typography variant="h5">Latitude</Typography>
-                <Typography variant="body1">{activeMarker.coordinates ? activeMarker.coordinates.lat : null}</Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography variant="h5">Longitude</Typography>
-                <Typography variant="body1">{activeMarker.coordinates ? activeMarker.coordinates.lng : null}</Typography>
-              </Grid>
-              <Grid item xs={12}>
-                {activeMarker.notSaved ? (
-                  <Button
-                    variant="contained"
-                    className={classes.saveButton}
-                    startIcon={<SaveIcon />}
-                    onClick={saveMarker}
-                  >
-                    Save Marker
-                  </Button>
-                )
-                  : (
-                    <Button
-                      variant="contained"
-                      className={classes.deleteButton}
-                      startIcon={<DeleteIcon />}
-                      onClick={deleteMarker}
-                    >
-                      Delete Marker
-                    </Button>
-                  )}
-              </Grid>
-            </Grid>
-          </Card>
-        </Grid>
-      </Grid> */}
 
       <Box
         className={classes.searchBox}
@@ -441,29 +362,72 @@ function ElsewhereMap(props) {
               container
               direction="column"
               justify="center"
-              alignItems="flex-start"
+              alignItems="baseline"
+              wrap="nowrap"
               spacing={3}
             >
-              <Grid item>
+              {/* Name field */}
+              <Grid item xs={12}>
                 <Typography variant="h5">Name</Typography>
-                {
-                  activeMarker.name ? (
-                    <Typography variant="body1">{activeMarker.name}</Typography>
-                  )
-                    : (
-                      <Typography variant="body1" fontStyle="italic">Make this a textfield</Typography>
+                <Grid
+                  container
+                  direction="row"
+                  justify="center"
+                  alignItems="center"
+                  spacing={2}
+                >
+                  {
+                    activeMarkerEditMode ? (
+                      <>
+                        <Grid item>
+                          <TextField
+                            id="filled-basic"
+                            value={editedActiveMarkerName}
+                            label="Marker Name"
+                            variant="filled"
+                            onChange={(e) => handleMapNameTextFieldChange(e)}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <IconButton
+                            aria-label="save"
+                            onClick={toggleActiveMarkerNameEditMode}
+                          >
+                            <SaveIcon />
+                          </IconButton>
+                        </Grid>
+                      </>
                     )
-                }
+                      : (
+                        <>
+                          <Grid item>
+                            <Typography variant="body1">{activeMarker.name || 'Click edit to add a name.'}</Typography>
+                          </Grid>
+                          <Grid item>
+                            <IconButton
+                              aria-label="edit"
+                              onClick={toggleActiveMarkerNameEditMode}
+                            >
+                              <EditIcon />
+                            </IconButton>
+                          </Grid>
+                        </>
+                      )
+                  }
+                </Grid>
               </Grid>
-              <Grid item>
+              {/* Lat field */}
+              <Grid item xs={12}>
                 <Typography variant="h5">Latitude</Typography>
                 <Typography variant="body1">{activeMarker.coordinates ? activeMarker.coordinates.lat : null}</Typography>
               </Grid>
-              <Grid item>
+              {/* Lng field */}
+              <Grid item xs={12}>
                 <Typography variant="h5">Longitude</Typography>
                 <Typography variant="body1">{activeMarker.coordinates ? activeMarker.coordinates.lng : null}</Typography>
               </Grid>
-              <Grid item>
+              {/* Save or delete button */}
+              <Grid item xs={12}>
                 {activeMarker.notSaved ? (
                   <Button
                     variant="contained"
