@@ -2,6 +2,8 @@ import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import { getSession } from 'next-auth/client';
 import { makeStyles } from '@material-ui/core/styles';
+import Paper from '@material-ui/core/Paper';
+import Card from '@material-ui/core/Card';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
@@ -46,6 +48,18 @@ const useStyles = makeStyles((theme) => ({
     '&:hover': {
       backgroundColor: theme.palette.success.dark,
     },
+  },
+  infoWindowPaper: {},
+  infoWindowGrid: {
+    // margin: 20,
+    position: 'fixed',
+    minHeight: '100vh',
+    zIndex: theme.zIndex.appBar + 1,
+  },
+  infoWindowDrawer: {},
+  infoWindowDrawerPaper: {
+    width: '80%',
+    padding: theme.spacing(3),
   },
 }));
 
@@ -291,6 +305,70 @@ function ElsewhereMap(props) {
 
   return (
     <Layout mapPage>
+      {/* <Grid
+        container
+        direction="column"
+        justify="center"
+        alignItems="center"
+        className={classes.infoWindowGrid}
+      >
+        <Grid item xs={8}>
+          <Card
+            hidden={!activeInfoWindow}
+          >
+            <Grid
+              container
+              direction="column"
+              justify="center"
+              alignItems="flex-start"
+              spacing={3}
+            >
+              <Grid item xs={12}>
+                <Typography variant="h5">Name</Typography>
+                {
+                  activeMarker.name ? (
+                    <Typography variant="body1">{activeMarker.name}</Typography>
+                  )
+                    : (
+                      <Typography variant="body1" fontStyle="italic">_____</Typography>
+                    )
+                }
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="h5">Latitude</Typography>
+                <Typography variant="body1">{activeMarker.coordinates ? activeMarker.coordinates.lat : null}</Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="h5">Longitude</Typography>
+                <Typography variant="body1">{activeMarker.coordinates ? activeMarker.coordinates.lng : null}</Typography>
+              </Grid>
+              <Grid item xs={12}>
+                {activeMarker.notSaved ? (
+                  <Button
+                    variant="contained"
+                    className={classes.saveButton}
+                    startIcon={<SaveIcon />}
+                    onClick={saveMarker}
+                  >
+                    Save Marker
+                  </Button>
+                )
+                  : (
+                    <Button
+                      variant="contained"
+                      className={classes.deleteButton}
+                      startIcon={<DeleteIcon />}
+                      onClick={deleteMarker}
+                    >
+                      Delete Marker
+                    </Button>
+                  )}
+              </Grid>
+            </Grid>
+          </Card>
+        </Grid>
+      </Grid> */}
+
       <Box
         className={classes.searchBox}
       >
@@ -357,38 +435,57 @@ function ElsewhereMap(props) {
             anchor="right"
             open={activeInfoWindow}
             onClose={onInfoWindowClose}
+            classes={{ paper: classes.infoWindowDrawerPaper }}
           >
-            <div>
-              <Typography variant="body1">Name:</Typography>
-              <Typography variant="body1">{activeMarker.name || 'Click the edit icon to add a name.'}</Typography>
-              <br />
-              <Typography variant="body1">Latitude:</Typography>
-              <Typography variant="body1">{activeMarker.coordinates ? activeMarker.coordinates.lat : null}</Typography>
-              <br />
-              <Typography variant="body1">Longitude:</Typography>
-              <Typography variant="body1">{activeMarker.coordinates ? activeMarker.coordinates.lng : null}</Typography>
-              <br />
-              {activeMarker.notSaved ? (
-                <Button
-                  variant="contained"
-                  className={classes.saveButton}
-                  startIcon={<SaveIcon />}
-                  onClick={saveMarker}
-                >
-                  Save Marker
-                </Button>
-              )
-                : (
+            <Grid
+              container
+              direction="column"
+              justify="center"
+              alignItems="flex-start"
+              spacing={3}
+            >
+              <Grid item>
+                <Typography variant="h5">Name</Typography>
+                {
+                  activeMarker.name ? (
+                    <Typography variant="body1">{activeMarker.name}</Typography>
+                  )
+                    : (
+                      <Typography variant="body1" fontStyle="italic">Make this a textfield</Typography>
+                    )
+                }
+              </Grid>
+              <Grid item>
+                <Typography variant="h5">Latitude</Typography>
+                <Typography variant="body1">{activeMarker.coordinates ? activeMarker.coordinates.lat : null}</Typography>
+              </Grid>
+              <Grid item>
+                <Typography variant="h5">Longitude</Typography>
+                <Typography variant="body1">{activeMarker.coordinates ? activeMarker.coordinates.lng : null}</Typography>
+              </Grid>
+              <Grid item>
+                {activeMarker.notSaved ? (
                   <Button
                     variant="contained"
-                    className={classes.deleteButton}
-                    startIcon={<DeleteIcon />}
-                    onClick={deleteMarker}
+                    className={classes.saveButton}
+                    startIcon={<SaveIcon />}
+                    onClick={saveMarker}
                   >
-                    Delete Marker
+                    Save Marker
                   </Button>
-                )}
-            </div>
+                )
+                  : (
+                    <Button
+                      variant="contained"
+                      className={classes.deleteButton}
+                      startIcon={<DeleteIcon />}
+                      onClick={deleteMarker}
+                    >
+                      Delete Marker
+                    </Button>
+                  )}
+              </Grid>
+            </Grid>
           </Drawer>
 
         </Map>
