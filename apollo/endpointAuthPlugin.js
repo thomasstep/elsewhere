@@ -2,6 +2,7 @@ const { AuthenticationError } = require('apollo-server-micro');
 const { getMarkersAuth } = require('./auth/getMarkers');
 const { getMapAuth } = require('./auth/getMap');
 const { createMarkersAuth } = require('./auth/createMarkers');
+const { updateMarkerAuth } = require('./auth/updateMarker');
 const { deleteMarkersAuth } = require('./auth/deleteMarkers');
 const { createMapAuth } = require('./auth/createMap');
 const { updateMapAuth } = require('./auth/updateMap');
@@ -92,6 +93,10 @@ function endpointAuth(endpoint, args, user) {
 
     case 'createMarkers':
       createMarkersAuth(args, user);
+      break;
+
+    case 'updateMarker':
+      updateMarkerAuth(args, user);
       break;
 
     case 'deleteMarkers':

@@ -1,4 +1,5 @@
 const { v4 } = require('uuid');
+const { AuthenticationError } = require('apollo-server-micro');
 const { getSession, setOptions } = require('next-auth/client');
 const { users, log } = require('../utils');
 
@@ -6,7 +7,13 @@ setOptions({ site: process.env.SITE });
 
 async function context(ctx) {
   const { req } = ctx;
-  const { user } = await getSession({ req });
+  const session = await getSession({ req });
+  if (!session) {
+    log.warn('Session not found.');
+    throw new AuthenticationError('Session not found. Log in.');
+  }
+
+  const { user } = session;
   if (user && user.email) {
     let foundUser = await users.findOne({ email: user.email });
 
@@ -31,7 +38,7 @@ async function context(ctx) {
           email: user.email,
         });
         log.error(err);
-        log.error(err.message)
+        log.error(err.message);
       }
     }
 

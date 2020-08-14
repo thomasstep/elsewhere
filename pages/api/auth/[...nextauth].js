@@ -23,7 +23,6 @@ if (process.env.NODE_ENV === 'development') {
 const options = {
   site: process.env.SITE || 'http://localhost:3000',
 
-  // Configure one or more authentication providers
   providers,
   database: {
     type: 'mongodb',
@@ -62,7 +61,7 @@ const options = {
   pages: {
     signIn: '/signin',
     signOut: '/signout',
-  }
+  },
 };
 
 export default (req, res) => NextAuth(req, res, options);

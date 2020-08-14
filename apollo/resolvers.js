@@ -50,6 +50,13 @@ const resolvers = {
       try {
         const map = await maps.findOne({ uuid: mapId });
         markers = map.markers;
+        // If you use the spread operator (...) it does not return a normal object;
+        // it returns a Mongoose document, just hardcode the fields in
+        markers = markers.map((marker) => ({
+          markerId: marker.uuid,
+          coordinates: marker.coordinates,
+          name: marker.name,
+        }));
       } catch (err) {
         log.error('Error finding map markers.', {
           mapId,
@@ -238,8 +245,13 @@ const resolvers = {
     },
 
     createMarkers: async (parent, args) => {
-      const { mapId, markers } = args;
+      const { mapId } = args;
+      let { markers } = args;
 
+      markers = markers.map((marker) => ({
+        ...marker,
+        uuid: v4(),
+      }));
       try {
         await maps.findOneAndUpdate(
           { uuid: mapId },
@@ -260,27 +272,28 @@ const resolvers = {
       return true;
     },
 
+    updateMarker: (parent, args) => args.updates,
+
     deleteMarkers: async (parent, args) => {
-      const { mapId, markers } = args;
-      const promises = [];
-      // For some reason $pull $in does not work with an array of objects
-      markers.forEach((marker) => {
-        promises.push(
-          maps.findOneAndUpdate(
-            { uuid: mapId },
-            {
-              $pull: {
-                markers: marker,
+      const { mapId, markerIds } = args;
+      try {
+        await maps.findOneAndUpdate(
+          { uuid: mapId },
+          {
+            $pull: {
+              markers: {
+                uuid: {
+                  $in: markerIds,
+                },
               },
             },
-          ),
+          },
         );
-      });
-
-      try {
-        await Promise.all(promises);
       } catch (err) {
-        log.error('Error deleting markers.');
+        log.error('Error deleting markers.', {
+          mapId,
+          markerIds,
+        });
         log.error(err);
         return false;
       }
@@ -556,6 +569,38 @@ const resolvers = {
     },
 
     readers: () => true,
+  },
+
+  MarkerUpdate: {
+    markerName: async (parent) => {
+      const { mapId, markerId, markerName } = parent;
+      try {
+        await maps.findOneAndUpdate(
+          {
+            $and: [
+              { uuid: mapId },
+              { 'markers.uuid': markerId },
+            ],
+          },
+          {
+            $set: {
+              'markers.$[elem].name': markerName,
+            },
+          },
+          {
+            arrayFilters: [{ 'elem.uuid': markerId }],
+          },
+        );
+      } catch (err) {
+        log.error('Error updating marker.', {
+          ...parent,
+        });
+        log.error(err);
+        return false;
+      }
+
+      return true;
+    },
   },
 };
 

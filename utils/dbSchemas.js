@@ -14,6 +14,7 @@ const mapsSchema = new mongoose.Schema({
   name: String,
   markers: [
     {
+      uuid: String,
       coordinates: {
         lat: Number,
         lng: Number,

@@ -24,6 +24,12 @@ const typeDefs = gql`
     readers: MapUserListInput
   }
 
+  input MarkerUpdateInput {
+    mapId: ID!
+    markerId: ID!
+    markerName: String
+  }
+
   input MapUserListInput {
     push: [String]
     pull: [String]
@@ -67,6 +73,10 @@ const typeDefs = gql`
     readers: Boolean
   }
 
+  type MarkerUpdate {
+    markerName: Boolean
+  }
+
   type SignUpPayload {
     user: User!
   }
@@ -81,6 +91,7 @@ const typeDefs = gql`
   }
 
   type Marker {
+    markerId: ID!
     coordinates: LatLng!
     name: String
   }
@@ -115,9 +126,14 @@ const typeDefs = gql`
     createMarkers(mapId: ID!, markers: [MarkerInput]!): Boolean!
 
     """
+    Update markers for a map given by ID.
+    """
+    updateMarker(updates: MarkerUpdateInput!): MarkerUpdate!
+
+    """
     Delete markers from a map given by ID.
     """
-    deleteMarkers(mapId: ID!, markers: [MarkerInput]!): Boolean!
+    deleteMarkers(mapId: ID!, markerIds: [ID]!): Boolean!
 
     """
     Create a map with a given name. Returns map's ID.

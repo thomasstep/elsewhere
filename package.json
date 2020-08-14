@@ -40,7 +40,7 @@
     "mongodb": "^3.5.9",
     "mongoose": "^5.9.24",
     "next": "^9.4.4",
-    "next-auth": "^2.2.0",
+    "next-auth": "^3.1.0",
     "passport": "^0.4.1",
     "passport-google-oauth20": "^2.0.0",
     "prop-types": "^15.7.2",

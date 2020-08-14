@@ -59,11 +59,20 @@ const getMarkers = `query getMarkers (
     $mapId: ID!
   ) {
   getMarkers(mapId: $mapId) {
+    markerId
     coordinates {
       lat
       lng
     }
     name
+  }
+}`;
+
+const updateMarker = `mutation updateMarker(
+  $updates: MarkerUpdateInput!
+) {
+  updateMarker(updates: $updates) {
+    markerName
   }
 }`;
 
@@ -76,9 +85,9 @@ const createMarkers = `mutation createMarkers(
 
 const deleteMarkers = `mutation deleteMarkers(
   $mapId: ID!
-  $markers: [MarkerInput]!
+  $markerIds: [ID]!
 ) {
-  deleteMarkers(mapId: $mapId, markers: $markers)
+  deleteMarkers(mapId: $mapId, markerIds: $markerIds)
 }`;
 
 const getPlace = `query getPlace(
@@ -105,9 +114,10 @@ const nearbyPlaces = `query nearbySearch(
 
 function ElsewhereMap(props) {
   const router = useRouter();
+  const [session, setSession] = useState(null);
   const [activeMarker, setActiveMarker] = useState({});
   const [activeMarkerEditMode, setActiveMarkerEditMode] = useState(false);
-  const [editedActiveMarkerName, setEditedActiveMarkerName] = useState('');
+  const [editedActiveMarkerName, setEditedActiveMarkerName] = useState(''); // TODO can I just use activeMarker.markerName??
   const [activeInfoWindow, setActiveInfoWindow] = useState(false);
   const [markers, setMarkers] = useState([]);
   const [searchFieldText, setSearchFieldText] = useState('');
@@ -117,8 +127,9 @@ function ElsewhereMap(props) {
   const classes = useStyles(props);
 
   useEffect(() => {
-    getSession().then((session) => {
-      if (!session) router.push('/signin');
+    getSession().then((foundSession) => {
+      if (!foundSession) router.push('/signin');
+      setSession(foundSession);
     });
   }, []);
 
@@ -135,20 +146,49 @@ function ElsewhereMap(props) {
 
     setActiveInfoWindow(false);
     setActiveMarker({});
+    setActiveMarkerEditMode(false);
   }
 
   async function toggleActiveMarkerNameEditMode() {
     if (activeMarkerEditMode) {
-      if (activeMarker.name !== editedActiveMarkerName) {
-        // TODO add mutation to handle this
-        console.log(`Changing marker name to ${editedActiveMarkerName}`);
+      if (activeMarker.name !== editedActiveMarkerName && activeMarker.markerId) {
+        const updates = {
+          mapId: router.query.id,
+          markerId: activeMarker.markerId,
+          markerName: editedActiveMarkerName,
+        };
+
+        fetcher(updateMarker, { updates }).then(({
+          updateMarker: {
+            markerName: updateSuccess,
+          },
+        }) => {
+          if (updateSuccess) {
+            const index = markers.findIndex(
+              (marker) => marker.markerId === activeMarker.markerId,
+            );
+            if (index !== -1) {
+              markers[index] = {
+                ...activeMarker,
+                name: editedActiveMarkerName,
+              };
+            }
+
+            setActiveMarker({
+              ...activeMarker,
+              name: editedActiveMarkerName,
+            });
+          }
+        });
       }
+    } else {
+      setEditedActiveMarkerName(activeMarker.name);
     }
 
     setActiveMarkerEditMode(!activeMarkerEditMode);
   }
 
-  function handleMapNameTextFieldChange(event) {
+  function handleActiveMarkerNameTextFieldChange(event) {
     setEditedActiveMarkerName(event.target.value);
   }
 
@@ -237,12 +277,7 @@ function ElsewhereMap(props) {
   function deleteMarker() {
     const variables = {
       mapId: router.query.id,
-      markers: [
-        {
-          coordinates: activeMarker.coordinates,
-          name: activeMarker.name,
-        },
-      ],
+      markerIds: [activeMarker.markerId],
     };
 
     fetcher(deleteMarkers, variables).then(({ deleteMarkers: success }) => {
@@ -288,7 +323,7 @@ function ElsewhereMap(props) {
   }
 
   return (
-    <Layout mapPage>
+    <Layout mapPage session={session}>
 
       <Box
         className={classes.searchBox}
@@ -343,7 +378,7 @@ function ElsewhereMap(props) {
 
           {markers.length ? markers.map((marker) => (
             <Marker
-              key={marker.coordinates.lat.toString().concat(marker.coordinates.lng.toString())}
+              key={marker.markerId}
               position={marker.coordinates}
               onClick={() => {
                 setActiveMarker(marker);
@@ -385,7 +420,7 @@ function ElsewhereMap(props) {
                             value={editedActiveMarkerName}
                             label="Marker Name"
                             variant="filled"
-                            onChange={(e) => handleMapNameTextFieldChange(e)}
+                            onChange={(e) => handleActiveMarkerNameTextFieldChange(e)}
                           />
                         </Grid>
                         <Grid item>
