@@ -89,7 +89,6 @@ function ElsewhereMapSettings(props) {
   const [editedMapName, setEditedMapName] = useState('');
   const [writers, setWriters] = useState(null);
   const [travelPartnerTextField, setTravelPartnerTextField] = useState('');
-  const { session } = props;
   const classes = useStyles(props);
 
   useEffect(() => {
@@ -103,6 +102,7 @@ function ElsewhereMapSettings(props) {
       })
       .catch((err) => {
         console.log(err);
+        router.push('/signin');
       });
 
     fetcher(getMapQuery, { mapId: router.query.id }).then(({

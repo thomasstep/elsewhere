@@ -141,6 +141,7 @@ function ElsewhereMap(props) {
       })
       .catch((err) => {
         console.log(err);
+        router.push('/signin');
       });
   }, []);
 
