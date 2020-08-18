@@ -15,12 +15,15 @@ async function connectMongo() {
     };
 
     try {
+      log.info('Attempting to connect to DB.');
       await mongoose.connect(process.env.MONGODB_URI, options);
       log.info('Connected to DB.');
     } catch (e) {
       log.error('Caught error connecting to DB.');
       log.error(e);
     }
+  } else {
+    log.info('DB already connected.');
   }
 }
 
