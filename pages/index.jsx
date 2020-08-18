@@ -1,14 +1,12 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { getSession } from 'next-auth/client';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Layout from '../components/layout';
 
-function Index({ session }) {
+function Index() {
   return (
-    <Layout session={session}>
+    <Layout session={{}}>
       <Box
         mt={10}
       >
@@ -29,14 +27,5 @@ function Index({ session }) {
     </Layout>
   );
 }
-
-Index.getInitialProps = async (context) => ({
-  session: await getSession(context),
-});
-
-Index.propTypes = {
-  // eslint-disable-next-line react/forbid-prop-types
-  session: PropTypes.object.isRequired,
-};
 
 export default Index;
