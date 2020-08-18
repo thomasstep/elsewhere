@@ -1,19 +1,15 @@
 import passport from 'passport';
-import Local from 'passport-local';
+import Google from 'passport-google-oauth20';
 import nextConnect from 'next-connect';
 import { v4 } from 'uuid';
 import cookie from 'cookie';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
 import { users } from '../../../utils/db';
 import { log } from '../../../utils';
 
 const authenticate = (method, req, res) => new Promise((resolve, reject) => {
   passport.authenticate(
     method,
-    {
-      session: false,
-    },
     (error, token) => {
       if (error) {
         reject(error);
@@ -24,27 +20,31 @@ const authenticate = (method, req, res) => new Promise((resolve, reject) => {
   )(req, res);
 });
 
-const { JWT_SECRET } = process.env;
+const {
+  SITE,
+  GOOGLE_OAUTH_CLIENT_ID,
+  GOOGLE_OAUTH_CLIENT_SECRET,
+  JWT_SECRET,
+} = process.env;
 
-function validPassword(user, password) {
-  return bcrypt.compareSync(password, user.hashedPassword);
-}
-
-passport.use(new Local.Strategy(
+passport.use(new Google.Strategy(
   {
-    usernameField: 'email',
+    clientID: GOOGLE_OAUTH_CLIENT_ID,
+    clientSecret: GOOGLE_OAUTH_CLIENT_SECRET,
+    callbackURL: `${SITE}/api/google/callback`,
   },
-  async (email, password, done) => {
-    let user = await users.findOne({ email });
+  async (accessToken, refreshToken, profile, done) => {
+    const verifiedEmailObject = profile.emails.find((email) => email.verified) || profile.emails[0];
+    const { value: verifiedEmail } = verifiedEmailObject;
+
+    let user = await users.findOne({ email: verifiedEmail });
 
     // Create user if they do not exist
     if (!user) {
-      const salt = bcrypt.genSaltSync();
-
       const newUser = {
         uuid: v4(),
-        email,
-        hashedPassword: bcrypt.hashSync(password, salt),
+        email: verifiedEmail,
+        googleId: profile.id,
         ownedMaps: [],
         writableMaps: [],
         readableMaps: [],
@@ -62,20 +62,18 @@ passport.use(new Local.Strategy(
       user = newUser;
     }
 
-    // For a user that has previously only used OAuth providers
-    if (user.uuid && !user.hashedPassword) {
+    // For a user that has previously only used credentials
+    if (user.uuid && !user.googleId) {
       try {
-        const salt = bcrypt.genSaltSync();
-        const hashedPassword = bcrypt.hashSync(password, salt);
         await users.findOneAndUpdate(
           { uuid: user.uuid },
           {
             $set: {
-              hashedPassword,
+              googleId: profile.id,
             },
           },
         );
-        user.hashedPassword = hashedPassword;
+        user.googleId = profile.id;
       } catch (err) {
         log.error('Trouble updating existing user.', {
           email: user.email,
@@ -90,7 +88,7 @@ passport.use(new Local.Strategy(
       });
     }
 
-    if (user && validPassword(user, password)) {
+    if (user) {
       done(null, user);
     } else {
       done(null, null);
@@ -99,10 +97,9 @@ passport.use(new Local.Strategy(
 ));
 
 export default nextConnect()
-  .use(passport.initialize())
-  .post(async (req, res) => {
+  .get(async (req, res) => {
     try {
-      const user = await authenticate('local', req, res);
+      const user = await authenticate('google', req, res);
       const token = jwt.sign(
         { uuid: user.uuid, time: new Date() },
         JWT_SECRET,
@@ -122,10 +119,15 @@ export default nextConnect()
         }),
       );
 
-      // setTokenCookie(res, token);
-      res.status(200).send({ done: true });
+      res.writeHead(302, {
+        Location: `${process.env.SITE}/profile`,
+      });
+      res.end();
     } catch (error) {
       console.error(error);
-      res.status(401).send(error.message);
+      res.writeHead(302, {
+        Location: `${process.env.SITE}/signin`,
+      });
+      res.end();
     }
   });

@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import { useRouter } from 'next/router';
-import { providers, csrfToken, signin } from 'next-auth/client';
 import Layout from '../components/layout';
 
-function SignIn({ elsewhereProviders }) {
+function SignIn() {
   const [signInEmail, setSignInEmail] = useState('');
   const [signInPassword, setSignInPassword] = useState('');
-  const [signInEmailLocal, setSignInEmailLocal] = useState('');
   const router = useRouter();
 
   function handleSignInEmailFieldChange(event) {
@@ -43,13 +40,8 @@ function SignIn({ elsewhereProviders }) {
         throw new Error(await res.text());
       }
     } catch (error) {
-      console.error('An unexpected error happened occurred:', error);
+      console.error('An unexpected error occurred:', error);
     }
-  }
-
-  function handleSignInEmailLocalFieldChange(event) {
-    event.preventDefault();
-    setSignInEmailLocal(event.target.value);
   }
 
   return (
@@ -61,57 +53,16 @@ function SignIn({ elsewhereProviders }) {
         alignItems="center"
         spacing={5}
       >
-        {Object.values(elsewhereProviders).map((provider) => {
-          if (provider.id === 'email') {
-            return (
-              <Grid item xs={12}>
-                <Grid
-                  container
-                  direction="column"
-                  justify="space-evenly"
-                  alignItems="center"
-                  spacing={2}
-                >
-                  <Grid item xs={12}>
-                    <TextField
-                      id="filled-basic"
-                      value={signInEmailLocal}
-                      label="Email address"
-                      variant="filled"
-                      onChange={(e) => handleSignInEmailLocalFieldChange(e)}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Button
-                      variant="contained"
-                      onClick={() => signin(
-                        'email',
-                        {
-                          email: signInEmailLocal,
-                          callbackUrl: `${process.env.SITE}/profile`,
-                        },
-                      )}
-                    >
-                      Sign in with Email
-                    </Button>
-                  </Grid>
-                </Grid>
-              </Grid>
-            );
-          }
+        <Grid item xs={12}>
+          <Button
+            variant="contained"
+            href="/api/google/signin"
+          >
+            Sign In With Google
+          </Button>
+        </Grid>
 
-          return (
-            <Grid item xs={12}>
-              <Button
-                variant="contained"
-                onClick={() => signin(provider.id, { callbackUrl: `${process.env.SITE}/profile` })}
-              >
-                {`Sign in with ${provider.name}`}
-              </Button>
-            </Grid>
-          );
-        })}
-
+        <hr style={{ width: '100%' }} />
         {/* This is username and password authentication */}
         <Grid item xs={12}>
           <TextField
@@ -144,22 +95,5 @@ function SignIn({ elsewhereProviders }) {
     </Layout>
   );
 }
-
-SignIn.getInitialProps = async (context) => {
-  const props = {
-    elsewhereProviders: await providers(context),
-  };
-
-  if (process.env.NODE_ENV === 'development') {
-    props.csrfToken = await csrfToken(context);
-  }
-
-  return props;
-};
-
-SignIn.propTypes = {
-  elsewhereProviders: PropTypes.shape.isRequired,
-};
-
 
 export default SignIn;

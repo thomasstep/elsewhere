@@ -1,7 +1,5 @@
 import { useRouter } from 'next/router';
-import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
-import { getSession } from 'next-auth/client';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
@@ -34,6 +32,12 @@ const useStyles = makeStyles((theme) => ({
     },
   },
 }));
+
+const viewerQuery = `{
+  viewer {
+    email
+  }
+}`;
 
 const getMapQuery = `query getMap (
   $mapId: ID!
@@ -89,7 +93,17 @@ function ElsewhereMapSettings(props) {
   const classes = useStyles(props);
 
   useEffect(() => {
-    if (!session) router.push('/signin');
+    fetcher(viewerQuery)
+      .then(({
+        viewer: {
+          email: viewerEmail,
+        },
+      }) => {
+        if (!viewerEmail) router.push('/signin');
+      })
+      .catch((err) => {
+        console.log(err);
+      });
 
     fetcher(getMapQuery, { mapId: router.query.id }).then(({
       getMap: {
@@ -200,7 +214,7 @@ function ElsewhereMapSettings(props) {
 
   if (writers) {
     return (
-      <Layout session={session}>
+      <Layout session={{}}>
         <Grid
           container
           direction="column"
@@ -358,14 +372,5 @@ function ElsewhereMapSettings(props) {
 
   return <LoadingPage />;
 }
-
-ElsewhereMapSettings.getInitialProps = async (context) => ({
-  session: await getSession(context),
-});
-
-ElsewhereMapSettings.propTypes = {
-  // eslint-disable-next-line react/forbid-prop-types
-  session: PropTypes.object.isRequired,
-};
 
 export default ElsewhereMapSettings;

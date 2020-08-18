@@ -1,6 +1,5 @@
 import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
-import { getSession } from 'next-auth/client';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
@@ -54,6 +53,12 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(3),
   },
 }));
+
+const viewerQuery = `{
+  viewer {
+    email
+  }
+}`;
 
 const getMarkers = `query getMarkers (
     $mapId: ID!
@@ -114,7 +119,6 @@ const nearbyPlaces = `query nearbySearch(
 
 function ElsewhereMap(props) {
   const router = useRouter();
-  const [session, setSession] = useState(null);
   const [activeMarker, setActiveMarker] = useState({});
   const [activeMarkerEditMode, setActiveMarkerEditMode] = useState(false);
   const [editedActiveMarkerName, setEditedActiveMarkerName] = useState(''); // TODO can I just use activeMarker.markerName??
@@ -127,10 +131,17 @@ function ElsewhereMap(props) {
   const classes = useStyles(props);
 
   useEffect(() => {
-    getSession().then((foundSession) => {
-      if (!foundSession) router.push('/signin');
-      setSession(foundSession);
-    });
+    fetcher(viewerQuery)
+      .then(({
+        viewer: {
+          email: viewerEmail,
+        },
+      }) => {
+        if (!viewerEmail) router.push('/signin');
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }, []);
 
   function onInfoWindowClose() {
@@ -323,7 +334,7 @@ function ElsewhereMap(props) {
   }
 
   return (
-    <Layout mapPage session={session}>
+    <Layout mapPage session={{}}>
 
       <Box
         className={classes.searchBox}

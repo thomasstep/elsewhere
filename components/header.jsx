@@ -22,8 +22,6 @@ import AccountBoxIcon from '@material-ui/icons/AccountBox';
 import MapIcon from '@material-ui/icons/Map';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
-import { signout } from 'next-auth/client';
-
 const useStyles = makeStyles((theme) => ({
   fab: {
     margin: 0,
@@ -97,10 +95,12 @@ function Header(props) {
           {
             session
               ? (
-                <ListItem button key="Sign Out" onClick={signout}>
-                  <ListItemIcon><ExitToAppIcon /></ListItemIcon>
-                  <ListItemText primary="Sign Out" />
-                </ListItem>
+                <Link href="/signout">
+                  <ListItem button key="Sign Out">
+                    <ListItemIcon><ExitToAppIcon /></ListItemIcon>
+                    <ListItemText primary="Sign Out" />
+                  </ListItem>
+                </Link>
               ) : (
                 <Link href="/signin">
                   <ListItem button key="Sign In">

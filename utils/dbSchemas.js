@@ -4,6 +4,7 @@ const usersSchema = new mongoose.Schema({
   uuid: String,
   email: String,
   hashedPassword: String,
+  googleId: String,
   ownedMaps: [String],
   writableMaps: [String],
   readableMaps: [String],

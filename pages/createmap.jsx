@@ -6,10 +6,15 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import AddIcon from '@material-ui/icons/Add';
 import { useRouter } from 'next/router';
-import { getSession } from 'next-auth/client';
 import Layout from '../components/layout';
 import { getErrorMessage } from '../lib/form';
 import { fetcher } from '../utils/fetcher';
+
+const viewerQuery = `{
+  viewer {
+    email
+  }
+}`;
 
 const createMapMutation = `
   mutation CreateMapMutation($name: String!) {
@@ -17,13 +22,23 @@ const createMapMutation = `
   }
 `;
 
-function CreateMap({ session }) {
+function CreateMap() {
   const [newMapNameField, setNewMapNameField] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const router = useRouter();
 
   useEffect(() => {
-    if (!session) router.push('/signin');
+    fetcher(viewerQuery)
+      .then(({
+        viewer: {
+          email: viewerEmail,
+        },
+      }) => {
+        if (!viewerEmail) router.push('/signin');
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   });
 
   function handleNewMapNameFieldChange(event) {
@@ -49,7 +64,7 @@ function CreateMap({ session }) {
   }
 
   return (
-    <Layout session={session}>
+    <Layout session={{}}>
       <Grid
         container
         direction="column"
@@ -92,14 +107,5 @@ function CreateMap({ session }) {
     </Layout>
   );
 }
-
-CreateMap.getInitialProps = async (context) => ({
-  session: await getSession(context),
-});
-
-CreateMap.propTypes = {
-  // eslint-disable-next-line react/forbid-prop-types
-  session: PropTypes.object.isRequired,
-};
 
 export default CreateMap;

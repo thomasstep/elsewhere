@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { useRouter } from 'next/router';
-import { getSession } from 'next-auth/client';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Layout from '../components/layout';
@@ -19,7 +17,7 @@ const viewerQuery = `{
     }
   }`;
 
-function Profile({ session }) {
+function Profile() {
   const [id, setId] = useState('');
   const [email, setEmail] = useState('');
   const [ownedMaps, setOwnedMap] = useState([]);
@@ -28,8 +26,6 @@ function Profile({ session }) {
   const router = useRouter();
 
   useEffect(() => {
-    if (!session) router.push('/signin');
-
     fetcher(viewerQuery)
       .then(({
         viewer: {
@@ -40,6 +36,8 @@ function Profile({ session }) {
           writableMaps: viewerWritableMaps,
         },
       }) => {
+        if (!viewerEmail) router.push('/signin');
+
         setId(viewerId);
         setEmail(viewerEmail);
         setOwnedMap(viewerOwnedMaps);
@@ -54,7 +52,7 @@ function Profile({ session }) {
   if (id) {
     const sharedMaps = [...writableMaps, ...readableMaps];
     return (
-      <Layout session={session}>
+      <Layout session={{ uuid: id }}>
         <Grid
           container
           direction="column"
@@ -103,14 +101,5 @@ function Profile({ session }) {
 
   return <LoadingPage />;
 }
-
-Profile.getInitialProps = async (context) => ({
-  session: await getSession(context),
-});
-
-Profile.propTypes = {
-  // eslint-disable-next-line react/forbid-prop-types
-  session: PropTypes.object.isRequired,
-};
 
 export default Profile;

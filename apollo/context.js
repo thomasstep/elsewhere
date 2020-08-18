@@ -1,49 +1,27 @@
-const { v4 } = require('uuid');
-const { AuthenticationError } = require('apollo-server-micro');
-const { getSession, setOptions } = require('next-auth/client');
+const cookie = require('cookie');
+const jwt = require('jsonwebtoken');
 const { users, log } = require('../utils');
 
-setOptions({ site: process.env.SITE });
+const { JWT_SECRET } = process.env;
 
 async function context(ctx) {
   const { req } = ctx;
-  const session = await getSession({ req });
-  if (!session) {
-    log.warn('Session not found.');
-    throw new AuthenticationError('Session not found. Log in.');
-  }
 
-  const { user } = session;
-  if (user && user.email) {
-    let foundUser = await users.findOne({ email: user.email });
+  const { token } = cookie.parse(req.headers.cookie ?? '');
+  if (token) {
+    try {
+      const { uuid } = jwt.verify(token, JWT_SECRET);
+      const user = await users.findOne({ uuid });
 
-    // There are some instances in which a user will not be created by the NextAuth event
-    // A successful getSession call means they are a legitimate user
-    if (!foundUser) {
-      const uuid = v4();
-      try {
-        foundUser = await users.create(
-          {
-            uuid,
-            email: user.email,
-            ownedMaps: [],
-            writableMaps: [],
-            readableMaps: [],
-          },
-        );
-      } catch (err) {
-        log.error('Error creating new user.', {
-          nextauthUser: user,
-          uuid,
-          email: user.email,
-        });
-        log.error(err);
-        log.error(err.message);
-      }
+      log.info('User found from token.', {
+        email: user.email,
+      });
+      ctx.user = user;
+    } catch (err) {
+      log.error(err);
     }
-
-    ctx.user = foundUser;
-    ctx.user.id = foundUser.uuid;
+  } else {
+    log.info('No token found.');
   }
 
   return ctx;

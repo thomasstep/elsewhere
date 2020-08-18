@@ -41,7 +41,6 @@
     "mongodb": "^3.5.9",
     "mongoose": "^5.9.24",
     "next": "^9.4.4",
-    "next-auth": "^3.1.0",
     "next-connect": "^0.8.1",
     "passport": "^0.4.1",
     "passport-google-oauth20": "^2.0.0",
