@@ -27,6 +27,11 @@ const { log } = require('./log');
 //   }
 // }
 
+module.exports = {
+  // connectMongo,
+  ...schemas,
+};
+
 if (!mongoose.connection.readyStates) {
   mongoose.Promise = global.Promise;
   const options = {
@@ -49,8 +54,3 @@ if (!mongoose.connection.readyStates) {
 } else {
   log.info('DB already connected.');
 }
-
-module.exports = {
-  // connectMongo,
-  ...schemas,
-};
