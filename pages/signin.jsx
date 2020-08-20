@@ -39,8 +39,8 @@ function SignIn() {
       } else {
         throw new Error(await res.text());
       }
-    } catch (error) {
-      console.error('An unexpected error occurred:', error);
+    } catch (err) {
+      // Do something?
     }
   }
 

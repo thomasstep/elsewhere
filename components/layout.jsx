@@ -33,7 +33,7 @@ Layout.propTypes = {
   ]).isRequired,
   mapPage: PropTypes.bool,
   // eslint-disable-next-line react/forbid-prop-types
-  session: PropTypes.object,
+  session: PropTypes.string,
 };
 
 Layout.defaultProps = {

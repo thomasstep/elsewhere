@@ -1,12 +1,35 @@
-import React from 'react';
+import { useRouter } from 'next/router';
+import React, { useState, useEffect } from 'react';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Layout from '../components/layout';
+import { fetcher } from '../utils/fetcher';
+
+const viewerQuery = `{
+  viewer {
+    email
+  }
+}`;
 
 function Index() {
+  const router = useRouter();
+  const [userEmail, setUserEmail] = useState('');
+
+  useEffect(() => {
+    fetcher(viewerQuery)
+      .then(({
+        viewer: {
+          email: viewerEmail,
+        },
+      }) => {
+        setUserEmail(viewerEmail);
+      })
+      .catch(() => {});
+  }, []);
+
   return (
-    <Layout session={{}}>
+    <Layout session={userEmail}>
       <Box
         mt={10}
       >

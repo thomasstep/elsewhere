@@ -20,18 +20,14 @@ function MapList({ mapList }) {
 
   useEffect(() => {
     const promises = [];
-    console.log(mapList)
     mapList.forEach((mapId) => {
       promises.push(
         fetcher(getMapNameQuery(mapId))
           .then(({ getMap }) => getMap)
-          .catch((err) => {
-            console.error(err);
-            return {
-              mapId,
-              mapName: 'Error retrieving map.',
-            };
-          }),
+          .catch(() => ({
+            mapId,
+            mapName: 'Error retrieving map.',
+          })),
       );
     });
     Promise.all(promises)

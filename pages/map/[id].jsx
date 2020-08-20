@@ -119,6 +119,7 @@ const nearbyPlaces = `query nearbySearch(
 
 function ElsewhereMap(props) {
   const router = useRouter();
+  const [userEmail, setUserEmail] = useState('');
   const [activeMarker, setActiveMarker] = useState({});
   const [activeMarkerEditMode, setActiveMarkerEditMode] = useState(false);
   const [editedActiveMarkerName, setEditedActiveMarkerName] = useState(''); // TODO can I just use activeMarker.markerName??
@@ -138,9 +139,9 @@ function ElsewhereMap(props) {
         },
       }) => {
         if (!viewerEmail) router.push('/signin');
+        setUserEmail(viewerEmail);
       })
-      .catch((err) => {
-        console.log(err);
+      .catch(() => {
         router.push('/signin');
       });
   }, []);
@@ -335,7 +336,7 @@ function ElsewhereMap(props) {
   }
 
   return (
-    <Layout mapPage session={{}}>
+    <Layout mapPage session={userEmail}>
 
       <Box
         className={classes.searchBox}

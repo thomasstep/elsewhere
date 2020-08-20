@@ -50,6 +50,6 @@ export default nextConnect()
     try {
       await authenticate('google', req, res);
     } catch (error) {
-      console.error(error);
+      log.error(error);
     }
   });

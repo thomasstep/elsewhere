@@ -83,6 +83,7 @@ const removeTravelPartnerMutation = `mutation removeTravelPartner(
 
 function ElsewhereMapSettings(props) {
   const router = useRouter();
+  const [userEmail, setUserEmail] = useState('');
   const [mapId] = useState(router.query.id);
   const [mapName, setMapName] = useState('');
   const [mapNameEditMode, setMapNameEditMode] = useState(false);
@@ -99,9 +100,9 @@ function ElsewhereMapSettings(props) {
         },
       }) => {
         if (!viewerEmail) router.push('/signin');
+        setUserEmail(viewerEmail);
       })
-      .catch((err) => {
-        console.log(err);
+      .catch(() => {
         router.push('/signin');
       });
 
@@ -214,7 +215,7 @@ function ElsewhereMapSettings(props) {
 
   if (writers) {
     return (
-      <Layout session={{}}>
+      <Layout session={userEmail}>
         <Grid
           container
           direction="column"

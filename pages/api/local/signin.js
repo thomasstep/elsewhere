@@ -56,7 +56,7 @@ passport.use(new Local.Strategy(
         log.error('Trouble creating user.', {
           email: user.email,
         });
-        console.error(err);
+        log.error(err);
         done(err);
       }
       user = newUser;
@@ -81,7 +81,7 @@ passport.use(new Local.Strategy(
           email: user.email,
           uuid: user.uuid,
         });
-        console.error(err);
+        log.error(err);
         done(err);
       }
       log.info('User updated.', {
@@ -126,7 +126,7 @@ export default nextConnect()
       // setTokenCookie(res, token);
       res.status(200).send({ done: true });
     } catch (error) {
-      console.error(error);
+      log.error(error);
       res.status(401).send(error.message);
     }
   });

@@ -63,7 +63,6 @@ function Profile() {
         setWritableMaps(viewerWritableMaps);
       })
       .catch((err) => {
-        console.log(err);
         router.push('/signin');
       });
   }, []);
@@ -91,7 +90,7 @@ function Profile() {
   if (id) {
     const sharedMaps = [...writableMaps, ...readableMaps];
     return (
-      <Layout session={{ uuid: id }}>
+      <Layout session={email}>
         <Grid
           container
           direction="column"

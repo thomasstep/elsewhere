@@ -56,7 +56,7 @@ passport.use(new Google.Strategy(
         log.error('Trouble creating user.', {
           email: user.email,
         });
-        console.error(err);
+        log.error(err);
         done(err);
       }
       user = newUser;
@@ -79,7 +79,7 @@ passport.use(new Google.Strategy(
           email: user.email,
           uuid: user.uuid,
         });
-        console.error(err);
+        log.error(err);
         done(err);
       }
       log.info('User updated.', {
@@ -125,7 +125,7 @@ export default nextConnect()
       });
       res.end();
     } catch (error) {
-      console.error(error);
+      log.error(error);
       res.writeHead(302, {
         Location: `${process.env.SITE}/signin`,
       });
