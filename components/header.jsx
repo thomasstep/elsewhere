@@ -86,12 +86,6 @@ function Header(props) {
               <ListItemText primary="Profile" />
             </ListItem>
           </Link>
-          <Link href="/createmap">
-            <ListItem button key="Create Map">
-              <ListItemIcon><MapIcon /></ListItemIcon>
-              <ListItemText primary="Create Map" />
-            </ListItem>
-          </Link>
           {
             session
               ? (
