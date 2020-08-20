@@ -1,13 +1,13 @@
 const cookie = require('cookie');
 const jwt = require('jsonwebtoken');
-const { connectMongo, users } = require('../utils/db');
+const { AuthenticationError } = require('apollo-server-micro');
+const { users } = require('../utils/db');
 const { log } = require('../utils');
 
 const { JWT_SECRET } = process.env;
 
 async function context(ctx) {
   const { req } = ctx;
-  await connectMongo();
 
   const { token } = cookie.parse(req.headers.cookie ?? '');
   if (token) {
@@ -21,9 +21,11 @@ async function context(ctx) {
       ctx.user = user;
     } catch (err) {
       log.error(err);
+      throw new AuthenticationError('Please log in.');
     }
   } else {
     log.info('No token found.');
+    throw new AuthenticationError('Please log in.');
   }
 
   return ctx;

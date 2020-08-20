@@ -40,10 +40,6 @@ const resolvers = {
       return context.user;
     },
 
-    // getUser: async (parent, args) => {
-
-    // },
-
     getMarkers: async (parent, args) => {
       const { mapId } = args;
       let markers;
@@ -89,7 +85,7 @@ const resolvers = {
           mapId,
         });
         log.error(err);
-        return map;
+        throw new ApolloError('Error finding map.');
       }
 
       log.info('Found map.', {
@@ -365,7 +361,13 @@ const resolvers = {
         return -1;
       }
 
-      return uuid;
+      return {
+        mapId: map.uuid,
+        mapName: map.name,
+        owners: map.owners,
+        writers: map.writers,
+        readers: map.readers,
+      };
     },
 
     updateMap: (parent, args) => args.updates,

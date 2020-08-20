@@ -138,7 +138,7 @@ const typeDefs = gql`
     """
     Create a map with a given name. Returns map's ID.
     """
-    createMap(name: String!): ID!
+    createMap(name: String!): Map!
 
     """
     Update a map with a given by ID.

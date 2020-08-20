@@ -4,7 +4,7 @@ import nextConnect from 'next-connect';
 import { v4 } from 'uuid';
 import cookie from 'cookie';
 import jwt from 'jsonwebtoken';
-import { connectMongo, users } from '../../../utils/db';
+import { users } from '../../../utils/db';
 import { log } from '../../../utils';
 
 const authenticate = (method, req, res) => new Promise((resolve, reject) => {
@@ -99,7 +99,6 @@ passport.use(new Google.Strategy(
 export default nextConnect()
   .get(async (req, res) => {
     try {
-      await connectMongo();
       const user = await authenticate('google', req, res);
       const token = jwt.sign(
         { uuid: user.uuid, time: new Date() },

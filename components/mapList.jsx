@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import List from '@material-ui/core/List';
@@ -15,56 +15,48 @@ const getMapNameQuery = (id) => `{
   }
 }`;
 
-class MapList extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      maps: [],
-    };
-  }
+function MapList({ mapList }) {
+  const [maps, setMaps] = useState([]);
 
-  componentDidMount() {
-    const {
-      mapList,
-    } = this.props;
+  useEffect(() => {
     const promises = [];
+    console.log(mapList)
     mapList.forEach((mapId) => {
       promises.push(
         fetcher(getMapNameQuery(mapId))
-          .then(({ getMap }) => getMap),
+          .then(({ getMap }) => getMap)
+          .catch((err) => {
+            console.error(err);
+            return {
+              mapId,
+              mapName: 'Error retrieving map.',
+            };
+          }),
       );
     });
     Promise.all(promises)
-      .then((maps) => {
-        this.setState({
-          maps,
-        });
+      .then((allMaps) => {
+        setMaps(allMaps);
       });
-  }
+  }, [mapList]);
 
-  render() {
-    const {
-      maps,
-    } = this.state;
-
-    return (
-      <List component="nav">
-        {maps.map(({ mapId, mapName }) => (
-          <React.Fragment key={mapId}>
-            <ListItem button>
-              <Link href="/map/[id]" as={`/map/${mapId}`}>
-                <ListItemText primary={mapName} />
-              </Link>
-              <Link href="/map/[id]/settings" as={`/map/${mapId}/settings`}>
-                <SettingsIcon />
-              </Link>
-            </ListItem>
-            <Divider />
-          </React.Fragment>
-        ))}
-      </List>
-    );
-  }
+  return (
+    <List component="nav">
+      {maps.map(({ mapId, mapName }) => (
+        <React.Fragment key={mapId}>
+          <ListItem button>
+            <Link href="/map/[id]" as={`/map/${mapId}`}>
+              <ListItemText primary={mapName} />
+            </Link>
+            <Link href="/map/[id]/settings" as={`/map/${mapId}/settings`}>
+              <SettingsIcon />
+            </Link>
+          </ListItem>
+          <Divider />
+        </React.Fragment>
+      ))}
+    </List>
+  );
 }
 
 MapList.propTypes = {

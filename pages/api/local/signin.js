@@ -5,7 +5,7 @@ import { v4 } from 'uuid';
 import cookie from 'cookie';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { connectMongo, users } from '../../../utils/db';
+import { users } from '../../../utils/db';
 import { log } from '../../../utils';
 
 const authenticate = (method, req, res) => new Promise((resolve, reject) => {
@@ -102,7 +102,6 @@ export default nextConnect()
   .use(passport.initialize())
   .post(async (req, res) => {
     try {
-      await connectMongo();
       const user = await authenticate('local', req, res);
       const token = jwt.sign(
         { uuid: user.uuid, time: new Date() },
