@@ -18,9 +18,8 @@ import Layout from '../../components/layout';
 
 const useStyles = makeStyles((theme) => ({
   searchBox: {
-    margin: 0,
-    left: 10,
-    bottom: '5%',
+    left: theme.spacing(1),
+    bottom: theme.spacing(1),
     position: 'fixed',
     zIndex: theme.zIndex.appBar,
   },
@@ -387,6 +386,11 @@ function ElsewhereMap(props) {
           onClick={onMapClick}
           onCenterChanged={onMapCenterChanged}
           onReady={onMapReady}
+          zoomControl={false}
+          streetViewControl={false}
+          fullscreenControl={false}
+          mapType="TERRAIN"
+          mapTypeControl={false}
         >
 
           {markers.length ? markers.map((marker) => (

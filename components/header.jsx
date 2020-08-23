@@ -19,23 +19,20 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import HomeIcon from '@material-ui/icons/Home';
 import AccountBoxIcon from '@material-ui/icons/AccountBox';
-import MapIcon from '@material-ui/icons/Map';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 const useStyles = makeStyles((theme) => ({
   fab: {
-    margin: 0,
-    top: 10,
-    left: '50%',
+    left: 'calc(50% - 28px)',
+    top: theme.spacing(1),
     position: 'fixed',
-    zIndex: theme.zIndex.drawer + 1,
+    zIndex: theme.zIndex.appBar,
     backgroundColor: theme.palette.primary.main,
     '&:hover': {
       backgroundColor: theme.palette.primary.dark,
     },
   },
   appBar: {
-    zIndex: theme.zIndex.drawer + 1,
     position: 'static',
   },
   iconButton: {
@@ -110,12 +107,12 @@ function Header(props) {
   );
 
   return mapPage ? (
-    <React.Fragment key="top">
+    <>
       <Fab onClick={(e) => toggleDrawer(e)} className={classes.fab}>
         <MenuIcon className={classes.menuIcon} />
       </Fab>
       {navigationDrawer}
-    </React.Fragment>
+    </>
   )
     : (
       <>

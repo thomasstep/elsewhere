@@ -1,4 +1,3 @@
-import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
@@ -13,7 +12,6 @@ const viewerQuery = `{
 }`;
 
 function Index() {
-  const router = useRouter();
   const [userEmail, setUserEmail] = useState('');
 
   useEffect(() => {
