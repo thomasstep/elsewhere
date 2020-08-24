@@ -43,6 +43,9 @@ function Index() {
           <Grid item xs={12}>
             <Typography variant="h3">Elsewhere.</Typography>
           </Grid>
+          {/* <Grid item xs={12}>
+            <Typography variant="body1">Collaboratively map out your trip.</Typography>
+          </Grid> */}
         </Grid>
       </Box>
     </Layout>

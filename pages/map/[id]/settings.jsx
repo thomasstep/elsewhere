@@ -191,7 +191,7 @@ function ElsewhereMapSettings(props) {
     } = router;
 
     const updates = {
-      queryMapId,
+      mapId: queryMapId,
       writers: {
         pull: email,
       },
@@ -205,12 +205,14 @@ function ElsewhereMapSettings(props) {
     if (!success) return;
 
     // Remove writer from list if the API call was successful
-    const index = writers.indexOf(email);
+    // Need to make a deep copy and call setWriters to get the render
+    const writerUpdates = [...writers];
+    const index = writerUpdates.indexOf(email);
     if (index > -1) {
-      writers.splice(index, 1);
+      writerUpdates.splice(index, 1);
     }
 
-    // setWriters(writers); Do I need to do this?
+    setWriters(writerUpdates);
   }
 
   if (writers) {

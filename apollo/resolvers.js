@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { v4 } from 'uuid';
 import { Client } from '@googlemaps/google-maps-services-js';
+import nodemailer from 'nodemailer';
 
 import { log } from '../utils/log';
 
@@ -566,6 +567,31 @@ const resolvers = {
         log.error(err);
         return false;
       }
+
+      // Nodemailer
+      // const transporter = nodemailer.createTransport({
+      //   host: process.env.EMAIL_HOST,
+      //   port: process.env.EMAIL_PORT,
+      //   secure: false, // true for 465, false for other ports
+      //   auth: {
+      //     user: process.env.EMAIL_USERNAME,
+      //     pass: process.env.EMAIL_PASSWORD,
+      //   },
+      // });
+      const transporter = nodemailer.createTransport(process.env.EMAIL_SERVER);
+
+      const emailPromises = [];
+      push.forEach((email) => {
+        emailPromises.push(
+          transporter.sendMail({
+            from: process.env.EMAIL_FROM,
+            to: email,
+            subject: 'You have been added to a map',
+            text: 'You have been added to a map in Elsewhere.',
+            // html: '<text in HTML>', // html body
+          }),
+        );
+      });
 
       return true;
     },
