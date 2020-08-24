@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { v4 } from 'uuid';
 import { Client } from '@googlemaps/google-maps-services-js';
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 
 import { log } from '../utils/log';
 
@@ -568,30 +568,29 @@ const resolvers = {
         return false;
       }
 
-      // Nodemailer
-      // const transporter = nodemailer.createTransport({
-      //   host: process.env.EMAIL_HOST,
-      //   port: process.env.EMAIL_PORT,
-      //   secure: false, // true for 465, false for other ports
-      //   auth: {
-      //     user: process.env.EMAIL_USERNAME,
-      //     pass: process.env.EMAIL_PASSWORD,
-      //   },
-      // });
-      const transporter = nodemailer.createTransport(process.env.EMAIL_SERVER);
+      // SendGrid
+      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
       const emailPromises = [];
       push.forEach((email) => {
+        const msg = {
+          to: email,
+          from: process.env.EMAIL_FROM,
+          subject: 'You have been added to a map',
+          text: 'You have been added to a map in Elsewhere.',
+          // html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+        };
         emailPromises.push(
-          transporter.sendMail({
-            from: process.env.EMAIL_FROM,
-            to: email,
-            subject: 'You have been added to a map',
-            text: 'You have been added to a map in Elsewhere.',
-            // html: '<text in HTML>', // html body
-          }),
+          sgMail.send(msg),
         );
       });
+
+      try {
+        const sgRes = await Promise.all(emailPromises);
+      } catch (err) {
+        log.error('There was an error with SendGrid while sending email.');
+        console.error(err);
+      }
 
       return true;
     },

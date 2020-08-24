@@ -106,19 +106,23 @@ function ElsewhereMapSettings(props) {
         router.push('/signin');
       });
 
-    fetcher(getMapQuery, { mapId: router.query.id }).then(({
-      getMap: {
-        mapName: retrievedName,
-        // owners,
-        writers: mapWriters,
-        // readers,
-      },
-    }) => {
-      setWriters(mapWriters);
-      setMapName(retrievedName);
-      // Initialize this so it doesn't automatically change map name to ''
-      setEditedMapName(retrievedName);
-    });
+    fetcher(getMapQuery, { mapId: router.query.id })
+      .then(({
+        getMap: {
+          mapName: retrievedName,
+          // owners,
+          writers: mapWriters,
+          // readers,
+        },
+      }) => {
+        setWriters(mapWriters);
+        setMapName(retrievedName);
+        // Initialize this so it doesn't automatically change map name to ''
+        setEditedMapName(retrievedName);
+      })
+      .catch((err) => {
+        if (err.message === 'Context creation failed: Please log in.') router.push('/signin');
+      });
   }, []);
 
   async function toggleMapNameEditMode() {
@@ -197,13 +201,16 @@ function ElsewhereMapSettings(props) {
       },
     };
 
-    const {
-      updateMap: {
-        writers: success,
-      },
-    } = await fetcher(removeTravelPartnerMutation, { map: updates });
-    if (!success) return;
-
+    try {
+      const {
+        updateMap: {
+          writers: success,
+        },
+      } = await fetcher(removeTravelPartnerMutation, { map: updates });
+      if (!success) return;
+    } catch (err) {
+      if (err.message === 'Context creation failed: Please log in.') router.push('/signin');
+    }
     // Remove writer from list if the API call was successful
     // Need to make a deep copy and call setWriters to get the render
     const writerUpdates = [...writers];
