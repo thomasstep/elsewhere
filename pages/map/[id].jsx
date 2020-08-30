@@ -69,14 +69,18 @@ const getMarkers = `query getMarkers (
     }
     name
     createdBy
+    notes
   }
 }`;
 
 const updateMarker = `mutation updateMarker(
   $updates: MarkerUpdateInput!
+  $isName: Boolean=false
+  $isNotes: Boolean=false
 ) {
   updateMarker(updates: $updates) {
-    markerName
+    markerName @include(if: $isName)
+    notes @include(if: $isNotes)
   }
 }`;
 
@@ -126,6 +130,7 @@ function ElsewhereMap(props) {
   const [userEmail, setUserEmail] = useState('');
   const [activeMarker, setActiveMarker] = useState({});
   const [editedActiveMarkerName, setEditedActiveMarkerName] = useState('');
+  const [editedActiveMarkerNotes, setEditedActiveMarkerNotes] = useState('');
   const [activeInfoWindow, setActiveInfoWindow] = useState(false);
   const [markers, setMarkers] = useState([]);
   const [searchFieldText, setSearchFieldText] = useState('');
@@ -162,6 +167,7 @@ function ElsewhereMap(props) {
     setActiveInfoWindow(false);
     setActiveMarker({});
     setEditedActiveMarkerName('');
+    setEditedActiveMarkerNotes('');
   }
 
   async function saveActiveMarkerName() {
@@ -172,7 +178,7 @@ function ElsewhereMap(props) {
         markerName: editedActiveMarkerName,
       };
 
-      fetcher(updateMarker, { updates }).then(({
+      fetcher(updateMarker, { updates, isName: true }).then(({
         updateMarker: {
           markerName: updateSuccess,
         },
@@ -201,6 +207,45 @@ function ElsewhereMap(props) {
 
   function handleActiveMarkerNameTextFieldChange(event) {
     setEditedActiveMarkerName(event.target.value);
+  }
+
+  async function saveActiveMarkerNotes() {
+    if (activeMarker.notes !== editedActiveMarkerNotes && activeMarker.markerId) {
+      const updates = {
+        mapId: router.query.id,
+        markerId: activeMarker.markerId,
+        notes: editedActiveMarkerNotes,
+      };
+
+      fetcher(updateMarker, { updates, isNotes: true }).then(({
+        updateMarker: {
+          notes: updateSuccess,
+        },
+      }) => {
+        if (updateSuccess) {
+          const index = markers.findIndex(
+            (marker) => marker.markerId === activeMarker.markerId,
+          );
+          if (index !== -1) {
+            markers[index] = {
+              ...activeMarker,
+              notes: editedActiveMarkerNotes,
+            };
+          }
+
+          setActiveMarker({
+            ...activeMarker,
+            notes: editedActiveMarkerNotes,
+          });
+        } else {
+          setEditedActiveMarkerNotes(activeMarker.notes);
+        }
+      });
+    }
+  }
+
+  function handleActiveMarkerNotesTextFieldChange(event) {
+    setEditedActiveMarkerNotes(event.target.value);
   }
 
   function onMapReady(mapProps, map) {
@@ -456,6 +501,41 @@ function ElsewhereMap(props) {
                     <Typography variant="body1">{activeMarker.createdBy}</Typography>
                   </Grid>
                 ) : null
+              }
+
+              {/* Notes field */}
+              {
+                activeMarker.notSaved ? null : (
+                  <Grid item xs={12}>
+                    <Grid
+                      container
+                      direction="row"
+                      justify="center"
+                      alignItems="center"
+                      spacing={2}
+                    >
+                      <Grid item>
+                        <TextField
+                          id="filled-basic"
+                          value={editedActiveMarkerNotes || activeMarker.notes}
+                          label="Notes"
+                          variant="outlined"
+                          onChange={(e) => handleActiveMarkerNotesTextFieldChange(e)}
+                          multiline
+                          rowsMax={10}
+                        />
+                      </Grid>
+                      <Grid item>
+                        <IconButton
+                          aria-label="save"
+                          onClick={saveActiveMarkerNotes}
+                        >
+                          <SaveIcon />
+                        </IconButton>
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                )
               }
 
               {/* Lat field */}

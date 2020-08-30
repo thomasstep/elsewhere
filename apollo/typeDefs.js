@@ -28,6 +28,7 @@ const typeDefs = gql`
     mapId: ID!
     markerId: ID!
     markerName: String
+    notes: String
   }
 
   input MapUserListInput {
@@ -75,6 +76,7 @@ const typeDefs = gql`
 
   type MarkerUpdate {
     markerName: Boolean
+    notes: Boolean
   }
 
   type SignUpPayload {
@@ -95,6 +97,7 @@ const typeDefs = gql`
     coordinates: LatLng!
     name: String
     createdBy: String
+    notes: String
   }
 
   type Query {

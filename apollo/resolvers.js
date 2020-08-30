@@ -54,6 +54,7 @@ const resolvers = {
           coordinates: marker.coordinates,
           name: marker.name,
           createdBy: marker.createdBy,
+          notes: marker.notes,
         }));
       } catch (err) {
         log.error('Error finding map markers.', {
@@ -661,7 +662,37 @@ const resolvers = {
           },
         );
       } catch (err) {
-        log.error('Error updating marker.', {
+        log.error('Error updating marker name.', {
+          ...parent,
+        });
+        log.error(err);
+        return false;
+      }
+
+      return true;
+    },
+
+    notes: async (parent) => {
+      const { mapId, markerId, notes } = parent;
+      try {
+        await maps.findOneAndUpdate(
+          {
+            $and: [
+              { uuid: mapId },
+              { 'markers.uuid': markerId },
+            ],
+          },
+          {
+            $set: {
+              'markers.$[elem].notes': notes,
+            },
+          },
+          {
+            arrayFilters: [{ 'elem.uuid': markerId }],
+          },
+        );
+      } catch (err) {
+        log.error('Error updating marker notes.', {
           ...parent,
         });
         log.error(err);
