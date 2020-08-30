@@ -95,6 +95,11 @@ function endpointAuth(endpoint, args, user) {
       createMarkersAuth(args, user);
       break;
 
+    case 'createMarker':
+      // Same as createMarkers
+      createMarkersAuth(args, user);
+      break;
+
     case 'updateMarker':
       updateMarkerAuth(args, user);
       break;

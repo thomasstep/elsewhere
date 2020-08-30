@@ -33,19 +33,32 @@ function Index() {
       >
         <Grid
           container
-          direction="row"
+          direction="column"
           justify="flex-start"
           alignItems="center"
+          spacing={3}
         >
-          <Grid item xs={12}>
-            <Typography variant="h5">Let&apos;s go</Typography>
+          <Grid item xs={12} md={8}>
+            <Typography variant="h3">Map out your plan together.</Typography>
+          </Grid>
+          <Grid item xs={12} md={5} lg={4}>
+            <Typography variant="body1">Whether you are planning a day in the city or an international trip, Elsewhere was made to collaboratively map out your plan.</Typography>
           </Grid>
           <Grid item xs={12}>
-            <Typography variant="h3">Elsewhere.</Typography>
+            <Grid
+              container
+              direction="row"
+              justify="flex-start"
+              alignItems="center"
+            >
+              <Grid item xs={12}>
+                <Typography variant="h5">Let&apos;s go</Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="h3">Elsewhere.</Typography>
+              </Grid>
+            </Grid>
           </Grid>
-          {/* <Grid item xs={12}>
-            <Typography variant="body1">Collaboratively map out your trip.</Typography>
-          </Grid> */}
         </Grid>
       </Box>
     </Layout>

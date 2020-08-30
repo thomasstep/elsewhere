@@ -80,11 +80,16 @@ const updateMarker = `mutation updateMarker(
   }
 }`;
 
-const createMarkers = `mutation createMarkers(
+const createMarker = `mutation createMarker(
   $mapId: ID!
-  $markers: [MarkerInput]!
+  $marker: MarkerInput!
 ) {
-  createMarkers(mapId: $mapId, markers: $markers)
+  createMarker(mapId: $mapId, marker: $marker) {
+    ... on Marker {
+      markerId
+      name
+    }
+  }
 }`;
 
 const deleteMarkers = `mutation deleteMarkers(
@@ -121,11 +126,11 @@ function ElsewhereMap(props) {
   const [userEmail, setUserEmail] = useState('');
   const [activeMarker, setActiveMarker] = useState({});
   const [activeMarkerEditMode, setActiveMarkerEditMode] = useState(false);
-  const [editedActiveMarkerName, setEditedActiveMarkerName] = useState(''); // TODO can I just use activeMarker.markerName??
+  const [editedActiveMarkerName, setEditedActiveMarkerName] = useState('');
   const [activeInfoWindow, setActiveInfoWindow] = useState(false);
   const [markers, setMarkers] = useState([]);
   const [searchFieldText, setSearchFieldText] = useState('');
-  const [mapCenterLat, setMapCenterLat] = useState(0); // TODO use map's initial center
+  const [mapCenterLat, setMapCenterLat] = useState(0);
   const [mapCenterLng, setMapCenterLng] = useState(0);
   const { google } = props;
   const classes = useStyles(props);
@@ -148,8 +153,7 @@ function ElsewhereMap(props) {
   function onInfoWindowClose() {
     if (activeMarker.notSaved) {
       const index = markers.findIndex(
-        (marker) => marker.coordinates.lat === activeMarker.coordinates.lat
-          && marker.coordinates.lng === activeMarker.coordinates.lng,
+        (marker) => marker.markerId === activeMarker.markerId,
       );
       if (index !== -1) {
         markers.splice(index, 1);
@@ -159,45 +163,42 @@ function ElsewhereMap(props) {
     setActiveInfoWindow(false);
     setActiveMarker({});
     setActiveMarkerEditMode(false);
+    setEditedActiveMarkerName('');
   }
 
-  async function toggleActiveMarkerNameEditMode() {
-    if (activeMarkerEditMode) {
-      if (activeMarker.name !== editedActiveMarkerName && activeMarker.markerId) {
-        const updates = {
-          mapId: router.query.id,
-          markerId: activeMarker.markerId,
-          markerName: editedActiveMarkerName,
-        };
+  async function saveActiveMarkerName() {
+    if (activeMarker.name !== editedActiveMarkerName && activeMarker.markerId) {
+      const updates = {
+        mapId: router.query.id,
+        markerId: activeMarker.markerId,
+        markerName: editedActiveMarkerName,
+      };
 
-        fetcher(updateMarker, { updates }).then(({
-          updateMarker: {
-            markerName: updateSuccess,
-          },
-        }) => {
-          if (updateSuccess) {
-            const index = markers.findIndex(
-              (marker) => marker.markerId === activeMarker.markerId,
-            );
-            if (index !== -1) {
-              markers[index] = {
-                ...activeMarker,
-                name: editedActiveMarkerName,
-              };
-            }
-
-            setActiveMarker({
+      fetcher(updateMarker, { updates }).then(({
+        updateMarker: {
+          markerName: updateSuccess,
+        },
+      }) => {
+        if (updateSuccess) {
+          const index = markers.findIndex(
+            (marker) => marker.markerId === activeMarker.markerId,
+          );
+          if (index !== -1) {
+            markers[index] = {
               ...activeMarker,
               name: editedActiveMarkerName,
-            });
+            };
           }
-        });
-      }
-    } else {
-      setEditedActiveMarkerName(activeMarker.name);
-    }
 
-    setActiveMarkerEditMode(!activeMarkerEditMode);
+          setActiveMarker({
+            ...activeMarker,
+            name: editedActiveMarkerName,
+          });
+        } else {
+          setEditedActiveMarkerName(activeMarker.name);
+        }
+      });
+    }
   }
 
   function handleActiveMarkerNameTextFieldChange(event) {
@@ -217,6 +218,9 @@ function ElsewhereMap(props) {
         });
       });
       map.fitBounds(bounds);
+      const boundsCenter = bounds.getCenter();
+      setMapCenterLat(boundsCenter.lat());
+      setMapCenterLng(boundsCenter.lng());
     });
   }
 
@@ -259,30 +263,20 @@ function ElsewhereMap(props) {
   function saveMarker() {
     const variables = {
       mapId: router.query.id,
-      markers: [
-        {
-          coordinates: activeMarker.coordinates,
-          name: activeMarker.name,
-        },
-      ],
+      marker: {
+        coordinates: activeMarker.coordinates,
+        name: editedActiveMarkerName || activeMarker.name,
+      },
     };
 
-    fetcher(createMarkers, variables).then(({ createMarkers: success }) => {
-      if (success) {
-        markers.forEach((marker) => {
-          if (marker.coordinates.lat === activeMarker.coordinates.lat
-            && marker.coordinates.lng === activeMarker.coordinates.lng) {
-            // eslint-disable-next-line no-param-reassign
-            marker.notSaved = false;
-          }
-        });
-        setActiveInfoWindow(false);
-        setActiveMarker({});
-        // setMarkers([...markers, activeMarker]);
-      } else {
-        setActiveInfoWindow(false);
-        setActiveMarker({});
+    fetcher(createMarker, variables).then(({ createMarker: createMarkerRes }) => {
+      if (createMarkerRes) {
+        activeMarker.notSaved = false;
+        activeMarker.markerId = createMarkerRes.markerId;
       }
+      setActiveInfoWindow(false);
+      setActiveMarker({});
+      setEditedActiveMarkerName('');
     });
   }
 
@@ -294,13 +288,14 @@ function ElsewhereMap(props) {
 
     fetcher(deleteMarkers, variables).then(({ deleteMarkers: success }) => {
       if (success) {
-        fetcher(getMarkers, { mapId: router.query.id }).then(({
-          getMarkers: mapMarkers,
-        }) => {
-          setActiveInfoWindow(false);
-          setActiveMarker({});
-          setMarkers(mapMarkers);
-        });
+        setActiveInfoWindow(false);
+        const index = markers.findIndex(
+          (marker) => marker.markerId === activeMarker.markerId,
+        );
+        if (index !== -1) {
+          markers.splice(index, 1);
+        }
+        setActiveMarker({});
       } else {
         setActiveInfoWindow(false);
         setActiveMarker({});
@@ -382,7 +377,7 @@ function ElsewhereMap(props) {
       <Box>
         <Map
           google={google}
-          zoom={14}
+          zoom={2}
           onClick={onMapClick}
           onCenterChanged={onMapCenterChanged}
           onReady={onMapReady}
@@ -428,43 +423,28 @@ function ElsewhereMap(props) {
                   alignItems="center"
                   spacing={2}
                 >
+                  <Grid item>
+                    <TextField
+                      id="filled-basic"
+                      value={editedActiveMarkerName || activeMarker.name}
+                      label="Marker Name"
+                      variant="outlined"
+                      onChange={(e) => handleActiveMarkerNameTextFieldChange(e)}
+                    />
+                  </Grid>
                   {
-                    activeMarkerEditMode ? (
-                      <>
-                        <Grid item>
-                          <TextField
-                            id="filled-basic"
-                            value={editedActiveMarkerName}
-                            label="Marker Name"
-                            variant="filled"
-                            onChange={(e) => handleActiveMarkerNameTextFieldChange(e)}
-                          />
-                        </Grid>
-                        <Grid item>
-                          <IconButton
-                            aria-label="save"
-                            onClick={toggleActiveMarkerNameEditMode}
-                          >
-                            <SaveIcon />
-                          </IconButton>
-                        </Grid>
-                      </>
+                    activeMarker.notSaved ? (
+                      null
+                    ) : (
+                      <Grid item>
+                        <IconButton
+                          aria-label="save"
+                          onClick={saveActiveMarkerName}
+                        >
+                          <SaveIcon />
+                        </IconButton>
+                      </Grid>
                     )
-                      : (
-                        <>
-                          <Grid item>
-                            <Typography variant="body1">{activeMarker.name || 'Click edit to add a name.'}</Typography>
-                          </Grid>
-                          <Grid item>
-                            <IconButton
-                              aria-label="edit"
-                              onClick={toggleActiveMarkerNameEditMode}
-                            >
-                              <EditIcon />
-                            </IconButton>
-                          </Grid>
-                        </>
-                      )
                   }
                 </Grid>
               </Grid>

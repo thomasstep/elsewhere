@@ -126,6 +126,11 @@ const typeDefs = gql`
     createMarkers(mapId: ID!, markers: [MarkerInput]!): Boolean!
 
     """
+    Create single marker for a map given by ID.
+    """
+    createMarker(mapId: ID!, marker: MarkerInput!): Marker
+
+    """
     Update markers for a map given by ID.
     """
     updateMarker(updates: MarkerUpdateInput!): MarkerUpdate!

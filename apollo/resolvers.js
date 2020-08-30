@@ -269,6 +269,31 @@ const resolvers = {
       return true;
     },
 
+    createMarker: async (parent, args) => {
+      const { mapId, marker } = args;
+
+      marker.uuid = v4();
+      try {
+        await maps.findOneAndUpdate(
+          { uuid: mapId },
+          {
+            $push: {
+              markers: {
+                ...marker,
+              },
+            },
+          },
+        );
+      } catch (err) {
+        log.error('Error creating marker.');
+        log.error(err);
+        return null;
+      }
+
+      marker.markerId = marker.uuid;
+      return marker;
+    },
+
     updateMarker: (parent, args) => args.updates,
 
     deleteMarkers: async (parent, args) => {
