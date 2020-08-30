@@ -448,16 +448,19 @@ function ElsewhereMap(props) {
                   }
                 </Grid>
               </Grid>
+
               {/* Lat field */}
               <Grid item xs={12}>
                 <Typography variant="h5">Latitude</Typography>
                 <Typography variant="body1">{activeMarker.coordinates ? activeMarker.coordinates.lat : null}</Typography>
               </Grid>
+
               {/* Lng field */}
               <Grid item xs={12}>
                 <Typography variant="h5">Longitude</Typography>
                 <Typography variant="body1">{activeMarker.coordinates ? activeMarker.coordinates.lng : null}</Typography>
               </Grid>
+
               {/* Save or delete button */}
               <Grid item xs={12}>
                 {activeMarker.notSaved ? (

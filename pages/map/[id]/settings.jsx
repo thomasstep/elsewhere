@@ -125,27 +125,23 @@ function ElsewhereMapSettings(props) {
       });
   }, []);
 
-  async function toggleMapNameEditMode() {
-    if (mapNameEditMode) {
-      if (mapName !== editedMapName) {
-        const updates = {
-          mapId,
-          mapName: editedMapName,
-        };
+  async function saveMapName() {
+    if (mapName !== editedMapName) {
+      const updates = {
+        mapId,
+        mapName: editedMapName,
+      };
 
-        const {
-          updateMap: {
-            mapName: success,
-          },
-        } = await fetcher(updateMapMutation, { map: updates });
-        if (!success) return;
+      const {
+        updateMap: {
+          mapName: success,
+        },
+      } = await fetcher(updateMapMutation, { map: updates });
+      if (!success) return;
 
-        setMapName(editedMapName);
-        setEditedMapName(editedMapName);
-      }
+      setMapName(editedMapName);
+      setEditedMapName(editedMapName);
     }
-
-    setMapNameEditMode(!mapNameEditMode);
   }
 
   async function deleteMap(event) {
@@ -243,6 +239,7 @@ function ElsewhereMapSettings(props) {
               <Grid item xs={12}>
                 <Typography variant="h3">Settings</Typography>
               </Grid>
+              {/* Map Name */}
               <Grid item xs={12}>
                 <Grid
                   container
@@ -251,52 +248,34 @@ function ElsewhereMapSettings(props) {
                   alignItems="center"
                   spacing={2}
                 >
-                  {
-                    mapNameEditMode ? (
-                      <>
-                        <Grid item>
-                          <TextField
-                            id="filled-basic"
-                            value={editedMapName}
-                            label="Map Name"
-                            variant="filled"
-                            onChange={(e) => handleMapNameTextFieldChange(e)}
-                          />
-                        </Grid>
-                        <Grid item>
-                          <IconButton
-                            aria-label="save"
-                            onClick={toggleMapNameEditMode}
-                          >
-                            <SaveIcon />
-                          </IconButton>
-                        </Grid>
-                      </>
-                    )
-                      : (
-                        <>
-                          <Grid item>
-                            <Typography variant="h3">{mapName}</Typography>
-                          </Grid>
-                          <Grid item>
-                            <IconButton
-                              aria-label="edit"
-                              onClick={toggleMapNameEditMode}
-                            >
-                              <EditIcon />
-                            </IconButton>
-                          </Grid>
-                        </>
-                      )
-                  }
+                  <Grid item>
+                    <TextField
+                      id="filled-basic"
+                      value={editedMapName}
+                      label="Map Name"
+                      variant="outlined"
+                      onChange={(e) => handleMapNameTextFieldChange(e)}
+                    />
+                  </Grid>
+                  <Grid item>
+                    <IconButton
+                      aria-label="save"
+                      onClick={saveMapName}
+                    >
+                      <SaveIcon />
+                    </IconButton>
+                  </Grid>
                 </Grid>
               </Grid>
+
+              {/* Map ID */}
               <Grid item xs={12}>
                 <Typography variant="body1">{`Map ID: ${router.query.id}`}</Typography>
               </Grid>
             </Grid>
           </Grid>
 
+          {/* Travel Partners */}
           <Grid item xs={12}>
             {
             writers.length ? (
@@ -327,6 +306,7 @@ function ElsewhereMapSettings(props) {
             }
           </Grid>
 
+          {/* Add Travel Partner */}
           <Grid item xs={12}>
             <Grid
               container
@@ -340,7 +320,7 @@ function ElsewhereMapSettings(props) {
                   id="filled-basic"
                   value={travelPartnerTextField}
                   label="Email"
-                  variant="filled"
+                  variant="outlined"
                   onChange={(e) => handleTravelBuddyTextFieldChange(e)}
                 />
               </Grid>
@@ -356,6 +336,7 @@ function ElsewhereMapSettings(props) {
             </Grid>
           </Grid>
 
+          {/* Delete Map Button */}
           <Grid item xs={12}>
             <Grid
               container
