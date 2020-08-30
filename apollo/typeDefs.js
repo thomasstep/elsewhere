@@ -94,6 +94,7 @@ const typeDefs = gql`
     markerId: ID!
     coordinates: LatLng!
     name: String
+    createdBy: String
   }
 
   type Query {

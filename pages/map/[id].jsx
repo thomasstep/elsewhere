@@ -9,7 +9,6 @@ import TextField from '@material-ui/core/TextField';
 import Drawer from '@material-ui/core/Drawer';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
 import React, { useState, useEffect } from 'react';
 import { Map, GoogleApiWrapper, Marker } from 'google-maps-react';
@@ -69,6 +68,7 @@ const getMarkers = `query getMarkers (
       lng
     }
     name
+    createdBy
   }
 }`;
 
@@ -125,7 +125,6 @@ function ElsewhereMap(props) {
   const router = useRouter();
   const [userEmail, setUserEmail] = useState('');
   const [activeMarker, setActiveMarker] = useState({});
-  const [activeMarkerEditMode, setActiveMarkerEditMode] = useState(false);
   const [editedActiveMarkerName, setEditedActiveMarkerName] = useState('');
   const [activeInfoWindow, setActiveInfoWindow] = useState(false);
   const [markers, setMarkers] = useState([]);
@@ -162,7 +161,6 @@ function ElsewhereMap(props) {
 
     setActiveInfoWindow(false);
     setActiveMarker({});
-    setActiveMarkerEditMode(false);
     setEditedActiveMarkerName('');
   }
 
@@ -273,6 +271,7 @@ function ElsewhereMap(props) {
       if (createMarkerRes) {
         activeMarker.notSaved = false;
         activeMarker.markerId = createMarkerRes.markerId;
+        activeMarker.createdBy = userEmail;
       }
       setActiveInfoWindow(false);
       setActiveMarker({});
@@ -377,7 +376,7 @@ function ElsewhereMap(props) {
       <Box>
         <Map
           google={google}
-          zoom={2}
+          zoom={3}
           onClick={onMapClick}
           onCenterChanged={onMapCenterChanged}
           onReady={onMapReady}
@@ -386,6 +385,7 @@ function ElsewhereMap(props) {
           fullscreenControl={false}
           mapType="TERRAIN"
           mapTypeControl={false}
+          clickableIcons
         >
 
           {markers.length ? markers.map((marker) => (
@@ -415,7 +415,6 @@ function ElsewhereMap(props) {
             >
               {/* Name field */}
               <Grid item xs={12}>
-                <Typography variant="h5">Name</Typography>
                 <Grid
                   container
                   direction="row"
@@ -448,6 +447,16 @@ function ElsewhereMap(props) {
                   }
                 </Grid>
               </Grid>
+
+              {/* Placed By field */}
+              {
+                activeMarker.createdBy ? (
+                  <Grid item xs={12}>
+                    <Typography variant="h5">Created By</Typography>
+                    <Typography variant="body1">{activeMarker.createdBy}</Typography>
+                  </Grid>
+                ) : null
+              }
 
               {/* Lat field */}
               <Grid item xs={12}>

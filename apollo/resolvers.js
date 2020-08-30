@@ -53,6 +53,7 @@ const resolvers = {
           markerId: marker.uuid,
           coordinates: marker.coordinates,
           name: marker.name,
+          createdBy: marker.createdBy,
         }));
       } catch (err) {
         log.error('Error finding map markers.', {
@@ -61,6 +62,7 @@ const resolvers = {
         log.error(err);
         return [];
       }
+
       return markers;
     },
 
@@ -185,6 +187,7 @@ const resolvers = {
       return places;
     },
   },
+
   Mutation: {
     signUp: async (parent, args) => {
       const newUser = createUser(args.input);
@@ -241,13 +244,20 @@ const resolvers = {
       return true;
     },
 
-    createMarkers: async (parent, args) => {
+    createMarkers: async (parent, args, context) => {
       const { mapId } = args;
       let { markers } = args;
+      const {
+        user:
+        {
+          email,
+        },
+      } = context;
 
       markers = markers.map((marker) => ({
         ...marker,
         uuid: v4(),
+        createdBy: email,
       }));
       try {
         await maps.findOneAndUpdate(
@@ -269,10 +279,17 @@ const resolvers = {
       return true;
     },
 
-    createMarker: async (parent, args) => {
+    createMarker: async (parent, args, context) => {
       const { mapId, marker } = args;
+      const {
+        user:
+        {
+          email,
+        },
+      } = context;
 
       marker.uuid = v4();
+      marker.createdBy = email;
       try {
         await maps.findOneAndUpdate(
           { uuid: mapId },

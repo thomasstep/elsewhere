@@ -21,6 +21,8 @@ const mapsSchema = new mongoose.Schema({
         lng: Number,
       },
       name: String,
+      createdBy: String,
+      notes: String,
     },
   ],
   owners: [String],
