@@ -1,47 +1,38 @@
 import React, { useState } from 'react';
-import Link from 'next/link';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import { useRouter } from 'next/router';
-import Layout from '../components/layout';
+import Layout from '../../components/layout';
 
-function SignIn() {
+function ForgotPassword() {
   const [signInEmail, setSignInEmail] = useState('');
-  const [signInPassword, setSignInPassword] = useState('');
   const router = useRouter();
 
   function handleSignInEmailFieldChange(event) {
     event.preventDefault();
     setSignInEmail(event.target.value);
   }
-
-  function handleSignInPasswordFieldChange(event) {
-    event.preventDefault();
-    setSignInPassword(event.target.value);
-  }
-
-  async function handleEmailPasswordSignIn(event) {
+  async function handleRequestPasswordResetLink(event) {
     event.preventDefault();
 
     const body = {
       email: signInEmail,
-      password: signInPassword,
     };
 
     try {
-      const res = await fetch('/api/local/signin', {
+      const res = await fetch('/api/local/forgot-password/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
       if (res.status === 200) {
-        router.push('/profile');
+        router.push('/forgot-password/email-sent');
       } else {
-        throw new Error(await res.text());
+        router.push('/forgot-password/email-not-sent');
       }
     } catch (err) {
-      // Do something?
+      router.push('/forgot-password/email-not-sent');
     }
   }
 
@@ -55,17 +46,6 @@ function SignIn() {
         spacing={5}
       >
         <Grid item xs={12}>
-          <Button
-            variant="contained"
-            href="/api/google/signin"
-          >
-            Sign In With Google
-          </Button>
-        </Grid>
-
-        <hr style={{ width: '100%' }} />
-        {/* This is username and password authentication */}
-        <Grid item xs={12}>
           <TextField
             id="filled-basic"
             value={signInEmail}
@@ -75,29 +55,16 @@ function SignIn() {
           />
         </Grid>
         <Grid item xs={12}>
-          <TextField
-            id="filled-basic"
-            value={signInPassword}
-            label="Password"
-            variant="outlined"
-            type="password"
-            onChange={(e) => handleSignInPasswordFieldChange(e)}
-          />
-        </Grid>
-        <Grid item xs={12}>
           <Button
             variant="contained"
-            onClick={handleEmailPasswordSignIn}
+            onClick={handleRequestPasswordResetLink}
           >
-            Sign In With Email
+            Request Password Reset Link
           </Button>
-        </Grid>
-        <Grid item xs={12}>
-          <Link href="/forgot-password">Forgot your password?</Link>
         </Grid>
       </Grid>
     </Layout>
   );
 }
 
-export default SignIn;
+export default ForgotPassword;

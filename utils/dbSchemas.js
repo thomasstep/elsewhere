@@ -8,6 +8,8 @@ const usersSchema = new mongoose.Schema({
   ownedMaps: [String],
   writableMaps: [String],
   readableMaps: [String],
+  resetPasswordToken: String,
+  resetTokenExpiration: Date,
 });
 
 const mapsSchema = new mongoose.Schema({
