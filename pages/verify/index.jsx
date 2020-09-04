@@ -19,7 +19,7 @@ function EmailSent() {
           spacing={9}
         >
           <Grid item xs={12}>
-            <Typography variant="h3">Email sent. Please check your inbox.</Typography>
+            <Typography variant="h3">Your account has not yet been verified. Please check your inbox for a verification email.</Typography>
             <Typography variant="h3">
               If you do not see the email, please&nbsp;
               <Link href="/verify/send-email">

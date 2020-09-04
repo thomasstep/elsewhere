@@ -80,7 +80,7 @@ function Index() {
             variant="contained"
             onClick={verifyToken}
           >
-            Verify Token
+            Verify Code
           </Button>
         </Grid>
         <Grid item xs={12}>
