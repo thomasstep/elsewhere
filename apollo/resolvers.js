@@ -629,7 +629,7 @@ const resolvers = {
       });
 
       try {
-        const sgRes = await Promise.all(emailPromises);
+        await Promise.all(emailPromises);
       } catch (err) {
         log.error('There was an error with SendGrid while sending email.');
         console.error(err);

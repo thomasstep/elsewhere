@@ -19,8 +19,6 @@ function Index() {
       token: token.trim(),
     };
 
-    console.log(body)
-
     fetch('/api/local/verify/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

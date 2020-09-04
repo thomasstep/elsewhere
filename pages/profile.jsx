@@ -8,7 +8,7 @@ import AddIcon from '@material-ui/icons/Add';
 import Layout from '../components/layout';
 import MapList from '../components/mapList';
 import LoadingPage from '../components/loadingPage';
-import { getErrorMessage } from '../lib/form';
+// import { getErrorMessage } from '../lib/form';
 import { fetcher } from '../utils/fetcher';
 
 const viewerQuery = `{
@@ -40,7 +40,7 @@ function Profile() {
   const [readableMaps, setReadableMaps] = useState([]);
   const [writableMaps, setWritableMaps] = useState([]);
   const [newMapNameField, setNewMapNameField] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
+  // const [errorMsg, setErrorMsg] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -62,7 +62,7 @@ function Profile() {
         setReadableMaps(viewerReadableMaps);
         setWritableMaps(viewerWritableMaps);
       })
-      .catch((err) => {
+      .catch(() => {
         router.push('/signin');
       });
   }, []);
@@ -82,8 +82,8 @@ function Profile() {
       .then(({ createMap }) => {
         setOwnedMap([...ownedMaps, createMap.mapId]);
       })
-      .catch((error) => {
-        setErrorMsg(getErrorMessage(error));
+      .catch(() => {
+        // setErrorMsg(getErrorMessage(error));
       });
   }
 

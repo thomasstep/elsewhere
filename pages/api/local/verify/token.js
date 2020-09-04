@@ -1,4 +1,3 @@
-import bcrypt from 'bcrypt';
 import { log } from '../../../../utils/log';
 import { connectMongo, users } from '../../../../utils/db';
 
@@ -8,7 +7,7 @@ export default async (req, res) => {
     const {
       body: { token },
     } = req;
-    console.log(token)
+
     if (!token) {
       res.status(500).end();
       return null;

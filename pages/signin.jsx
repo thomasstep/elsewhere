@@ -36,7 +36,6 @@ function SignIn() {
         body: JSON.stringify(body),
       });
       const resJson = await res.json();
-      console.log(resJson)
       if (resJson.done && resJson.verified) {
         router.push('/profile');
       }

@@ -7,7 +7,6 @@ import Button from '@material-ui/core/Button';
 import DeleteIcon from '@material-ui/icons/Delete';
 import TextField from '@material-ui/core/TextField';
 import AddIcon from '@material-ui/icons/Add';
-import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -86,7 +85,6 @@ function ElsewhereMapSettings(props) {
   const [userEmail, setUserEmail] = useState('');
   const [mapId] = useState(router.query.id);
   const [mapName, setMapName] = useState('');
-  const [mapNameEditMode, setMapNameEditMode] = useState(false);
   const [editedMapName, setEditedMapName] = useState('');
   const [writers, setWriters] = useState(null);
   const [travelPartnerTextField, setTravelPartnerTextField] = useState('');

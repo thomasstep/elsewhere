@@ -7,7 +7,6 @@ import theme from '../lib/theme';
 
 export default function MyApp(props) {
   const { Component, pageProps } = props;
-  const { session } = pageProps;
 
   React.useEffect(() => {
     // Remove the server-side injected CSS.
