@@ -49,7 +49,7 @@ export default async (req, res) => {
 
     res.status(200).end();
   } else {
-    res.status(200).end();
+    res.status(500).end();
   }
 
   return null;

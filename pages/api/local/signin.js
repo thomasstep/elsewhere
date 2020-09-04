@@ -7,6 +7,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { connectMongo, users } from '../../../utils/db';
 import { log } from '../../../utils';
+import sendVerificationEmail from '../../../utils/sendVerificationEmail';
 
 const authenticate = (method, req, res) => new Promise((resolve, reject) => {
   passport.authenticate(
@@ -40,14 +41,18 @@ passport.use(new Local.Strategy(
     // Create user if they do not exist
     if (!user) {
       const salt = bcrypt.genSaltSync();
+      const uuid = v4();
+      const verificationToken = v4();
 
       const newUser = {
-        uuid: v4(),
+        uuid,
         email,
         hashedPassword: bcrypt.hashSync(password, salt),
         ownedMaps: [],
         writableMaps: [],
         readableMaps: [],
+        verified: false,
+        verificationToken,
       };
 
       try {
@@ -59,6 +64,13 @@ passport.use(new Local.Strategy(
         log.error(err);
         done(err);
       }
+
+      try {
+        await sendVerificationEmail(email, verificationToken);
+      } catch (err) {
+        done(err);
+      }
+
       user = newUser;
     }
 
@@ -104,6 +116,10 @@ export default nextConnect()
     try {
       await connectMongo();
       const user = await authenticate('local', req, res);
+      if (!user.verified) {
+        res.status(200).send({ done: true, verified: false });
+      }
+
       const token = jwt.sign(
         { uuid: user.uuid, time: new Date() },
         JWT_SECRET,
@@ -124,7 +140,7 @@ export default nextConnect()
       );
 
       // setTokenCookie(res, token);
-      res.status(200).send({ done: true });
+      res.status(200).send({ done: true, verified: true });
     } catch (error) {
       log.error(error);
       res.status(401).send(error.message);

@@ -35,10 +35,13 @@ function SignIn() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
-      if (res.status === 200) {
+      const resJson = await res.json();
+      console.log(resJson)
+      if (resJson.done && resJson.verified) {
         router.push('/profile');
-      } else {
-        throw new Error(await res.text());
+      }
+      if (!resJson.verified) {
+        router.push('/verify');
       }
     } catch (err) {
       // Do something?

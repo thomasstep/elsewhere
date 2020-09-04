@@ -14,7 +14,13 @@ async function context(ctx) {
   if (token) {
     try {
       const { uuid } = jwt.verify(token, JWT_SECRET);
-      const user = await users.findOne({ uuid });
+      // const user = await users.findOne({ uuid });
+      const user = await users.findOne({
+        $and: [
+          { uuid },
+          { verified: true },
+        ],
+      });
 
       log.info('User found from token.', {
         email: user.email,

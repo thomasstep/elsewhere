@@ -10,6 +10,8 @@ const usersSchema = new mongoose.Schema({
   readableMaps: [String],
   resetPasswordToken: String,
   resetTokenExpiration: Date,
+  verified: Boolean,
+  verificationToken: String,
 });
 
 const mapsSchema = new mongoose.Schema({

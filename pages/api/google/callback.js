@@ -48,6 +48,8 @@ passport.use(new Google.Strategy(
         ownedMaps: [],
         writableMaps: [],
         readableMaps: [],
+        // If it's coming from Google, that's good enough for me
+        verified: true,
       };
 
       try {
