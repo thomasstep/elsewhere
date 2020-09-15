@@ -312,12 +312,14 @@ function ElsewhereMap(props) {
       },
     };
 
+    console.log(variables)
+
     fetcher(createMarker, variables).then(({ createMarker: createMarkerRes }) => {
       if (createMarkerRes) {
         activeMarker.notSaved = false;
         activeMarker.markerId = createMarkerRes.markerId;
         activeMarker.createdBy = userEmail;
-        activeMarker.name = editedActiveMarkerName;
+        activeMarker.name = createMarkerRes.name;
       }
       setActiveInfoWindow(false);
       setActiveMarker({});
@@ -366,6 +368,7 @@ function ElsewhereMap(props) {
         const [coordinates] = places;
         const searchMarker = {
           coordinates,
+          name: searchFieldText,
           notSaved: true,
         };
         setMarkers([...markers, searchMarker]);
