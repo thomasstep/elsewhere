@@ -317,6 +317,7 @@ function ElsewhereMap(props) {
         activeMarker.notSaved = false;
         activeMarker.markerId = createMarkerRes.markerId;
         activeMarker.createdBy = userEmail;
+        activeMarker.name = editedActiveMarkerName;
       }
       setActiveInfoWindow(false);
       setActiveMarker({});
