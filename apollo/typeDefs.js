@@ -14,6 +14,7 @@ const typeDefs = gql`
   input MarkerInput {
     coordinates: LatLngInput!
     name: String
+    notes: String
   }
 
   input MapUpdateInput {

@@ -92,6 +92,7 @@ const createMarker = `mutation createMarker(
     ... on Marker {
       markerId
       name
+      notes
     }
   }
 }`;
@@ -309,6 +310,7 @@ function ElsewhereMap(props) {
       marker: {
         coordinates: activeMarker.coordinates,
         name: editedActiveMarkerName || activeMarker.name,
+        notes: editedActiveMarkerNotes || activeMarker.notes,
       },
     };
 
@@ -320,10 +322,12 @@ function ElsewhereMap(props) {
         activeMarker.markerId = createMarkerRes.markerId;
         activeMarker.createdBy = userEmail;
         activeMarker.name = createMarkerRes.name;
+        activeMarker.notes = createMarkerRes.notes;
       }
       setActiveInfoWindow(false);
       setActiveMarker({});
       setEditedActiveMarkerName('');
+      setEditedActiveMarkerNotes('');
     });
   }
 
@@ -508,27 +512,29 @@ function ElsewhereMap(props) {
               }
 
               {/* Notes field */}
-              {
-                activeMarker.notSaved ? null : (
-                  <Grid item xs={12}>
-                    <Grid
-                      container
-                      direction="row"
-                      justify="center"
-                      alignItems="center"
-                      spacing={2}
-                    >
-                      <Grid item>
-                        <TextField
-                          id="filled-basic"
-                          value={editedActiveMarkerNotes || activeMarker.notes}
-                          label="Notes"
-                          variant="outlined"
-                          onChange={(e) => handleActiveMarkerNotesTextFieldChange(e)}
-                          multiline
-                          rowsMax={10}
-                        />
-                      </Grid>
+              <Grid item xs={12}>
+                <Grid
+                  container
+                  direction="row"
+                  justify="center"
+                  alignItems="center"
+                  spacing={2}
+                >
+                  <Grid item>
+                    <TextField
+                      id="filled-basic"
+                      value={editedActiveMarkerNotes || activeMarker.notes}
+                      label="Notes"
+                      variant="outlined"
+                      onChange={(e) => handleActiveMarkerNotesTextFieldChange(e)}
+                      multiline
+                      rowsMax={10}
+                    />
+                  </Grid>
+                  {
+                    activeMarker.notSaved ? (
+                      null
+                    ) : (
                       <Grid item>
                         <IconButton
                           aria-label="save"
@@ -537,10 +543,10 @@ function ElsewhereMap(props) {
                           <SaveIcon />
                         </IconButton>
                       </Grid>
-                    </Grid>
-                  </Grid>
-                )
-              }
+                    )
+                  }
+                </Grid>
+              </Grid>
 
               {/* Lat field */}
               <Grid item xs={12}>
