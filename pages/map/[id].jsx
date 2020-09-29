@@ -409,6 +409,9 @@ function ElsewhereMap(props) {
                   label="Search for a place"
                   variant="outlined"
                   onChange={(e) => handleSearchFieldTextChange(e)}
+                  onKeyDown={(e) => (
+                    e.keyCode === 13 ? searchForPlace(e) : null
+                  )}
                   className={classes.searchTextField}
                 />
               </Grid>
