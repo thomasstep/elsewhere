@@ -7,6 +7,7 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Drawer from '@material-ui/core/Drawer';
+import MapIcon from '@material-ui/icons/Map';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import SaveIcon from '@material-ui/icons/Save';
@@ -49,6 +50,11 @@ const useStyles = makeStyles((theme) => ({
   infoWindowDrawerPaper: {
     width: '80%',
     padding: theme.spacing(3),
+  },
+  infoWindowDrawerSeeThroughPaper: {
+    width: '80%',
+    padding: theme.spacing(3),
+    opacity: '50%',
   },
 }));
 
@@ -139,6 +145,7 @@ function ElsewhereMap(props) {
   const [mapCenterLng, setMapCenterLng] = useState(0);
   const { google } = props;
   const classes = useStyles(props);
+  const [drawerPaperClass, setDrawerPaperClass] = useState(classes.infoWindowDrawerPaper);
 
   useEffect(() => {
     fetcher(viewerQuery)
@@ -459,7 +466,8 @@ function ElsewhereMap(props) {
             anchor="right"
             open={activeInfoWindow}
             onClose={onInfoWindowClose}
-            classes={{ paper: classes.infoWindowDrawerPaper }}
+            BackdropProps={{ invisible: true }}
+            classes={{ paper: drawerPaperClass }}
           >
             <Grid
               container
@@ -467,8 +475,22 @@ function ElsewhereMap(props) {
               justify="center"
               alignItems="baseline"
               wrap="nowrap"
-              spacing={3}
+              spacing={6}
             >
+              {/* See Through Button */}
+              <Grid item xs={12}>
+                <Button
+                  variant="contained"
+                  // className={classes.saveButton}
+                  color="primary"
+                  startIcon={<MapIcon />}
+                  onMouseDown={() => setDrawerPaperClass(classes.infoWindowDrawerSeeThroughPaper)}
+                  onMouseUp={() => setDrawerPaperClass(classes.infoWindowDrawerPaper)}
+                >
+                  Press And Hold For Map
+                </Button>
+              </Grid>
+
               {/* Name field */}
               <Grid item xs={12}>
                 <Grid
