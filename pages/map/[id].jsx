@@ -136,6 +136,7 @@ function ElsewhereMap(props) {
   const router = useRouter();
   const [userEmail, setUserEmail] = useState('');
   const [activeMarker, setActiveMarker] = useState({});
+  const [activeGoogleMarker, setActiveGoogleMarker] = useState({});
   const [editedActiveMarkerName, setEditedActiveMarkerName] = useState('');
   const [editedActiveMarkerNotes, setEditedActiveMarkerNotes] = useState('');
   const [activeInfoWindow, setActiveInfoWindow] = useState(false);
@@ -173,6 +174,12 @@ function ElsewhereMap(props) {
     }
 
     setActiveInfoWindow(false);
+    try {
+      activeGoogleMarker.setAnimation(null);
+    } catch (err) {
+      // Shit happens
+    }
+    setActiveGoogleMarker({});
     setActiveMarker({});
     setEditedActiveMarkerName('');
     setEditedActiveMarkerNotes('');
@@ -301,6 +308,12 @@ function ElsewhereMap(props) {
         setMarkers([...markers, nearbyPlace]);
       } else {
         setActiveInfoWindow(false);
+        try {
+          activeGoogleMarker.setAnimation(null);
+        } catch (err) {
+          // Shit happens
+        }
+        setActiveGoogleMarker({});
         setActiveMarker({});
       }
     });
@@ -332,6 +345,12 @@ function ElsewhereMap(props) {
         activeMarker.notes = createMarkerRes.notes;
       }
       setActiveInfoWindow(false);
+      try {
+        activeGoogleMarker.setAnimation(null);
+      } catch (err) {
+        // Shit happens
+      }
+      setActiveGoogleMarker({});
       setActiveMarker({});
       setEditedActiveMarkerName('');
       setEditedActiveMarkerNotes('');
@@ -353,9 +372,21 @@ function ElsewhereMap(props) {
         if (index !== -1) {
           markers.splice(index, 1);
         }
+        try {
+          activeGoogleMarker.setAnimation(null);
+        } catch (err) {
+          // Shit happens
+        }
+        setActiveGoogleMarker({});
         setActiveMarker({});
       } else {
         setActiveInfoWindow(false);
+        try {
+          activeGoogleMarker.setAnimation(null);
+        } catch (err) {
+          // Shit happens
+        }
+        setActiveGoogleMarker({});
         setActiveMarker({});
       }
     });
@@ -382,8 +413,8 @@ function ElsewhereMap(props) {
           name: searchFieldText,
           notSaved: true,
         };
-        setMarkers([...markers, searchMarker]);
         setActiveMarker(searchMarker);
+        setMarkers([...markers, searchMarker]);
         setActiveInfoWindow(true);
       });
   }
@@ -451,16 +482,27 @@ function ElsewhereMap(props) {
           clickableIcons
         >
 
-          {markers.length ? markers.map((marker) => (
-            <Marker
-              key={marker.markerId}
-              position={marker.coordinates}
-              onClick={() => {
-                setActiveMarker(marker);
-                setActiveInfoWindow(true);
-              }}
-            />
-          )) : null}
+          {markers.length ? markers.map((marker) => {
+            let animate = null;
+            if (marker.markerId === activeMarker.markerId) {
+              animate = true;
+            }
+
+            const googleMarker = (
+              <Marker
+                key={marker.markerId}
+                position={marker.coordinates}
+                onClick={(props, googleMarker) => {
+                  googleMarker.setAnimation(google.maps.Animation.BOUNCE);
+                  setActiveGoogleMarker(googleMarker);
+                  setActiveMarker(marker);
+                  setActiveInfoWindow(true);
+                }}
+                animation={animate && google.maps.Animation.BOUNCE}
+              />
+            );
+            return googleMarker;
+          }) : null}
 
           <Drawer
             anchor="right"
@@ -484,10 +526,24 @@ function ElsewhereMap(props) {
                   // className={classes.saveButton}
                   color="primary"
                   startIcon={<MapIcon />}
-                  onMouseDown={() => setDrawerPaperClass(classes.infoWindowDrawerSeeThroughPaper)}
-                  onMouseUp={() => setDrawerPaperClass(classes.infoWindowDrawerPaper)}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    setDrawerPaperClass(classes.infoWindowDrawerSeeThroughPaper);
+                  }}
+                  onMouseUp={(e) => {
+                    e.preventDefault();
+                    setDrawerPaperClass(classes.infoWindowDrawerPaper);
+                  }}
+                  onTouchStart={(e) => {
+                    e.preventDefault();
+                    setDrawerPaperClass(classes.infoWindowDrawerSeeThroughPaper);
+                  }}
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    setDrawerPaperClass(classes.infoWindowDrawerPaper);
+                  }}
                 >
-                  Press And Hold For Map
+                  Press And Hold To See Map
                 </Button>
               </Grid>
 
