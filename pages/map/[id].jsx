@@ -136,7 +136,7 @@ function ElsewhereMap(props) {
   const router = useRouter();
   const [userEmail, setUserEmail] = useState('');
   const [activeMarker, setActiveMarker] = useState({});
-  const [activeGoogleMarker, setActiveGoogleMarker] = useState({});
+  const [activeGoogleMarker, setActiveGoogleMarker] = useState(null);
   const [editedActiveMarkerName, setEditedActiveMarkerName] = useState('');
   const [editedActiveMarkerNotes, setEditedActiveMarkerNotes] = useState('');
   const [activeInfoWindow, setActiveInfoWindow] = useState(false);
@@ -147,6 +147,7 @@ function ElsewhereMap(props) {
   const { google } = props;
   const classes = useStyles(props);
   const [drawerPaperClass, setDrawerPaperClass] = useState(classes.infoWindowDrawerPaper);
+  const googleMarkers = {};
 
   useEffect(() => {
     fetcher(viewerQuery)
@@ -179,7 +180,7 @@ function ElsewhereMap(props) {
     } catch (err) {
       // Shit happens
     }
-    setActiveGoogleMarker({});
+    setActiveGoogleMarker(null);
     setActiveMarker({});
     setEditedActiveMarkerName('');
     setEditedActiveMarkerNotes('');
@@ -268,6 +269,10 @@ function ElsewhereMap(props) {
       getMarkers: mapMarkers,
     }) => {
       setMarkers(mapMarkers);
+      if(!mapMarkers.length) {
+        return;
+      }
+
       const bounds = new google.maps.LatLngBounds();
       mapMarkers.forEach((marker) => {
         bounds.extend({
@@ -313,7 +318,7 @@ function ElsewhereMap(props) {
         } catch (err) {
           // Shit happens
         }
-        setActiveGoogleMarker({});
+        setActiveGoogleMarker(null);
         setActiveMarker({});
       }
     });
@@ -344,14 +349,14 @@ function ElsewhereMap(props) {
         activeMarker.name = createMarkerRes.name;
         activeMarker.notes = createMarkerRes.notes;
       }
-      setActiveInfoWindow(false);
       try {
         activeGoogleMarker.setAnimation(null);
       } catch (err) {
         // Shit happens
       }
-      setActiveGoogleMarker({});
+      setActiveGoogleMarker(null);
       setActiveMarker({});
+      setActiveInfoWindow(false);
       setEditedActiveMarkerName('');
       setEditedActiveMarkerNotes('');
     });
@@ -377,7 +382,7 @@ function ElsewhereMap(props) {
         } catch (err) {
           // Shit happens
         }
-        setActiveGoogleMarker({});
+        setActiveGoogleMarker(null);
         setActiveMarker({});
       } else {
         setActiveInfoWindow(false);
@@ -385,8 +390,9 @@ function ElsewhereMap(props) {
           activeGoogleMarker.setAnimation(null);
         } catch (err) {
           // Shit happens
+
         }
-        setActiveGoogleMarker({});
+        setActiveGoogleMarker(null);
         setActiveMarker({});
       }
     });
@@ -501,6 +507,7 @@ function ElsewhereMap(props) {
                 animation={animate && google.maps.Animation.BOUNCE}
               />
             );
+
             return googleMarker;
           }) : null}
 
