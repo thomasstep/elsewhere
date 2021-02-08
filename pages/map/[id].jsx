@@ -301,26 +301,24 @@ function ElsewhereMap(props) {
       const [nearbyPlace] = foundNearbyPlaces;
       nearbyPlace.notSaved = true;
       const {
-        name,
-        coordinates: {
-          lat,
-          lng,
-        },
+        name = ''
       } = nearbyPlace;
-      if (name && lat && lng) {
-        setActiveInfoWindow(true);
-        setActiveMarker(nearbyPlace);
-        setMarkers([...markers, nearbyPlace]);
-      } else {
-        setActiveInfoWindow(false);
-        try {
-          activeGoogleMarker.setAnimation(null);
-        } catch (err) {
-          // Shit happens
-        }
-        setActiveGoogleMarker(null);
-        setActiveMarker({});
-      }
+      nearbyPlace.lat = nearbyPlacesVars.location.lat;
+      nearbyPlace.lng = nearbyPlacesVars.location.lng;
+      // if (name && lat && lng) {
+      setActiveInfoWindow(true);
+      setActiveMarker(nearbyPlace);
+      setMarkers([...markers, nearbyPlace]);
+      // } else {
+      //   setActiveInfoWindow(false);
+      //   try {
+      //     activeGoogleMarker.setAnimation(null);
+      //   } catch (err) {
+      //     // Shit happens
+      //   }
+      //   setActiveGoogleMarker(null);
+      //   setActiveMarker({});
+      // }
     });
   }
 
