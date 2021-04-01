@@ -9,7 +9,7 @@
   },
   "env": {
     "JWT_SECRET": "@jwt-secret",
-    "SITE": "https://elsewhere.now.sh",
+    "SITE": "https://elsewhere.thomasstep.dev",
     "GOOGLE_OAUTH_CLIENT_ID": "@google-oauth-client-id",
     "GOOGLE_OAUTH_CLIENT_SECRET": "@google-oauth-client-secret",
     "MONGODB_FOR_AUTH": "@mongo-for-auth",
