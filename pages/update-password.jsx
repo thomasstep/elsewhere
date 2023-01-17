@@ -6,38 +6,43 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Layout from '../../components/layout';
 
-function Index() {
+function UpdatePassword() {
   const router = useRouter();
   const [resetSuccess, setResetSuccess] = useState(null);
+  const [token, setToken] = useState('');
   const [password, setPassword] = useState('');
 
   function handlePasswordFieldChange(event) {
     setPassword(event.target.value);
   }
 
-  function resetPassword() {
-    const token = router.query.id;
+  function handleTokenFieldChange(event) {
+    setToken(event.target.value);
+  }
 
+  async function resetPassword() {
     const body = {
       token,
       password,
     };
 
-    fetch('/api/local/forgot-password/reset', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
-      .then((res) => {
-        if (res.status === 200) {
-          setResetSuccess(true);
-        } else {
-          setResetSuccess(false);
-        }
+    try {
+      const authServiceUrl = process.env.AUTH_SERVICE_URL;
+      const applicationId = process.env.AUTH_SERVICE_APP_ID;
+      const res = await fetch(`${authServiceUrl}/v1/applications/${applicationId}/users`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       })
-      .catch(() => {
+      if (res.status === 200) {
+        setResetSuccess(true);
+      } else {
         setResetSuccess(false);
-      });
+      }
+    } catch (err) {
+      // Do something?
+      setResetSuccess(false);
+    }
   }
 
   let successMessage = null;
@@ -74,6 +79,16 @@ function Index() {
           />
         </Grid>
         <Grid item xs={12}>
+          <TextField
+            id="filled-basic"
+            value={token}
+            label="Token"
+            variant="outlined"
+            type="text"
+            onChange={(e) => handleTokenFieldChange(e)}
+          />
+        </Grid>
+        <Grid item xs={12}>
           <Button
             variant="contained"
             onClick={resetPassword}
@@ -89,4 +104,4 @@ function Index() {
   );
 }
 
-export default Index;
+export default UpdatePassword;

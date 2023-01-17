@@ -4,9 +4,9 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
-import Layout from '../../components/layout';
+import Layout from '../components/layout';
 
-function Index() {
+function Verify() {
   const [token, setToken] = useState('');
   const [verified, setVerified] = useState(null);
 
@@ -14,26 +14,25 @@ function Index() {
     setToken(event.target.value);
   }
 
-  function verifyToken() {
+  async function verifyToken() {
     const body = {
       token: token.trim(),
     };
 
-    fetch('/api/local/verify/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
-      .then((res) => {
-        if (res.status === 200) {
-          setVerified(true);
-        } else {
-          setVerified(false);
-        }
-      })
-      .catch(() => {
-        setVerified(false);
-      });
+    try {
+      const authServiceUrl = process.env.AUTH_SERVICE_URL;
+      const applicationId = process.env.AUTH_SERVICE_APP_ID;
+      const res = await fetch(`${authServiceUrl}/v1/applications/${applicationId}/users/verification?${new URLSearchParams(body)}`);
+      if (res.status === 200) {
+        setVerified(true);
+        router.push('/signin');
+      }
+      // If no previous cases were hit, we don't know what happened
+      // TODO say there was an error, try again
+      setVerified(false);
+    } catch (err) {
+      // Do something?
+    }
   }
 
   let successMessage = null;
@@ -91,4 +90,4 @@ function Index() {
   );
 }
 
-export default Index;
+export default Verify;

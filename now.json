@@ -8,11 +8,10 @@
     }
   },
   "env": {
-    "JWT_SECRET": "@jwt-secret",
     "SITE": "https://elsewhere.thomasstep.com",
-    "GOOGLE_OAUTH_CLIENT_ID": "@google-oauth-client-id",
-    "GOOGLE_OAUTH_CLIENT_SECRET": "@google-oauth-client-secret",
     "MONGODB_FOR_AUTH": "@mongo-for-auth",
-    "GOOGLE_PLACES_KEY": "@google-places-key"
+    "GOOGLE_PLACES_KEY": "@google-places-key",
+    "ELSEWHERE_API_URL": "https://gdrn046bzd.execute-api.us-east-1.amazonaws.com/prod",
+    "AUTH_SERVICE_URL": "https://zic515c2s0.execute-api.us-east-1.amazonaws.com/prod"
   }
 }

@@ -3,7 +3,7 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import { useRouter } from 'next/router';
-import Layout from '../../components/layout';
+import Layout from '../components/layout';
 
 function ForgotPassword() {
   const [signInEmail, setSignInEmail] = useState('');
@@ -13,6 +13,7 @@ function ForgotPassword() {
     event.preventDefault();
     setSignInEmail(event.target.value);
   }
+
   async function handleRequestPasswordResetLink(event) {
     event.preventDefault();
 
@@ -21,18 +22,16 @@ function ForgotPassword() {
     };
 
     try {
-      const res = await fetch('/api/local/forgot-password/send-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
+      const authServiceUrl = process.env.AUTH_SERVICE_URL;
+      const applicationId = process.env.AUTH_SERVICE_APP_ID;
+      const res = await fetch(`${authServiceUrl}/v1/applications/${applicationId}/users/password/reset?${new URLSearchParams(body)}`);
       if (res.status === 200) {
-        router.push('/forgot-password/email-sent');
-      } else {
-        router.push('/forgot-password/email-not-sent');
+        router.push('/update-password');
       }
+      // If no previous cases were hit, we don't know what happened
+      // TODO say there was an error, try again
     } catch (err) {
-      router.push('/forgot-password/email-not-sent');
+      // Do something?
     }
   }
 

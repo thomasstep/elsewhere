@@ -6,43 +6,39 @@ import TextField from '@material-ui/core/TextField';
 import { useRouter } from 'next/router';
 import Layout from '../components/layout';
 
-function SignIn() {
-  const [signInEmail, setSignInEmail] = useState('');
-  const [signInPassword, setSignInPassword] = useState('');
+function SignUp() {
+  const [signUpEmail, setSignUpEmail] = useState('');
+  const [signUpPassword, setSignUpPassword] = useState('');
   const router = useRouter();
 
-  function handleSignInEmailFieldChange(event) {
+  function handleSignUpEmailFieldChange(event) {
     event.preventDefault();
-    setSignInEmail(event.target.value);
+    setSignUpEmail(event.target.value);
   }
 
-  function handleSignInPasswordFieldChange(event) {
+  function handleSignUpPasswordFieldChange(event) {
     event.preventDefault();
-    setSignInPassword(event.target.value);
+    setSignUpPassword(event.target.value);
   }
 
-  async function handleEmailPasswordSignIn(event) {
+  async function handleEmailPasswordSignUp(event) {
     event.preventDefault();
 
     const body = {
-      email: signInEmail,
-      password: signInPassword,
+      email: signUpEmail,
+      password: signUpPassword,
     };
 
     try {
       const authServiceUrl = process.env.AUTH_SERVICE_URL;
       const applicationId = process.env.AUTH_SERVICE_APP_ID;
-      const res = await fetch(`${authServiceUrl}/v1/applications/${applicationId}/users/token?${new URLSearchParams(body)}`);
-      if (res.status === 200) {
-        const resJson = await res.json();
-        document.cookie = `authToken=${resJson.token}; max-age=${60*60*24}; secure; samesite=strict`
-        router.push('/profile');
-      }
-      if (res.status === 401) {
-        // TODO say wrong password
-      }
-      if (res.status === 404) {
-        // TODO say user not found with given email, do you need to verify?
+      const res = await fetch(`${authServiceUrl}/v1/applications/${applicationId}/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (res.status === 204) {
+        router.push('/verify');
       }
       // If no previous cases were hit, we don't know what happened
       // TODO say there was an error, try again
@@ -60,50 +56,41 @@ function SignIn() {
         alignItems="center"
         spacing={5}
       >
-        {/* <Grid item xs={12}>
-          <Button
-            variant="contained"
-            href="/api/google/signin"
-          >
-            Sign In With Google
-          </Button>
-        </Grid> */}
-
         <hr style={{ width: '100%' }} />
         {/* This is username and password authentication */}
         <Grid item xs={12}>
           <TextField
             id="filled-basic"
-            value={signInEmail}
+            value={signUpEmail}
             label="Email address"
             variant="outlined"
-            onChange={(e) => handleSignInEmailFieldChange(e)}
+            onChange={(e) => handleSignUpEmailFieldChange(e)}
           />
         </Grid>
         <Grid item xs={12}>
           <TextField
             id="filled-basic"
-            value={signInPassword}
+            value={signUpPassword}
             label="Password"
             variant="outlined"
             type="password"
-            onChange={(e) => handleSignInPasswordFieldChange(e)}
+            onChange={(e) => handleSignUpPasswordFieldChange(e)}
           />
         </Grid>
         <Grid item xs={12}>
           <Button
             variant="contained"
-            onClick={handleEmailPasswordSignIn}
+            onClick={handleEmailPasswordSignUp}
           >
-            Sign In With Email
+            Sign Up With Email
           </Button>
         </Grid>
         <Grid item xs={12}>
-          <Link href="/forgot-password">Forgot your password?</Link>
+          <Link href="/verify">Need to verify your email?</Link>
         </Grid>
       </Grid>
     </Layout>
   );
 }
 
-export default SignIn;
+export default SignUp;
