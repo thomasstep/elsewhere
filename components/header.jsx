@@ -93,12 +93,20 @@ function Header(props) {
                   </ListItem>
                 </Link>
               ) : (
-                <Link href="/signin">
-                  <ListItem button key="Sign In">
-                    <ListItemIcon><ExitToAppIcon /></ListItemIcon>
-                    <ListItemText primary="Sign In" />
-                  </ListItem>
-                </Link>
+                <>
+                  <Link href="/signin">
+                    <ListItem button key="Sign In">
+                      <ListItemIcon><ExitToAppIcon /></ListItemIcon>
+                      <ListItemText primary="Sign In" />
+                    </ListItem>
+                  </Link>
+                  <Link href="/signup">
+                    <ListItem button key="Sign Up">
+                      <ListItemIcon><ExitToAppIcon /></ListItemIcon>
+                      <ListItemText primary="Sign Up" />
+                    </ListItem>
+                  </Link>
+                </>
               )
           }
         </List>

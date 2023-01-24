@@ -23,7 +23,7 @@ function Verify() {
       const authServiceUrl = process.env.AUTH_SERVICE_URL;
       const applicationId = process.env.AUTH_SERVICE_APP_ID;
       const res = await fetch(`${authServiceUrl}/v1/applications/${applicationId}/users/verification?${new URLSearchParams(body)}`);
-      if (res.status === 200) {
+      if (res.status === 204) {
         setVerified(true);
         router.push('/signin');
       }

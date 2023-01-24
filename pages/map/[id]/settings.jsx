@@ -13,9 +13,17 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
-import { fetcher } from '../../../utils/fetcher';
 import Layout from '../../../components/layout';
 import LoadingPage from '../../../components/loadingPage';
+import {
+  elsewhereApiUrl,
+  authenticationServiceUrl,
+  applicationId,
+  jwtCookieName,
+} from '../../../utils/config';
+import {
+  getCookie,
+} from '../../../utils/util';
 
 const useStyles = makeStyles((theme) => ({
   deleteButton: {
@@ -32,123 +40,107 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const viewerQuery = `{
-  viewer {
-    email
-  }
-}`;
-
-const getMapQuery = `query getMap (
-  $mapId: ID!
-){
-  getMap(mapId: $mapId) {
-    mapName
-    owners
-    writers
-    readers
-  }
-}`;
-
-// TODO consolidate all of the updateMap mutations
-const updateMapMutation = `mutation updateMapName (
-  $map: MapUpdateInput!
-) {
-  updateMap(updates: $map) {
-    mapName
-  }
-}`;
-
-const deleteMapMutation = `mutation deleteMap (
-  $mapId: ID!
-){
-  deleteMap(mapId: $mapId)
-}`;
-
-const addTravelPartnerMutation = `mutation addTravelPartner (
-  $map: MapUpdateInput!
-) {
-  updateMap(updates: $map) {
-    writers
-  }
-}`;
-
-const removeTravelPartnerMutation = `mutation removeTravelPartner(
-  $map: MapUpdateInput!
-) {
-  updateMap(updates: $map) {
-    writers
-  }
-}`;
-
 function ElsewhereMapSettings(props) {
   const router = useRouter();
-  const [userEmail, setUserEmail] = useState('');
+  const [id, setId] = useState('');
   const [mapId] = useState(router.query.id);
   const [mapName, setMapName] = useState('');
   const [editedMapName, setEditedMapName] = useState('');
   const [writers, setWriters] = useState(null);
+  const [token, setToken] = useState(getCookie(jwtCookieName));
   const [travelPartnerTextField, setTravelPartnerTextField] = useState('');
   const classes = useStyles(props);
 
-  useEffect(() => {
-    fetcher(viewerQuery)
-      .then(({
-        viewer: {
-          email: viewerEmail,
-        },
-      }) => {
-        if (!viewerEmail) router.push('/signin');
-        setUserEmail(viewerEmail);
+  useEffect(async () => {
+    setToken(getCookie(jwtCookieName));
+    console.log(`TOKEN: ${token}`)
+    fetch(`${authenticationServiceUrl}/v1/applications/${applicationId}/users/me`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (res.status !== 200) router.push('/signin');
+
+        return res.json();
+      })
+      .then((data) => {
+        setId(data.id);
       })
       .catch(() => {
         router.push('/signin');
       });
 
-    fetcher(getMapQuery, { mapId: router.query.id })
-      .then(({
-        getMap: {
-          mapName: retrievedName,
-          // owners,
-          writers: mapWriters,
-          // readers,
-        },
-      }) => {
-        setWriters(mapWriters);
-        setMapName(retrievedName);
-        // Initialize this so it doesn't automatically change map name to ''
-        setEditedMapName(retrievedName);
+    fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (res.status !== 200) console.log('REFRESH');
+
+        return res.json();
       })
-      .catch((err) => {
-        if (err.message === 'Context creation failed: Please log in.') router.push('/signin');
+      .then(async (data) => {
+        setMapName(data.name);
+        // Initialize this so it doesn't automatically change map name to ''
+        setEditedMapName(data.name);
+        const writers = new Set();
+        for (const collaborator of data.collaborators) {
+          if (collaborator !== data.createdBy){
+            const res = await fetch(`${authenticationServiceUrl}/v1/applications/${applicationId}/users?${new URLSearchParams({id: collaborator})}`);
+            if (res.status === 200) {
+              const data = await res.json();
+              writers.add(data.email);
+            }
+          }
+        }
+        setWriters(writers);
+        console.log(`writers: ${writers}`)
       });
   }, []);
 
   async function saveMapName() {
     if (mapName !== editedMapName) {
       const updates = {
-        mapId,
-        mapName: editedMapName,
+        name: editedMapName,
       };
 
-      const {
-        updateMap: {
-          mapName: success,
+      fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-      } = await fetcher(updateMapMutation, { map: updates });
-      if (!success) return;
-
-      setMapName(editedMapName);
-      setEditedMapName(editedMapName);
+        body: JSON.stringify(updates),
+      })
+        .then((res) => {
+          if (res.status === 200) {
+            setMapName(editedMapName);
+            setEditedMapName(editedMapName);
+          } else {
+            // TODO return error
+          }
+        });
     }
   }
 
   async function deleteMap(event) {
     event.preventDefault();
 
-    const { deleteMap: success } = await fetcher(deleteMapMutation, { mapId });
-    if (!success) return;
-
-    router.push('/profile');
+    fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (res.status === 204) {
+          router.push('/profile');
+        } else {
+          // TODO return error
+        }
+      });
   }
 
   function handleTravelBuddyTextFieldChange(event) {
@@ -161,64 +153,59 @@ function ElsewhereMapSettings(props) {
 
   async function addTravelPartner(event) {
     event.preventDefault();
+
     const updates = {
-      mapId,
-      writers: {
-        push: travelPartnerTextField,
-      },
+      email: travelPartnerTextField,
     };
 
-    const {
-      updateMap: {
-        writers: success,
+    fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/collaborator`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
-    } = await fetcher(addTravelPartnerMutation, { map: updates });
-    if (!success) return;
-
-    writers.push(travelPartnerTextField);
-    // setWriters(writers); Do I need to do this?
-    setTravelPartnerTextField('');
+      body: JSON.stringify(updates),
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          writers.add(travelPartnerTextField);
+          setWriters(writers); // Do I need to do this?
+          console.log(`added: ${writers}`)
+        } else {
+          // TODO return error
+        }
+      });
   }
 
   async function removeTravelPartner(event, email) {
     event.preventDefault();
-    const {
-      query: {
-        id: queryMapId,
-      },
-    } = router;
 
     const updates = {
-      mapId: queryMapId,
-      writers: {
-        pull: email,
-      },
+      email,
     };
 
-    try {
-      const {
-        updateMap: {
-          writers: success,
-        },
-      } = await fetcher(removeTravelPartnerMutation, { map: updates });
-      if (!success) return;
-    } catch (err) {
-      if (err.message === 'Context creation failed: Please log in.') router.push('/signin');
-    }
-    // Remove writer from list if the API call was successful
-    // Need to make a deep copy and call setWriters to get the render
-    const writerUpdates = [...writers];
-    const index = writerUpdates.indexOf(email);
-    if (index > -1) {
-      writerUpdates.splice(index, 1);
-    }
-
-    setWriters(writerUpdates);
+    fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/collaborator`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(updates),
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          writers.delete(email);
+          setWriters(writers);
+          console.log(`deleted: ${writers}`)
+        } else {
+          // TODO return error
+        }
+      });
   }
 
   if (writers) {
     return (
-      <Layout session={userEmail}>
+      <Layout session={id}>
         <Grid
           container
           direction="column"
@@ -276,11 +263,11 @@ function ElsewhereMapSettings(props) {
           {/* Travel Partners */}
           <Grid item xs={12}>
             {
-            writers.length ? (
+            writers.size ? (
               <>
                 <Typography variant="h5">Travel Partners</Typography>
                 <List component="nav">
-                  {writers.map((email) => (
+                  {Array.from(writers).map((email) => (
                     <React.Fragment key={email}>
                       <ListItem button>
                         <ListItemText primary={email} />

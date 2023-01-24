@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import List from '@material-ui/core/List';
@@ -6,45 +6,18 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Divider from '@material-ui/core/Divider';
 import SettingsIcon from '@material-ui/icons/Settings';
-import { fetcher } from '../utils/fetcher';
 
-const getMapNameQuery = (id) => `{
-  getMap(mapId: "${id}") {
-    mapId
-    mapName
-  }
-}`;
-
-function MapList({ mapList }) {
-  const [maps, setMaps] = useState([]);
-
-  useEffect(() => {
-    const promises = [];
-    mapList.forEach((mapId) => {
-      promises.push(
-        fetcher(getMapNameQuery(mapId))
-          .then(({ getMap }) => getMap)
-          .catch(() => ({
-            mapId,
-            mapName: 'Error retrieving map.',
-          })),
-      );
-    });
-    Promise.all(promises)
-      .then((allMaps) => {
-        setMaps(allMaps);
-      });
-  }, [mapList]);
+function MapList({ maps }) {
 
   return (
     <List component="nav">
-      {maps.map(({ mapId, mapName }) => (
-        <React.Fragment key={mapId}>
+      {maps.map(({ id, name }) => (
+        <React.Fragment key={id}>
           <ListItem button>
-            <Link href="/map/[id]" as={`/map/${mapId}`}>
-              <ListItemText primary={mapName} />
+            <Link href="/map/[id]" as={`/map/${id}`}>
+              <ListItemText primary={name} />
             </Link>
-            <Link href="/map/[id]/settings" as={`/map/${mapId}/settings`}>
+            <Link href="/map/[id]/settings" as={`/map/${id}/settings`}>
               <SettingsIcon />
             </Link>
           </ListItem>

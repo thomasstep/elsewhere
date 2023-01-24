@@ -5,6 +5,8 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import { useRouter } from 'next/router';
 import Layout from '../components/layout';
+import { jwtCookieName } from '../utils/config';
+import { setCookie } from '../utils/util';
 
 function SignIn() {
   const [signInEmail, setSignInEmail] = useState('');
@@ -35,7 +37,7 @@ function SignIn() {
       const res = await fetch(`${authServiceUrl}/v1/applications/${applicationId}/users/token?${new URLSearchParams(body)}`);
       if (res.status === 200) {
         const resJson = await res.json();
-        document.cookie = `authToken=${resJson.token}; max-age=${60*60*24}; secure; samesite=strict`
+        setCookie(jwtCookieName, resJson.token);
         router.push('/profile');
       }
       if (res.status === 401) {
@@ -67,10 +69,10 @@ function SignIn() {
           >
             Sign In With Google
           </Button>
-        </Grid> */}
+        </Grid>
 
-        <hr style={{ width: '100%' }} />
-        {/* This is username and password authentication */}
+        <hr style={{ width: '100%' }} /> */}
+
         <Grid item xs={12}>
           <TextField
             id="filled-basic"
@@ -95,7 +97,7 @@ function SignIn() {
             variant="contained"
             onClick={handleEmailPasswordSignIn}
           >
-            Sign In With Email
+            Sign In
           </Button>
         </Grid>
         <Grid item xs={12}>

@@ -9,58 +9,57 @@ import Layout from '../components/layout';
 import MapList from '../components/mapList';
 import LoadingPage from '../components/loadingPage';
 // import { getErrorMessage } from '../lib/form';
-import { fetcher } from '../utils/fetcher';
-
-const viewerQuery = `{
-    viewer {
-      id
-      email
-      ownedMaps
-      readableMaps
-      writableMaps
-    }
-  }`;
-
-const createMapMutation = `
-  mutation CreateMapMutation($name: String!) {
-    createMap(name: $name) {
-      mapId
-      mapName
-      owners
-      writers
-      readers
-    }
-  }
-`;
+import {
+  elsewhereApiUrl,
+  authenticationServiceUrl,
+  applicationId,
+  jwtCookieName,
+} from '../utils/config';
+import { getCookie } from '../utils/util';
 
 function Profile() {
   const [id, setId] = useState('');
-  const [email, setEmail] = useState('');
-  const [ownedMaps, setOwnedMap] = useState([]);
-  const [readableMaps, setReadableMaps] = useState([]);
-  const [writableMaps, setWritableMaps] = useState([]);
+  // const [email, setEmail] = useState('');
+  const [maps, setMaps] = useState([]);
   const [newMapNameField, setNewMapNameField] = useState('');
   // const [errorMsg, setErrorMsg] = useState('');
   const router = useRouter();
 
   useEffect(() => {
-    fetcher(viewerQuery)
-      .then(({
-        viewer: {
-          id: viewerId,
-          email: viewerEmail,
-          ownedMaps: viewerOwnedMaps,
-          readableMaps: viewerReadableMaps,
-          writableMaps: viewerWritableMaps,
-        },
-      }) => {
-        if (!viewerEmail) router.push('/signin');
+    const token = getCookie(jwtCookieName);
+    fetch(`${elsewhereApiUrl}/v1/trip`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        // if (res.status !== 200) router.push('/signin');
 
-        setId(viewerId);
-        setEmail(viewerEmail);
-        setOwnedMap(viewerOwnedMaps);
-        setReadableMaps(viewerReadableMaps);
-        setWritableMaps(viewerWritableMaps);
+        return res.json();
+      })
+      .then((data) => {
+        console.log(data)
+        setMaps(data);
+      })
+      .catch(() => {
+        router.push('/signin');
+      });
+  }, []);
+
+  useEffect(() => {
+    const token = getCookie(jwtCookieName);
+    fetch(`${authenticationServiceUrl}/v1/applications/${applicationId}/users/me`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (res.status !== 200) router.push('/signin');
+
+        return res.json();
+      })
+      .then((data) => {
+        setId(data.id);
       })
       .catch(() => {
         router.push('/signin');
@@ -78,9 +77,25 @@ function Profile() {
       name: newMapNameField,
     };
 
-    fetcher(createMapMutation, vars)
-      .then(({ createMap }) => {
-        setOwnedMap([...ownedMaps, createMap.mapId]);
+    const token = getCookie(jwtCookieName);
+    fetch(`${elsewhereApiUrl}/v1/trip`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(vars),
+    })
+      .then((res) => {
+        if (res.status !== 200) {
+          // TODO set error message
+          return;
+        }
+
+        return res.json();
+      })
+      .then((data) => {
+        setMaps([...maps, data]);
       })
       .catch(() => {
         // setErrorMsg(getErrorMessage(error));
@@ -88,9 +103,8 @@ function Profile() {
   }
 
   if (id) {
-    const sharedMaps = [...writableMaps, ...readableMaps];
     return (
-      <Layout session={email}>
+      <Layout session={id}>
         <Grid
           container
           direction="column"
@@ -107,17 +121,17 @@ function Profile() {
             <Grid item xs={12}>
               <Typography variant="h3">Profile</Typography>
             </Grid>
-            <Grid item xs={12}>
+            {/* <Grid item xs={12}>
               <Typography variant="h5">{email}</Typography>
-            </Grid>
+            </Grid> */}
           </Grid>
 
           <Grid item xs={12}>
             {
-              ownedMaps.length ? (
+              maps.length ? (
                 <>
                   <Typography variant="h5">Your maps</Typography>
-                  <MapList mapList={ownedMaps} />
+                  <MapList maps={maps} />
                 </>
               )
                 : null
@@ -154,18 +168,6 @@ function Profile() {
                 </Button>
               </Grid>
             </Grid>
-          </Grid>
-
-          <Grid item xs={12}>
-            {
-              sharedMaps.length ? (
-                <>
-                  <Typography variant="h5">Maps shared with you</Typography>
-                  <MapList mapList={sharedMaps} />
-                </>
-              )
-                : null
-            }
           </Grid>
         </Grid>
       </Layout>

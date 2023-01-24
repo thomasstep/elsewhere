@@ -13,8 +13,17 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import SaveIcon from '@material-ui/icons/Save';
 import React, { useState, useEffect } from 'react';
 import { Map, GoogleApiWrapper, Marker } from 'google-maps-react';
-import { fetcher } from '../../utils/fetcher';
 import Layout from '../../components/layout';
+import {
+  elsewhereApiUrl,
+  authenticationServiceUrl,
+  applicationId,
+  jwtCookieName,
+  googleMapsKey,
+} from '../../utils/config';
+import {
+  getCookie,
+} from '../../utils/util';
 
 const useStyles = makeStyles((theme) => ({
   searchBox: {
@@ -58,83 +67,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const viewerQuery = `{
-  viewer {
-    email
-  }
-}`;
-
-const getMarkers = `query getMarkers (
-    $mapId: ID!
-  ) {
-  getMarkers(mapId: $mapId) {
-    markerId
-    coordinates {
-      lat
-      lng
-    }
-    name
-    createdBy
-    notes
-  }
-}`;
-
-const updateMarker = `mutation updateMarker(
-  $updates: MarkerUpdateInput!
-  $isName: Boolean=false
-  $isNotes: Boolean=false
-) {
-  updateMarker(updates: $updates) {
-    markerName @include(if: $isName)
-    notes @include(if: $isNotes)
-  }
-}`;
-
-const createMarker = `mutation createMarker(
-  $mapId: ID!
-  $marker: MarkerInput!
-) {
-  createMarker(mapId: $mapId, marker: $marker) {
-    ... on Marker {
-      markerId
-      name
-      notes
-    }
-  }
-}`;
-
-const deleteMarkers = `mutation deleteMarkers(
-  $mapId: ID!
-  $markerIds: [ID]!
-) {
-  deleteMarkers(mapId: $mapId, markerIds: $markerIds)
-}`;
-
-const getPlace = `query getPlace(
-  $query: String!
-  $locationBias: LocationBiasInput
-) {
-  getPlace(query: $query, locationBias: $locationBias) {
-    lat
-    lng
-  }
-}`;
-
-const nearbyPlaces = `query nearbySearch(
-  $location: LatLngInput!
-) {
-  nearbySearch(location: $location) {
-    name
-    coordinates {
-      lat
-      lng
-    }
-  }
-}`;
-
 function ElsewhereMap(props) {
   const router = useRouter();
-  const [userEmail, setUserEmail] = useState('');
+  const [id, setId] = useState('');
   const [activeMarker, setActiveMarker] = useState({});
   const [activeGoogleMarker, setActiveGoogleMarker] = useState(null);
   const [editedActiveMarkerName, setEditedActiveMarkerName] = useState('');
@@ -148,16 +83,21 @@ function ElsewhereMap(props) {
   const classes = useStyles(props);
   const [drawerPaperClass, setDrawerPaperClass] = useState(classes.infoWindowDrawerPaper);
   const googleMarkers = {};
+  const token = getCookie(jwtCookieName);
 
   useEffect(() => {
-    fetcher(viewerQuery)
-      .then(({
-        viewer: {
-          email: viewerEmail,
-        },
-      }) => {
-        if (!viewerEmail) router.push('/signin');
-        setUserEmail(viewerEmail);
+    fetch(`${authenticationServiceUrl}/v1/applications/${applicationId}/users/me`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (res.status !== 200) router.push('/signin');
+
+        return res.json();
+      })
+      .then((data) => {
+        setId(data.id);
       })
       .catch(() => {
         router.push('/signin');
@@ -167,7 +107,7 @@ function ElsewhereMap(props) {
   function onInfoWindowClose() {
     if (activeMarker.notSaved) {
       const index = markers.findIndex(
-        (marker) => marker.markerId === activeMarker.markerId,
+        (marker) => marker.id === activeMarker.id,
       );
       if (index !== -1) {
         markers.splice(index, 1);
@@ -187,36 +127,38 @@ function ElsewhereMap(props) {
   }
 
   async function saveActiveMarkerName() {
-    if (activeMarker.name !== editedActiveMarkerName && activeMarker.markerId) {
+    if (activeMarker.name !== editedActiveMarkerName && activeMarker.id) {
       const updates = {
-        mapId: router.query.id,
-        markerId: activeMarker.markerId,
-        markerName: editedActiveMarkerName,
+        name: editedActiveMarkerName,
       };
 
-      fetcher(updateMarker, { updates, isName: true }).then(({
-        updateMarker: {
-          markerName: updateSuccess,
+      fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/entry/${activeMarker.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-      }) => {
-        if (updateSuccess) {
-          const index = markers.findIndex(
-            (marker) => marker.markerId === activeMarker.markerId,
-          );
-          if (index !== -1) {
-            markers[index] = {
+        body: JSON.stringify(updates),
+      })
+        .then((res) => {
+          if (res.status === 200) {
+            const index = markers.findIndex(
+              (marker) => marker.id === activeMarker.id,
+            );
+            if (index !== -1) {
+              markers[index] = {
+                ...activeMarker,
+                name: editedActiveMarkerName,
+              };
+            }
+
+            setActiveMarker({
               ...activeMarker,
               name: editedActiveMarkerName,
-            };
+            });
+          } else {
+            setEditedActiveMarkerName(activeMarker.name);
           }
-
-          setActiveMarker({
-            ...activeMarker,
-            name: editedActiveMarkerName,
-          });
-        } else {
-          setEditedActiveMarkerName(activeMarker.name);
-        }
       });
     }
   }
@@ -226,36 +168,38 @@ function ElsewhereMap(props) {
   }
 
   async function saveActiveMarkerNotes() {
-    if (activeMarker.notes !== editedActiveMarkerNotes && activeMarker.markerId) {
+    if (activeMarker.notes !== editedActiveMarkerNotes && activeMarker.id) {
       const updates = {
-        mapId: router.query.id,
-        markerId: activeMarker.markerId,
         notes: editedActiveMarkerNotes,
       };
 
-      fetcher(updateMarker, { updates, isNotes: true }).then(({
-        updateMarker: {
-          notes: updateSuccess,
+      fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/entry/${activeMarker.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-      }) => {
-        if (updateSuccess) {
-          const index = markers.findIndex(
-            (marker) => marker.markerId === activeMarker.markerId,
-          );
-          if (index !== -1) {
-            markers[index] = {
+        body: JSON.stringify(updates),
+      })
+        .then((res) => {
+          if (res.status === 200) {
+            const index = markers.findIndex(
+              (marker) => marker.id === activeMarker.id,
+            );
+            if (index !== -1) {
+              markers[index] = {
+                ...activeMarker,
+                notes: editedActiveMarkerNotes,
+              };
+            }
+
+            setActiveMarker({
               ...activeMarker,
               notes: editedActiveMarkerNotes,
-            };
+            });
+          } else {
+            setEditedActiveMarkerNotes(activeMarker.notes);
           }
-
-          setActiveMarker({
-            ...activeMarker,
-            notes: editedActiveMarkerNotes,
-          });
-        } else {
-          setEditedActiveMarkerNotes(activeMarker.notes);
-        }
       });
     }
   }
@@ -265,61 +209,51 @@ function ElsewhereMap(props) {
   }
 
   function onMapReady(mapProps, map) {
-    fetcher(getMarkers, { mapId: router.query.id }).then(({
-      getMarkers: mapMarkers,
-    }) => {
-      setMarkers(mapMarkers);
-      if(!mapMarkers.length) {
-        return;
-      }
+    fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/entry`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (res.status !== 200) console.log('REFRESH');
 
-      const bounds = new google.maps.LatLngBounds();
-      mapMarkers.forEach((marker) => {
-        bounds.extend({
-          lat: marker.coordinates.lat,
-          lng: marker.coordinates.lng,
+        return res.json();
+      })
+      .then((data) => {
+        if (!data.length > 0) {
+          return;
+        }
+
+        const bounds = new google.maps.LatLngBounds();
+        data.forEach((entry) => {
+          if (!entry.location.latitude || !entry.location.longitude) {
+            return;
+          }
+
+          bounds.extend({
+            lat: entry.location.latitude,
+            lng: entry.location.longitude,
+          });
         });
+        map.fitBounds(bounds);
+        const boundsCenter = bounds.getCenter();
+        setMarkers(data);
+        setMapCenterLat(boundsCenter.lat());
+        setMapCenterLng(boundsCenter.lng());
       });
-      map.fitBounds(bounds);
-      const boundsCenter = bounds.getCenter();
-      setMapCenterLat(boundsCenter.lat());
-      setMapCenterLng(boundsCenter.lng());
-    });
   }
 
   function onMapClick(mapProps, map, clickEvent) {
-    const nearbyPlacesVars = {
+    const unsavedMarker = {
+      notSaved: true,
       location: {
-        lat: clickEvent.latLng.lat(),
-        lng: clickEvent.latLng.lng(),
+        latitude: clickEvent.latLng.lat(),
+        longitude: clickEvent.latLng.lng(),
       },
     };
-
-    fetcher(nearbyPlaces, nearbyPlacesVars).then(({
-      nearbySearch: foundNearbyPlaces,
-    }) => {
-      const [nearbyPlace] = foundNearbyPlaces;
-      nearbyPlace.notSaved = true;
-      const {
-        name = ''
-      } = nearbyPlace;
-      nearbyPlace.lat = nearbyPlacesVars.location.lat;
-      nearbyPlace.lng = nearbyPlacesVars.location.lng;
-      // if (name && lat && lng) {
-      setActiveInfoWindow(true);
-      setActiveMarker(nearbyPlace);
-      setMarkers([...markers, nearbyPlace]);
-      // } else {
-      //   setActiveInfoWindow(false);
-      //   try {
-      //     activeGoogleMarker.setAnimation(null);
-      //   } catch (err) {
-      //     // Shit happens
-      //   }
-      //   setActiveGoogleMarker(null);
-      //   setActiveMarker({});
-      // }
-    });
+    setActiveInfoWindow(true);
+    setActiveMarker(unsavedMarker);
+    setMarkers([...markers, unsavedMarker]);
   }
 
   function onMapCenterChanged(mapProps, map) {
@@ -328,103 +262,115 @@ function ElsewhereMap(props) {
   }
 
   function saveMarker() {
-    const variables = {
-      mapId: router.query.id,
-      marker: {
-        coordinates: activeMarker.coordinates,
-        name: editedActiveMarkerName || activeMarker.name,
-        notes: editedActiveMarkerNotes || activeMarker.notes,
-      },
+    const updatedEntry = {
+      name: editedActiveMarkerName || activeMarker.name,
+      notes: editedActiveMarkerNotes || activeMarker.notes,
+      location: activeMarker.location,
     };
 
-    console.log(variables)
+    fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/entry`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(updatedEntry),
+    })
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log(res);
+          // TODO error message
+        }
 
-    fetcher(createMarker, variables).then(({ createMarker: createMarkerRes }) => {
-      if (createMarkerRes) {
-        activeMarker.notSaved = false;
-        activeMarker.markerId = createMarkerRes.markerId;
-        activeMarker.createdBy = userEmail;
-        activeMarker.name = createMarkerRes.name;
-        activeMarker.notes = createMarkerRes.notes;
-      }
-      try {
-        activeGoogleMarker.setAnimation(null);
-      } catch (err) {
-        // Shit happens
-      }
-      setActiveGoogleMarker(null);
-      setActiveMarker({});
-      setActiveInfoWindow(false);
-      setEditedActiveMarkerName('');
-      setEditedActiveMarkerNotes('');
-    });
+        return res.json();
+      })
+      .then((data) => {
+        if (data) {
+          activeMarker.notSaved = false;
+          activeMarker.id = data.id;
+          activeMarker.createdBy = id;
+          activeMarker.name = data.name;
+          activeMarker.notes = data.notes;
+        }
+        try {
+          activeGoogleMarker.setAnimation(null);
+        } catch (err) {
+          // Shit happens
+        }
+        setActiveGoogleMarker(null);
+        setActiveMarker({});
+        setActiveInfoWindow(false);
+        setEditedActiveMarkerName('');
+        setEditedActiveMarkerNotes('');
+      });
   }
 
   function deleteMarker() {
-    const variables = {
-      mapId: router.query.id,
-      markerIds: [activeMarker.markerId],
-    };
+    fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/entry/${activeMarker.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (res.status === 204) {
+          setActiveInfoWindow(false);
+          const index = markers.findIndex(
+            (marker) => marker.id === activeMarker.id,
+          );
+          if (index !== -1) {
+            markers.splice(index, 1);
+          }
+          try {
+            activeGoogleMarker.setAnimation(null);
+          } catch (err) {
+            // Shit happens
+          }
+          setActiveGoogleMarker(null);
+          setActiveMarker({});
+        } else {
+          setActiveInfoWindow(false);
+          try {
+            activeGoogleMarker.setAnimation(null);
+          } catch (err) {
+            // Shit happens
 
-    fetcher(deleteMarkers, variables).then(({ deleteMarkers: success }) => {
-      if (success) {
-        setActiveInfoWindow(false);
-        const index = markers.findIndex(
-          (marker) => marker.markerId === activeMarker.markerId,
-        );
-        if (index !== -1) {
-          markers.splice(index, 1);
+          }
+          setActiveGoogleMarker(null);
+          setActiveMarker({});
         }
-        try {
-          activeGoogleMarker.setAnimation(null);
-        } catch (err) {
-          // Shit happens
-        }
-        setActiveGoogleMarker(null);
-        setActiveMarker({});
-      } else {
-        setActiveInfoWindow(false);
-        try {
-          activeGoogleMarker.setAnimation(null);
-        } catch (err) {
-          // Shit happens
-
-        }
-        setActiveGoogleMarker(null);
-        setActiveMarker({});
-      }
-    });
+      });
   }
 
   function handleSearchFieldTextChange(event) {
     setSearchFieldText(event.target.value);
   }
 
-  function searchForPlace() {
-    const query = searchFieldText;
-    const locationBias = {
-      point: {
-        lat: mapCenterLat,
-        lng: mapCenterLng,
-      },
-    };
+  // function searchForPlace() {
+  //   const query = searchFieldText;
+  //   const locationBias = {
+  //     point: {
+  //       lat: mapCenterLat,
+  //       lng: mapCenterLng,
+  //     },
+  //   };
 
-    fetcher(getPlace, { query, locationBias })
-      .then(({ getPlace: places }) => {
-        const [coordinates] = places;
-        const searchMarker = {
-          coordinates,
-          name: searchFieldText,
-          notSaved: true,
-        };
-        setActiveMarker(searchMarker);
-        setMarkers([...markers, searchMarker]);
-        setActiveInfoWindow(true);
-      });
-  }
+  //   fetcher(getPlace, { query, locationBias })
+  //     .then(({ getPlace: places }) => {
+  //       const [coordinates] = places;
+  //       const searchMarker = {
+  //         coordinates,
+  //         name: searchFieldText,
+  //         notSaved: true,
+  //       };
+  //       setActiveMarker(searchMarker);
+  //       setMarkers([...markers, searchMarker]);
+  //       setActiveInfoWindow(true);
+  //     });
+  // }
 
   return (
-    <Layout mapPage session={userEmail}>
+    <Layout mapPage session={id}>
 
       <Box
         className={classes.searchBox}
@@ -488,14 +434,17 @@ function ElsewhereMap(props) {
 
           {markers.length ? markers.map((marker) => {
             let animate = null;
-            if (marker.markerId === activeMarker.markerId) {
+            if (marker.id === activeMarker.id) {
               animate = true;
             }
 
             const googleMarker = (
               <Marker
-                key={marker.markerId}
-                position={marker.coordinates}
+                key={marker.id}
+                position={{
+                  lat: marker.location.latitude,
+                  lng: marker.location.longitude,
+                }}
                 onClick={(props, googleMarker) => {
                   googleMarker.setAnimation(google.maps.Animation.BOUNCE);
                   setActiveGoogleMarker(googleMarker);
@@ -637,13 +586,13 @@ function ElsewhereMap(props) {
               {/* Lat field */}
               <Grid item xs={12}>
                 <Typography variant="h5">Latitude</Typography>
-                <Typography variant="body1">{activeMarker.coordinates ? activeMarker.coordinates.lat : null}</Typography>
+                <Typography variant="body1">{activeMarker.location ? activeMarker.location.latitude : null}</Typography>
               </Grid>
 
               {/* Lng field */}
               <Grid item xs={12}>
                 <Typography variant="h5">Longitude</Typography>
-                <Typography variant="body1">{activeMarker.coordinates ? activeMarker.coordinates.lng : null}</Typography>
+                <Typography variant="body1">{activeMarker.location ? activeMarker.location.longitude : null}</Typography>
               </Grid>
 
               {/* Save or delete button */}
@@ -684,5 +633,5 @@ ElsewhereMap.propTypes = {
 };
 
 export default GoogleApiWrapper({
-  apiKey: process.env.GOOGLE_MAPS_KEY,
+  apiKey: googleMapsKey,
 })(ElsewhereMap);

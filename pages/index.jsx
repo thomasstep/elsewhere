@@ -3,31 +3,28 @@ import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Layout from '../components/layout';
-import { fetcher } from '../utils/fetcher';
-
-const viewerQuery = `{
-  viewer {
-    email
-  }
-}`;
+import {
+  elsewhereApiUrl,
+  authenticationServiceUrl,
+  applicationId,
+} from '../utils/config';
 
 function Index() {
-  const [userEmail, setUserEmail] = useState('');
+  const [id, setId] = useState('');
 
   useEffect(() => {
-    fetcher(viewerQuery)
-      .then(({
-        viewer: {
-          email: viewerEmail,
-        },
-      }) => {
-        setUserEmail(viewerEmail);
-      })
+    fetch(`${authenticationServiceUrl}/v1/applications/${applicationId}/users/me`)
+    .then((res) => {
+      if (res.status !== 200) router.push('/signin');
+
+      data = res.json()
+      setId(data.id);
+    })
       .catch(() => {});
   }, []);
 
   return (
-    <Layout session={userEmail}>
+    <Layout session={id}>
       <Box
         mt={9}
       >

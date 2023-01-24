@@ -56,8 +56,6 @@ function SignUp() {
         alignItems="center"
         spacing={5}
       >
-        <hr style={{ width: '100%' }} />
-        {/* This is username and password authentication */}
         <Grid item xs={12}>
           <TextField
             id="filled-basic"
@@ -82,7 +80,7 @@ function SignUp() {
             variant="contained"
             onClick={handleEmailPasswordSignUp}
           >
-            Sign Up With Email
+            Sign Up
           </Button>
         </Grid>
         <Grid item xs={12}>
