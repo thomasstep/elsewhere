@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
+import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
 import { useRouter } from 'next/router';
 import Layout from '../components/layout';
 

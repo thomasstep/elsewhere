@@ -1,59 +1,59 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
-import { makeStyles } from '@material-ui/core/styles';
+// import { makeStyles } from '@mui/styles';
 
 // Menu bar
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
 
 // Floating menu
-import Drawer from '@material-ui/core/Drawer';
-import Fab from '@material-ui/core/Fab';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import HomeIcon from '@material-ui/icons/Home';
-import AccountBoxIcon from '@material-ui/icons/AccountBox';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import Drawer from '@mui/material/Drawer';
+import Fab from '@mui/material/Fab';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import HomeIcon from '@mui/icons-material/Home';
+import AccountBoxIcon from '@mui/icons-material/AccountBox';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
-const useStyles = makeStyles((theme) => ({
-  fab: {
-    left: 'calc(50% - 28px)',
-    top: theme.spacing(1),
-    position: 'fixed',
-    zIndex: theme.zIndex.appBar,
-    backgroundColor: theme.palette.primary.main,
-    '&:hover': {
-      backgroundColor: theme.palette.primary.dark,
-    },
-  },
-  appBar: {
-    position: 'static',
-  },
-  iconButton: {
-    '&:hover': {
-      backgroundColor: theme.palette.primary.dark,
-    },
-  },
-  menuIcon: {
-    color: 'white',
-  },
-  typography: {
-    flexGrow: 1,
-    align: 'center',
-    marginLeft: theme.spacing(2),
-  },
-}));
+// const useStyles = makeStyles((theme) => ({
+//   fab: {
+//     left: 'calc(50% - 28px)',
+//     top: theme.spacing(1),
+//     position: 'fixed',
+//     zIndex: theme.zIndex.appBar,
+//     backgroundColor: theme.palette.primary.main,
+//     '&:hover': {
+//       backgroundColor: theme.palette.primary.dark,
+//     },
+//   },
+//   appBar: {
+//     position: 'static',
+//   },
+//   iconButton: {
+//     '&:hover': {
+//       backgroundColor: theme.palette.primary.dark,
+//     },
+//   },
+//   menuIcon: {
+//     color: 'white',
+//   },
+//   typography: {
+//     flexGrow: 1,
+//     align: 'center',
+//     marginLeft: theme.spacing(2),
+//   },
+// }));
 
 function Header(props) {
   const [open, setOpen] = useState(false);
   const { mapPage, session } = props;
-  const classes = useStyles(props);
+  // const classes = useStyles(props);
 
   function toggleDrawer(event) {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -116,22 +116,36 @@ function Header(props) {
 
   return mapPage ? (
     <>
-      <Fab onClick={(e) => toggleDrawer(e)} className={classes.fab}>
-        <MenuIcon className={classes.menuIcon} />
+      <Fab
+        onClick={(e) => toggleDrawer(e)}
+        // className={classes.fab}
+      >
+        <MenuIcon
+          // className={classes.menuIcon}
+        />
       </Fab>
       {navigationDrawer}
     </>
   )
     : (
       <>
-        <AppBar className={classes.appBar}>
+        <AppBar
+          // className={classes.appBar}
+        >
           <Toolbar>
-            <IconButton onClick={(e) => toggleDrawer(e)} className={classes.iconButton} edge="start" aria-label="menu">
-              <MenuIcon className={classes.menuIcon} />
+            <IconButton
+              onClick={(e) => toggleDrawer(e)}
+              // className={classes.iconButton}
+              edge="start"
+              aria-label="menu"
+            >
+              <MenuIcon
+                // className={classes.menuIcon}
+              />
             </IconButton>
             <Typography
               variant="h5"
-              className={classes.typography}
+              // className={classes.typography}
             >
               Elsewhere
             </Typography>

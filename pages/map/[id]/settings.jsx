@@ -1,18 +1,18 @@
 import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import DeleteIcon from '@material-ui/icons/Delete';
-import TextField from '@material-ui/core/TextField';
-import AddIcon from '@material-ui/icons/Add';
-import SaveIcon from '@material-ui/icons/Save';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import Divider from '@material-ui/core/Divider';
-import IconButton from '@material-ui/core/IconButton';
+// import { makeStyles } from '@mui/styles';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import DeleteIcon from '@mui/icons-material/Delete';
+import TextField from '@mui/material/TextField';
+import AddIcon from '@mui/icons-material/Add';
+import SaveIcon from '@mui/icons-material/Save';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
 import Layout from '../../../components/layout';
 import LoadingPage from '../../../components/loadingPage';
 import {
@@ -25,20 +25,20 @@ import {
   getCookie,
 } from '../../../utils/util';
 
-const useStyles = makeStyles((theme) => ({
-  deleteButton: {
-    color: 'white',
-    backgroundColor: theme.palette.error.main,
-    '&:hover': {
-      backgroundColor: theme.palette.error.dark,
-    },
-  },
-  deleteTravelPartnerButton: {
-    '&:hover': {
-      backgroundColor: theme.palette.error.main,
-    },
-  },
-}));
+// const useStyles = makeStyles((theme) => ({
+//   deleteButton: {
+//     color: 'white',
+//     backgroundColor: theme.palette.error.main,
+//     '&:hover': {
+//       backgroundColor: theme.palette.error.dark,
+//     },
+//   },
+//   deleteTravelPartnerButton: {
+//     '&:hover': {
+//       backgroundColor: theme.palette.error.main,
+//     },
+//   },
+// }));
 
 function ElsewhereMapSettings(props) {
   const router = useRouter();
@@ -49,7 +49,7 @@ function ElsewhereMapSettings(props) {
   const [writers, setWriters] = useState(null);
   const [token, setToken] = useState(getCookie(jwtCookieName));
   const [travelPartnerTextField, setTravelPartnerTextField] = useState('');
-  const classes = useStyles(props);
+  // const classes = useStyles(props);
 
   useEffect(async () => {
     setToken(getCookie(jwtCookieName));
@@ -273,7 +273,7 @@ function ElsewhereMapSettings(props) {
                         <ListItemText primary={email} />
                         <IconButton
                           aria-label="delete"
-                          className={classes.deleteTravelPartnerButton}
+                          // className={classes.deleteTravelPartnerButton}
                           onClick={(e) => removeTravelPartner(e, email)}
                         >
                           <DeleteIcon />
@@ -332,7 +332,7 @@ function ElsewhereMapSettings(props) {
               <Grid item xs={12}>
                 <Button
                   variant="contained"
-                  className={classes.deleteButton}
+                  // className={classes.deleteButton}
                   startIcon={<DeleteIcon />}
                   onClick={(e) => deleteMap(e)}
                 >

@@ -1,19 +1,22 @@
 import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
-import { makeStyles } from '@material-ui/core/styles';
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import Drawer from '@material-ui/core/Drawer';
-import MapIcon from '@material-ui/icons/Map';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import SaveIcon from '@material-ui/icons/Save';
+// import { makeStyles } from '@mui/styles';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Drawer from '@mui/material/Drawer';
+import MapIcon from '@mui/icons-material/Map';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SaveIcon from '@mui/icons-material/Save';
 import React, { useState, useEffect } from 'react';
-import { Map, GoogleApiWrapper, Marker } from 'google-maps-react';
+import { Wrapper, Status } from "@googlemaps/react-wrapper";
+import Map from '../../components/map';
+import Marker from '../../components/marker';
 import Layout from '../../components/layout';
+import LoadingPage from '../../components/loadingPage';
 import {
   elsewhereApiUrl,
   authenticationServiceUrl,
@@ -25,47 +28,60 @@ import {
   getCookie,
 } from '../../utils/util';
 
-const useStyles = makeStyles((theme) => ({
-  searchBox: {
-    left: theme.spacing(1),
-    bottom: theme.spacing(1),
-    position: 'fixed',
-    zIndex: theme.zIndex.appBar,
-  },
-  searchTextField: {
-    backgroundColor: 'white',
-  },
-  searchButton: {
-    color: 'white',
-    backgroundColor: theme.palette.primary.main,
-    '&:hover': {
-      backgroundColor: theme.palette.primary.dark,
-    },
-  },
-  deleteButton: {
-    color: 'white',
-    backgroundColor: theme.palette.error.main,
-    '&:hover': {
-      backgroundColor: theme.palette.error.dark,
-    },
-  },
-  saveButton: {
-    color: 'white',
-    backgroundColor: theme.palette.success.main,
-    '&:hover': {
-      backgroundColor: theme.palette.success.dark,
-    },
-  },
-  infoWindowDrawerPaper: {
-    width: '80%',
-    padding: theme.spacing(3),
-  },
-  infoWindowDrawerSeeThroughPaper: {
-    width: '80%',
-    padding: theme.spacing(3),
-    opacity: '50%',
-  },
-}));
+// const useStyles = makeStyles((theme) => ({
+//   searchBox: {
+//     left: theme.spacing(1),
+//     bottom: theme.spacing(1),
+//     position: 'fixed',
+//     zIndex: theme.zIndex.appBar,
+//   },
+//   searchTextField: {
+//     backgroundColor: 'white',
+//   },
+//   searchButton: {
+//     color: 'white',
+//     backgroundColor: theme.palette.primary.main,
+//     '&:hover': {
+//       backgroundColor: theme.palette.primary.dark,
+//     },
+//   },
+//   deleteButton: {
+//     color: 'white',
+//     backgroundColor: theme.palette.error.main,
+//     '&:hover': {
+//       backgroundColor: theme.palette.error.dark,
+//     },
+//   },
+//   saveButton: {
+//     color: 'white',
+//     backgroundColor: theme.palette.success.main,
+//     '&:hover': {
+//       backgroundColor: theme.palette.success.dark,
+//     },
+//   },
+//   infoWindowDrawerPaper: {
+//     width: '80%',
+//     padding: theme.spacing(3),
+//   },
+//   infoWindowDrawerSeeThroughPaper: {
+//     width: '80%',
+//     padding: theme.spacing(3),
+//     opacity: '50%',
+//   },
+// }));
+
+const loadingRender = (status) => {
+  switch (status) {
+    case Status.LOADING:
+      return <LoadingPage />;
+    case Status.FAILURE:
+      return <LoadingPage />;
+      // return <ErrorComponent />;
+    case Status.SUCCESS:
+      return <LoadingPage />;
+      // return <MyMapComponent />;
+  }
+};
 
 function ElsewhereMap(props) {
   const router = useRouter();
@@ -79,9 +95,8 @@ function ElsewhereMap(props) {
   const [searchFieldText, setSearchFieldText] = useState('');
   const [mapCenterLat, setMapCenterLat] = useState(0);
   const [mapCenterLng, setMapCenterLng] = useState(0);
-  const { google } = props;
-  const classes = useStyles(props);
-  const [drawerPaperClass, setDrawerPaperClass] = useState(classes.infoWindowDrawerPaper);
+  // const classes = useStyles(props);
+  // const [drawerPaperClass, setDrawerPaperClass] = useState(classes.infoWindowDrawerPaper);
   const googleMarkers = {};
   const token = getCookie(jwtCookieName);
 
@@ -373,7 +388,7 @@ function ElsewhereMap(props) {
     <Layout mapPage session={id}>
 
       <Box
-        className={classes.searchBox}
+        // className={classes.searchBox}
       >
         <Grid
           container
@@ -400,14 +415,14 @@ function ElsewhereMap(props) {
                   onKeyDown={(e) => (
                     e.keyCode === 13 ? searchForPlace(e) : null
                   )}
-                  className={classes.searchTextField}
+                  // className={classes.searchTextField}
                 />
               </Grid>
               <Grid item xs={12}>
                 <Button
                   variant="contained"
                   onClick={(e) => searchForPlace(e)}
-                  className={classes.searchButton}
+                  // className={classes.searchButton}
                 >
                   Search
                 </Button>
@@ -418,220 +433,214 @@ function ElsewhereMap(props) {
       </Box>
 
       <Box>
-        <Map
-          google={google}
-          zoom={3}
-          onClick={onMapClick}
-          onCenterChanged={onMapCenterChanged}
-          onReady={onMapReady}
-          zoomControl={false}
-          streetViewControl={false}
-          fullscreenControl={false}
-          mapType="TERRAIN"
-          mapTypeControl={false}
-          clickableIcons
-        >
+        <Wrapper apiKey={googleMapsKey} render={loadingRender}>
+          <Map
+            google={google}
+            zoom={3}
+            onClick={onMapClick}
+            onCenterChanged={onMapCenterChanged}
+            onReady={onMapReady}
+            zoomControl={false}
+            streetViewControl={false}
+            fullscreenControl={false}
+            mapType="TERRAIN"
+            mapTypeControl={false}
+            clickableIcons
+          >
 
-          {markers.length ? markers.map((marker) => {
-            let animate = null;
-            if (marker.id === activeMarker.id) {
-              animate = true;
+            {markers.length ? markers.map((marker) => {
+              let animate = null;
+              if (marker.id === activeMarker.id) {
+                animate = true;
+              }
+
+              const googleMarker = (
+                <Marker
+                  key={marker.id}
+                  position={{
+                    lat: marker.location.latitude,
+                    lng: marker.location.longitude,
+                  }}
+                  onClick={(props, googleMarker) => {
+                    googleMarker.setAnimation(google.maps.Animation.BOUNCE);
+                    setActiveGoogleMarker(googleMarker);
+                    setActiveMarker(marker);
+                    setActiveInfoWindow(true);
+                  }}
+                  animation={animate && google.maps.Animation.BOUNCE}
+                />
+              );
+
+              return googleMarker;
+            }) : null}
+
+          </Map>
+        </Wrapper>
+        <Drawer
+          anchor="right"
+          open={activeInfoWindow}
+          onClose={onInfoWindowClose}
+          BackdropProps={{ invisible: true }}
+          // classes={{ paper: drawerPaperClass }}
+        >
+          <Grid
+            container
+            direction="column"
+            justify="center"
+            alignItems="baseline"
+            wrap="nowrap"
+            spacing={6}
+          >
+            {/* See Through Button */}
+            <Grid item xs={12}>
+              <Button
+                variant="contained"
+                // className={classes.saveButton}
+                color="primary"
+                startIcon={<MapIcon />}
+                // onMouseDown={(e) => {
+                //   e.preventDefault();
+                //   setDrawerPaperClass(classes.infoWindowDrawerSeeThroughPaper);
+                // }}
+                // onMouseUp={(e) => {
+                //   e.preventDefault();
+                //   setDrawerPaperClass(classes.infoWindowDrawerPaper);
+                // }}
+                // onTouchStart={(e) => {
+                //   e.preventDefault();
+                //   setDrawerPaperClass(classes.infoWindowDrawerSeeThroughPaper);
+                // }}
+                // onTouchEnd={(e) => {
+                //   e.preventDefault();
+                //   setDrawerPaperClass(classes.infoWindowDrawerPaper);
+                // }}
+              >
+                Press And Hold To See Map
+              </Button>
+            </Grid>
+
+            {/* Name field */}
+            <Grid item xs={12}>
+              <Grid
+                container
+                direction="row"
+                justify="center"
+                alignItems="center"
+                spacing={2}
+              >
+                <Grid item>
+                  <TextField
+                    id="filled-basic"
+                    value={editedActiveMarkerName || activeMarker.name}
+                    label="Marker Name"
+                    variant="outlined"
+                    onChange={(e) => handleActiveMarkerNameTextFieldChange(e)}
+                  />
+                </Grid>
+                {
+                  activeMarker.notSaved ? (
+                    null
+                  ) : (
+                    <Grid item>
+                      <IconButton
+                        aria-label="save"
+                        onClick={saveActiveMarkerName}
+                      >
+                        <SaveIcon />
+                      </IconButton>
+                    </Grid>
+                  )
+                }
+              </Grid>
+            </Grid>
+
+            {/* Placed By field */}
+            {
+              activeMarker.createdBy ? (
+                <Grid item xs={12}>
+                  <Typography variant="h5">Created By</Typography>
+                  <Typography variant="body1">{activeMarker.createdBy}</Typography>
+                </Grid>
+              ) : null
             }
 
-            const googleMarker = (
-              <Marker
-                key={marker.id}
-                position={{
-                  lat: marker.location.latitude,
-                  lng: marker.location.longitude,
-                }}
-                onClick={(props, googleMarker) => {
-                  googleMarker.setAnimation(google.maps.Animation.BOUNCE);
-                  setActiveGoogleMarker(googleMarker);
-                  setActiveMarker(marker);
-                  setActiveInfoWindow(true);
-                }}
-                animation={animate && google.maps.Animation.BOUNCE}
-              />
-            );
+            {/* Notes field */}
+            <Grid item xs={12}>
+              <Grid
+                container
+                direction="row"
+                justify="center"
+                alignItems="center"
+                spacing={2}
+              >
+                <Grid item>
+                  <TextField
+                    id="filled-basic"
+                    value={editedActiveMarkerNotes || activeMarker.notes}
+                    label="Notes"
+                    variant="outlined"
+                    onChange={(e) => handleActiveMarkerNotesTextFieldChange(e)}
+                    multiline
+                    rowsMax={10}
+                  />
+                </Grid>
+                {
+                  activeMarker.notSaved ? (
+                    null
+                  ) : (
+                    <Grid item>
+                      <IconButton
+                        aria-label="save"
+                        onClick={saveActiveMarkerNotes}
+                      >
+                        <SaveIcon />
+                      </IconButton>
+                    </Grid>
+                  )
+                }
+              </Grid>
+            </Grid>
 
-            return googleMarker;
-          }) : null}
+            {/* Lat field */}
+            <Grid item xs={12}>
+              <Typography variant="h5">Latitude</Typography>
+              <Typography variant="body1">{activeMarker.location ? activeMarker.location.latitude : null}</Typography>
+            </Grid>
 
-          <Drawer
-            anchor="right"
-            open={activeInfoWindow}
-            onClose={onInfoWindowClose}
-            BackdropProps={{ invisible: true }}
-            classes={{ paper: drawerPaperClass }}
-          >
-            <Grid
-              container
-              direction="column"
-              justify="center"
-              alignItems="baseline"
-              wrap="nowrap"
-              spacing={6}
-            >
-              {/* See Through Button */}
-              <Grid item xs={12}>
+            {/* Lng field */}
+            <Grid item xs={12}>
+              <Typography variant="h5">Longitude</Typography>
+              <Typography variant="body1">{activeMarker.location ? activeMarker.location.longitude : null}</Typography>
+            </Grid>
+
+            {/* Save or delete button */}
+            <Grid item xs={12}>
+              {activeMarker.notSaved ? (
                 <Button
                   variant="contained"
                   // className={classes.saveButton}
-                  color="primary"
-                  startIcon={<MapIcon />}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    setDrawerPaperClass(classes.infoWindowDrawerSeeThroughPaper);
-                  }}
-                  onMouseUp={(e) => {
-                    e.preventDefault();
-                    setDrawerPaperClass(classes.infoWindowDrawerPaper);
-                  }}
-                  onTouchStart={(e) => {
-                    e.preventDefault();
-                    setDrawerPaperClass(classes.infoWindowDrawerSeeThroughPaper);
-                  }}
-                  onTouchEnd={(e) => {
-                    e.preventDefault();
-                    setDrawerPaperClass(classes.infoWindowDrawerPaper);
-                  }}
+                  startIcon={<SaveIcon />}
+                  onClick={saveMarker}
                 >
-                  Press And Hold To See Map
+                  Save Marker
                 </Button>
-              </Grid>
-
-              {/* Name field */}
-              <Grid item xs={12}>
-                <Grid
-                  container
-                  direction="row"
-                  justify="center"
-                  alignItems="center"
-                  spacing={2}
-                >
-                  <Grid item>
-                    <TextField
-                      id="filled-basic"
-                      value={editedActiveMarkerName || activeMarker.name}
-                      label="Marker Name"
-                      variant="outlined"
-                      onChange={(e) => handleActiveMarkerNameTextFieldChange(e)}
-                    />
-                  </Grid>
-                  {
-                    activeMarker.notSaved ? (
-                      null
-                    ) : (
-                      <Grid item>
-                        <IconButton
-                          aria-label="save"
-                          onClick={saveActiveMarkerName}
-                        >
-                          <SaveIcon />
-                        </IconButton>
-                      </Grid>
-                    )
-                  }
-                </Grid>
-              </Grid>
-
-              {/* Placed By field */}
-              {
-                activeMarker.createdBy ? (
-                  <Grid item xs={12}>
-                    <Typography variant="h5">Created By</Typography>
-                    <Typography variant="body1">{activeMarker.createdBy}</Typography>
-                  </Grid>
-                ) : null
-              }
-
-              {/* Notes field */}
-              <Grid item xs={12}>
-                <Grid
-                  container
-                  direction="row"
-                  justify="center"
-                  alignItems="center"
-                  spacing={2}
-                >
-                  <Grid item>
-                    <TextField
-                      id="filled-basic"
-                      value={editedActiveMarkerNotes || activeMarker.notes}
-                      label="Notes"
-                      variant="outlined"
-                      onChange={(e) => handleActiveMarkerNotesTextFieldChange(e)}
-                      multiline
-                      rowsMax={10}
-                    />
-                  </Grid>
-                  {
-                    activeMarker.notSaved ? (
-                      null
-                    ) : (
-                      <Grid item>
-                        <IconButton
-                          aria-label="save"
-                          onClick={saveActiveMarkerNotes}
-                        >
-                          <SaveIcon />
-                        </IconButton>
-                      </Grid>
-                    )
-                  }
-                </Grid>
-              </Grid>
-
-              {/* Lat field */}
-              <Grid item xs={12}>
-                <Typography variant="h5">Latitude</Typography>
-                <Typography variant="body1">{activeMarker.location ? activeMarker.location.latitude : null}</Typography>
-              </Grid>
-
-              {/* Lng field */}
-              <Grid item xs={12}>
-                <Typography variant="h5">Longitude</Typography>
-                <Typography variant="body1">{activeMarker.location ? activeMarker.location.longitude : null}</Typography>
-              </Grid>
-
-              {/* Save or delete button */}
-              <Grid item xs={12}>
-                {activeMarker.notSaved ? (
+              )
+                : (
                   <Button
                     variant="contained"
-                    className={classes.saveButton}
-                    startIcon={<SaveIcon />}
-                    onClick={saveMarker}
+                    // className={classes.deleteButton}
+                    startIcon={<DeleteIcon />}
+                    onClick={deleteMarker}
                   >
-                    Save Marker
+                    Delete Marker
                   </Button>
-                )
-                  : (
-                    <Button
-                      variant="contained"
-                      className={classes.deleteButton}
-                      startIcon={<DeleteIcon />}
-                      onClick={deleteMarker}
-                    >
-                      Delete Marker
-                    </Button>
-                  )}
-              </Grid>
+                )}
             </Grid>
-          </Drawer>
-
-        </Map>
+          </Grid>
+        </Drawer>
       </Box>
     </Layout>
   );
 }
 
-ElsewhereMap.propTypes = {
-  // eslint-disable-next-line react/forbid-prop-types
-  google: PropTypes.object.isRequired,
-};
-
-export default GoogleApiWrapper({
-  apiKey: googleMapsKey,
-})(ElsewhereMap);
+export default ElsewhereMap;
