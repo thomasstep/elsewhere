@@ -29,20 +29,19 @@ function Profile() {
     const token = getCookie(jwtCookieName);
     fetch(`${elsewhereApiUrl}/v1/trip`, {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     })
       .then((res) => {
-        // if (res.status !== 200) router.push('/signin');
-
+        if (res.status === 403) router.push('/signin');
+        if (res.status !== 200) throw new Error('Unhandled status');
         return res.json();
       })
       .then((data) => {
-        console.log(data)
         setMaps(data);
       })
       .catch(() => {
-        router.push('/signin');
+        // TODO show error
       });
   }, []);
 
@@ -50,7 +49,7 @@ function Profile() {
     const token = getCookie(jwtCookieName);
     fetch(`${authenticationServiceUrl}/v1/applications/${applicationId}/users/me`, {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     })
       .then((res) => {
@@ -81,15 +80,14 @@ function Profile() {
     fetch(`${elsewhereApiUrl}/v1/trip`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(vars),
     })
       .then((res) => {
         if (res.status !== 200) {
-          // TODO set error message
-          return;
+          throw new Error('Unhandled status');
         }
 
         return res.json();

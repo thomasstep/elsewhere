@@ -1,5 +1,4 @@
 import { useRouter } from 'next/router';
-import PropTypes from 'prop-types';
 // import { makeStyles } from '@mui/styles';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -12,7 +11,7 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import React, { useState, useEffect } from 'react';
-import { Wrapper, Status } from "@googlemaps/react-wrapper";
+import { Wrapper, Status } from '@googlemaps/react-wrapper';
 import Map from '../../components/map';
 import Marker from '../../components/marker';
 import Layout from '../../components/layout';
@@ -80,10 +79,12 @@ const loadingRender = (status) => {
     case Status.SUCCESS:
       return <LoadingPage />;
       // return <MyMapComponent />;
+    default:
+      return <LoadingPage />;
   }
 };
 
-function ElsewhereMap(props) {
+function ElsewhereMap() {
   const router = useRouter();
   const [id, setId] = useState('');
   const [activeMarker, setActiveMarker] = useState({});
@@ -97,13 +98,12 @@ function ElsewhereMap(props) {
   const [mapCenterLng, setMapCenterLng] = useState(0);
   // const classes = useStyles(props);
   // const [drawerPaperClass, setDrawerPaperClass] = useState(classes.infoWindowDrawerPaper);
-  const googleMarkers = {};
   const token = getCookie(jwtCookieName);
 
   useEffect(() => {
     fetch(`${authenticationServiceUrl}/v1/applications/${applicationId}/users/me`, {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     })
       .then((res) => {
@@ -151,7 +151,7 @@ function ElsewhereMap(props) {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(updates),
       })
@@ -174,7 +174,7 @@ function ElsewhereMap(props) {
           } else {
             setEditedActiveMarkerName(activeMarker.name);
           }
-      });
+        });
     }
   }
 
@@ -192,7 +192,7 @@ function ElsewhereMap(props) {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(updates),
       })
@@ -215,7 +215,7 @@ function ElsewhereMap(props) {
           } else {
             setEditedActiveMarkerNotes(activeMarker.notes);
           }
-      });
+        });
     }
   }
 
@@ -226,7 +226,7 @@ function ElsewhereMap(props) {
   function onMapReady(mapProps, map) {
     fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/entry`, {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     })
       .then((res) => {
@@ -239,6 +239,7 @@ function ElsewhereMap(props) {
           return;
         }
 
+        // eslint-disable-next-line no-undef
         const bounds = new google.maps.LatLngBounds();
         data.forEach((entry) => {
           if (!entry.location.latitude || !entry.location.longitude) {
@@ -258,7 +259,7 @@ function ElsewhereMap(props) {
       });
   }
 
-  function onMapClick(mapProps, map, clickEvent) {
+  function onMapClick(clickEvent) {
     const unsavedMarker = {
       notSaved: true,
       location: {
@@ -287,7 +288,7 @@ function ElsewhereMap(props) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(updatedEntry),
     })
@@ -324,7 +325,7 @@ function ElsewhereMap(props) {
     fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/entry/${activeMarker.id}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     })
       .then((res) => {
@@ -361,35 +362,34 @@ function ElsewhereMap(props) {
     setSearchFieldText(event.target.value);
   }
 
-  // function searchForPlace() {
-  //   const query = searchFieldText;
-  //   const locationBias = {
-  //     point: {
-  //       lat: mapCenterLat,
-  //       lng: mapCenterLng,
-  //     },
-  //   };
+  function searchForPlace(event) {
+    event.preventDefault();
+    // const query = searchFieldText;
+    // const locationBias = {
+    //   point: {
+    //     lat: mapCenterLat,
+    //     lng: mapCenterLng,
+    //   },
+    // };
 
-  //   fetcher(getPlace, { query, locationBias })
-  //     .then(({ getPlace: places }) => {
-  //       const [coordinates] = places;
-  //       const searchMarker = {
-  //         coordinates,
-  //         name: searchFieldText,
-  //         notSaved: true,
-  //       };
-  //       setActiveMarker(searchMarker);
-  //       setMarkers([...markers, searchMarker]);
-  //       setActiveInfoWindow(true);
-  //     });
-  // }
+    // fetcher(getPlace, { query, locationBias })
+    //   .then(({ getPlace: places }) => {
+    //     const [coordinates] = places;
+    //     const searchMarker = {
+    //       coordinates,
+    //       name: searchFieldText,
+    //       notSaved: true,
+    //     };
+    //     setActiveMarker(searchMarker);
+    //     setMarkers([...markers, searchMarker]);
+    //     setActiveInfoWindow(true);
+    //   });
+  }
 
   return (
     <Layout mapPage session={id}>
 
-      <Box
-        // className={classes.searchBox}
-      >
+      <Box>
         <Grid
           container
           direction="column"
@@ -435,17 +435,18 @@ function ElsewhereMap(props) {
       <Box>
         <Wrapper apiKey={googleMapsKey} render={loadingRender}>
           <Map
-            google={google}
             zoom={3}
-            onClick={onMapClick}
-            onCenterChanged={onMapCenterChanged}
-            onReady={onMapReady}
+            center={{ lat: mapCenterLat, lng: mapCenterLng }}
+            onClick={(mp, m, e) => onMapClick(mp, m, e)}
+            onCenterChanged={(mp, m) => onMapCenterChanged(mp, m)}
+            onReady={(mp, m) => onMapReady(mp, m)}
             zoomControl={false}
             streetViewControl={false}
             fullscreenControl={false}
             mapType="TERRAIN"
             mapTypeControl={false}
-            clickableIcons
+            // clickableIcons
+            style={{ height: '100vh', width: '100%' }}
           >
 
             {markers.length ? markers.map((marker) => {
@@ -462,11 +463,13 @@ function ElsewhereMap(props) {
                     lng: marker.location.longitude,
                   }}
                   onClick={(props, googleMarker) => {
+                    // eslint-disable-next-line no-undef
                     googleMarker.setAnimation(google.maps.Animation.BOUNCE);
                     setActiveGoogleMarker(googleMarker);
                     setActiveMarker(marker);
                     setActiveInfoWindow(true);
                   }}
+                  // eslint-disable-next-line no-undef
                   animation={animate && google.maps.Animation.BOUNCE}
                 />
               );
@@ -479,7 +482,7 @@ function ElsewhereMap(props) {
         <Drawer
           anchor="right"
           open={activeInfoWindow}
-          onClose={onInfoWindowClose}
+          onClose={() => onInfoWindowClose()}
           BackdropProps={{ invisible: true }}
           // classes={{ paper: drawerPaperClass }}
         >
@@ -544,7 +547,7 @@ function ElsewhereMap(props) {
                     <Grid item>
                       <IconButton
                         aria-label="save"
-                        onClick={saveActiveMarkerName}
+                        onClick={() => saveActiveMarkerName()}
                       >
                         <SaveIcon />
                       </IconButton>
@@ -591,7 +594,7 @@ function ElsewhereMap(props) {
                     <Grid item>
                       <IconButton
                         aria-label="save"
-                        onClick={saveActiveMarkerNotes}
+                        onClick={() => saveActiveMarkerNotes()}
                       >
                         <SaveIcon />
                       </IconButton>
@@ -620,7 +623,7 @@ function ElsewhereMap(props) {
                   variant="contained"
                   // className={classes.saveButton}
                   startIcon={<SaveIcon />}
-                  onClick={saveMarker}
+                  onClick={() => saveMarker()}
                 >
                   Save Marker
                 </Button>
@@ -630,7 +633,7 @@ function ElsewhereMap(props) {
                     variant="contained"
                     // className={classes.deleteButton}
                     startIcon={<DeleteIcon />}
-                    onClick={deleteMarker}
+                    onClick={() => deleteMarker()}
                   >
                     Delete Marker
                   </Button>

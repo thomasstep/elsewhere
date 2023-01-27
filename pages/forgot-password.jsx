@@ -56,7 +56,7 @@ function ForgotPassword() {
         <Grid item xs={12}>
           <Button
             variant="contained"
-            onClick={handleRequestPasswordResetLink}
+            onClick={(e) => handleRequestPasswordResetLink(e)}
           >
             Request Password Reset Link
           </Button>

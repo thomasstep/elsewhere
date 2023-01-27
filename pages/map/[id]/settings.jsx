@@ -40,10 +40,9 @@ import {
 //   },
 // }));
 
-function ElsewhereMapSettings(props) {
+function ElsewhereMapSettings() {
   const router = useRouter();
   const [id, setId] = useState('');
-  const [mapId] = useState(router.query.id);
   const [mapName, setMapName] = useState('');
   const [editedMapName, setEditedMapName] = useState('');
   const [writers, setWriters] = useState(null);
@@ -53,10 +52,10 @@ function ElsewhereMapSettings(props) {
 
   useEffect(async () => {
     setToken(getCookie(jwtCookieName));
-    console.log(`TOKEN: ${token}`)
+    console.log(`TOKEN: ${token}`);
     fetch(`${authenticationServiceUrl}/v1/applications/${applicationId}/users/me`, {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     })
       .then((res) => {
@@ -73,7 +72,7 @@ function ElsewhereMapSettings(props) {
 
     fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}`, {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     })
       .then((res) => {
@@ -85,18 +84,21 @@ function ElsewhereMapSettings(props) {
         setMapName(data.name);
         // Initialize this so it doesn't automatically change map name to ''
         setEditedMapName(data.name);
-        const writers = new Set();
+        const newWriters = new Set();
+        // eslint-disable-next-line no-restricted-syntax
         for (const collaborator of data.collaborators) {
-          if (collaborator !== data.createdBy){
-            const res = await fetch(`${authenticationServiceUrl}/v1/applications/${applicationId}/users?${new URLSearchParams({id: collaborator})}`);
+          if (collaborator !== data.createdBy) {
+            // eslint-disable-next-line no-await-in-loop
+            const res = await fetch(`${authenticationServiceUrl}/v1/applications/${applicationId}/users?${new URLSearchParams({ id: collaborator })}`);
             if (res.status === 200) {
-              const data = await res.json();
-              writers.add(data.email);
+              // eslint-disable-next-line no-await-in-loop
+              const userData = await res.json();
+              newWriters.add(userData.email);
             }
           }
         }
-        setWriters(writers);
-        console.log(`writers: ${writers}`)
+        setWriters(newWriters);
+        console.log(`writers: ${newWriters}`);
       });
   }, []);
 
@@ -110,7 +112,7 @@ function ElsewhereMapSettings(props) {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(updates),
       })
@@ -131,7 +133,7 @@ function ElsewhereMapSettings(props) {
     fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     })
       .then((res) => {
@@ -162,7 +164,7 @@ function ElsewhereMapSettings(props) {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(updates),
     })
@@ -170,7 +172,7 @@ function ElsewhereMapSettings(props) {
         if (res.status === 200) {
           writers.add(travelPartnerTextField);
           setWriters(writers); // Do I need to do this?
-          console.log(`added: ${writers}`)
+          console.log(`added: ${writers}`);
         } else {
           // TODO return error
         }
@@ -188,7 +190,7 @@ function ElsewhereMapSettings(props) {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(updates),
     })
@@ -196,7 +198,7 @@ function ElsewhereMapSettings(props) {
         if (res.status === 200) {
           writers.delete(email);
           setWriters(writers);
-          console.log(`deleted: ${writers}`)
+          console.log(`deleted: ${writers}`);
         } else {
           // TODO return error
         }
@@ -245,7 +247,7 @@ function ElsewhereMapSettings(props) {
                   <Grid item>
                     <IconButton
                       aria-label="save"
-                      onClick={saveMapName}
+                      onClick={() => saveMapName()}
                     >
                       <SaveIcon />
                     </IconButton>

@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Grid from '@mui/material/Grid';
@@ -7,6 +8,7 @@ import Typography from '@mui/material/Typography';
 import Layout from '../components/layout';
 
 function Verify() {
+  const router = useRouter();
   const [token, setToken] = useState('');
   const [verified, setVerified] = useState(null);
 
@@ -77,7 +79,7 @@ function Verify() {
         <Grid item xs={12}>
           <Button
             variant="contained"
-            onClick={verifyToken}
+            onClick={(e) => verifyToken(e)}
           >
             Verify Code
           </Button>

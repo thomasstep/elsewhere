@@ -4,7 +4,6 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Layout from '../components/layout';
 import {
-  elsewhereApiUrl,
   authenticationServiceUrl,
   applicationId,
 } from '../utils/config';
@@ -14,12 +13,14 @@ function Index() {
 
   useEffect(() => {
     fetch(`${authenticationServiceUrl}/v1/applications/${applicationId}/users/me`)
-    .then((res) => {
-      if (res.status !== 200) router.push('/signin');
+      .then((res) => {
+        if (res.status !== 200) throw new Error('Not signed in');
 
-      data = res.json()
-      setId(data.id);
-    })
+        return res.json();
+      })
+      .then((data) => {
+        setId(data.id);
+      })
       .catch(() => {});
   }, []);
 

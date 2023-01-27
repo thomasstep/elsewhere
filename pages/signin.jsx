@@ -95,7 +95,7 @@ function SignIn() {
         <Grid item xs={12}>
           <Button
             variant="contained"
-            onClick={handleEmailPasswordSignIn}
+            onClick={(e) => handleEmailPasswordSignIn(e)}
           >
             Sign In
           </Button>

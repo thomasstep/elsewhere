@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 
-const Marker = (options) => {
+function Marker(options) {
   const [marker, setMarker] = useState();
 
   useEffect(() => {
     if (!marker) {
+      // eslint-disable-next-line no-undef
       setMarker(new google.maps.Marker());
     }
 
@@ -21,6 +22,6 @@ const Marker = (options) => {
     }
   }, [marker, options]);
   return null;
-};
+}
 
 export default Marker;

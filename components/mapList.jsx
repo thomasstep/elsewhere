@@ -8,7 +8,6 @@ import Divider from '@mui/material/Divider';
 import SettingsIcon from '@mui/icons-material/Settings';
 
 function MapList({ maps }) {
-
   return (
     <List component="nav">
       {maps.map(({ id, name }) => (
@@ -29,7 +28,7 @@ function MapList({ maps }) {
 }
 
 MapList.propTypes = {
-  mapList: PropTypes.arrayOf(PropTypes.string).isRequired,
+  maps: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
 export default MapList;

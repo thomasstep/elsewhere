@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
-import { useRouter } from 'next/router';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import Layout from '../../components/layout';
+import Layout from '../components/layout';
 
 function UpdatePassword() {
-  const router = useRouter();
   const [resetSuccess, setResetSuccess] = useState(null);
   const [token, setToken] = useState('');
   const [password, setPassword] = useState('');
@@ -33,7 +31,7 @@ function UpdatePassword() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
-      })
+      });
       if (res.status === 200) {
         setResetSuccess(true);
       } else {
@@ -91,7 +89,7 @@ function UpdatePassword() {
         <Grid item xs={12}>
           <Button
             variant="contained"
-            onClick={resetPassword}
+            onClick={(e) => resetPassword(e)}
           >
             Reset Password
           </Button>

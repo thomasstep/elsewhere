@@ -1,5 +1,6 @@
 /* eslint-disable react/no-danger */
 import React from 'react';
+import Script from 'next/script';
 import Document, {
   Html,
   Head,
@@ -64,20 +65,19 @@ export default class MyDocument extends Document {
           <link rel="manifest" href="/site.webmanifest" />
 
           {/* <!-- Global site tag (gtag.js) - Google Analytics --> */}
-          <script
-            async
+          <Script
             src="https://www.googletagmanager.com/gtag/js?id=UA-121297743-3"
+            strategy="afterInteractive"
           />
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                    window.dataLayer = window.dataLayer || [];
-                    function gtag(){dataLayer.push(arguments);}
-                    gtag('js', new Date());
-                    gtag('config', 'UA-121297743-3');
-                `,
-            }}
-          />
+          <Script id="google-analytics" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){window.dataLayer.push(arguments);}
+              gtag('js', new Date());
+
+              gtag('config', 'UA-121297743-3');
+            `}
+          </Script>
 
         </Head>
         <body>

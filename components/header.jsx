@@ -120,18 +120,14 @@ function Header(props) {
         onClick={(e) => toggleDrawer(e)}
         // className={classes.fab}
       >
-        <MenuIcon
-          // className={classes.menuIcon}
-        />
+        <MenuIcon />
       </Fab>
       {navigationDrawer}
     </>
   )
     : (
       <>
-        <AppBar
-          // className={classes.appBar}
-        >
+        <AppBar>
           <Toolbar>
             <IconButton
               onClick={(e) => toggleDrawer(e)}
@@ -139,9 +135,7 @@ function Header(props) {
               edge="start"
               aria-label="menu"
             >
-              <MenuIcon
-                // className={classes.menuIcon}
-              />
+              <MenuIcon />
             </IconButton>
             <Typography
               variant="h5"

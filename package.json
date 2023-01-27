@@ -5,8 +5,8 @@
   "scripts": {
     "build": "next build",
     "dev": "next",
-    "lint": "eslint --ext .js \"apollo/**\" \"components/**\" \"lib/**\" \"pages/**\" \"utils/**\"",
-    "lintfix": "eslint --fix --ext .js \"apollo/**\" \"components/**\" \"lib/**\" \"pages/**\" \"utils/**\"",
+    "lint": "eslint --ext .js \"components/**\" \"lib/**\" \"pages/**\" \"utils/**\"",
+    "lintfix": "eslint --fix --ext .js \"components/**\" \"lib/**\" \"pages/**\" \"utils/**\"",
     "start": "next start"
   },
   "dependencies": {
@@ -23,6 +23,7 @@
     "react": "^18.2.0"
   },
   "devDependencies": {
+    "@next/eslint-plugin-next": "^13.1.5",
     "eslint": "^8.32.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-plugin-import": "^2.22.0",
