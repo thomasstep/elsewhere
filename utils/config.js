@@ -4,4 +4,8 @@ module.exports = {
   applicationId: process.env.AUTH_SERVICE_APP_ID,
   googleMapsKey: process.env.GOOGLE_MAPS_KEY,
   jwtCookieName: 'authToken',
+  newEntryFormView: 'new',
+  activeEntryFormView: 'active',
+  mapView: 'map',
+  scheduleView: 'schedule',
 };
