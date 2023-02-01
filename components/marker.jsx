@@ -1,12 +1,19 @@
 import { useState, useEffect } from 'react';
 
-function Marker(options) {
+function Marker({
+  onClick,
+  ...options
+}) {
   const [marker, setMarker] = useState();
 
   useEffect(() => {
     if (!marker) {
       // eslint-disable-next-line no-undef
-      setMarker(new google.maps.Marker());
+      const newMarker = new google.maps.Marker();
+      newMarker.addListener('click', (e) => {
+        onClick(e);
+      });
+      setMarker(newMarker);
     }
 
     // remove marker from map on unmount
@@ -16,6 +23,7 @@ function Marker(options) {
       }
     };
   }, [marker]);
+
   useEffect(() => {
     if (marker) {
       marker.setOptions(options);

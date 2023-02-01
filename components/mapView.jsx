@@ -42,7 +42,23 @@ function MapView({
       <Map
         zoom={3}
         center={{ lat: 0, lng: 0 }}
-        // onClick={(mp, m, e) => onMapClick(mp, m, e)}
+        onClick={(e) => {
+          // Behavior: if there is an active entry, only unset the active entry
+          //           if there is no active entry, set new entry's location
+          if (activeEntry.id) {
+            // Unset active entry if click is not on a marker
+            setActiveEntry({});
+          } else {
+            // Set new entry's location based on click
+            setNewEntryData({
+              ...newEntryData,
+              location: {
+                latitude: e.latLng.lat(),
+                longitude: e.latLng.lng(),
+              },
+            });
+          }
+        }}
         // onCenterChanged={(mp, m) => onMapCenterChanged(mp, m)}
         // onReady={(mp, m) => onMapReady(mp, m)}
         zoomControl={false}
@@ -67,12 +83,8 @@ function MapView({
                 lat: entry.location.latitude,
                 lng: entry.location.longitude,
               }}
-              onClick={(props, googleMarker) => {
-                // eslint-disable-next-line no-undef
-                googleMarker.setAnimation(google.maps.Animation.BOUNCE);
-                // setActiveGoogleMarker(googleMarker);
-                // setActiveEntry(entry);
-                // setActiveInfoWindow(true);
+              onClick={() => {
+                setActiveEntry(entry);
               }}
               // eslint-disable-next-line no-undef
               animation={animate && google.maps.Animation.BOUNCE}
@@ -81,6 +93,27 @@ function MapView({
 
           return googleMarker;
         }) : null}
+
+        {newEntryData
+          && newEntryData.location
+          && newEntryData.location.latitude
+          && newEntryData.location.longitude
+          ? (
+              <Marker
+                key={"new-entry"}
+                position={{
+                  lat: newEntryData.location.latitude,
+                  lng: newEntryData.location.longitude,
+                }}
+                label={{
+                  text: "\ue145",
+                  fontFamily: "Material Icons",
+                  color: "#ffffff",
+                  fontSize: "18px",
+                }}
+              />
+            )
+          : null}
 
       </Map>
     </Box>

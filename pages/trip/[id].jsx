@@ -52,9 +52,18 @@ function Trip() {
   const [activeEntry, setActiveEntry] = useState({});
   // newEntryData is the data that will be sent for a new entry being created
   const [newEntryData, setNewEntryData] = useState({});
+  // token is the auth token held in a cookie
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
-    const token = getCookie(jwtCookieName);
+    const cookieToken = getCookie(jwtCookieName);
+    setToken(cookieToken);
+  }, []);
+
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
 
     fetch(`${authenticationServiceUrl}/v1/applications/${applicationId}/users/me`, {
       headers: {
@@ -73,24 +82,101 @@ function Trip() {
         router.push('/signin');
       });
 
-    fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/entry`, {
+    if (router.isReady) {
+      fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/entry`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((res) => {
+          if (res.status !== 200) throw new Error('Unhandled status code');
+
+          return res.json();
+        })
+        .then((data) => {
+          setEntries(data);
+          console.log(data)
+        })
+        .catch((err) => {
+          // TODO handle error
+          console.error(err);
+        });
+    }
+  }, [router]);
+
+  async function createEntry() {
+    if (!router) {
+      return false;
+    }
+
+    const res = await fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/entry`, {
+      method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-    })
-      .then((res) => {
-        if (res.status !== 200) throw new Error('Unhandled status code');
+      body: JSON.stringify(newEntryData),
+    });
 
-        return res.json();
-      })
-      .then((data) => {
-        setEntries(data);
-        console.log(data)
-      })
-      .catch((err) => {
-        // TODO handle error
-      })
-  }, []);
+    if (res.status !== 200) {
+      return false;
+    }
+
+    const data = res.json();
+    return data;
+  }
+
+  async function updateEntry() {
+    if (!router) {
+      return false;
+    }
+
+    // Build request data
+    const entryData = {location: {}};
+    if (activeEntry.name !== '') entryData.name = activeEntry.name;
+    if (activeEntry.startTimestamp !== '') entryData.startTimestamp = activeEntry.startTimestamp;
+    if (activeEntry.endTimestamp !== '') entryData.endTimestamp = activeEntry.endTimestamp;
+    if (activeEntry.notes !== '') entryData.notes = activeEntry.notes;
+    if (activeEntry.location.latitude) entryData.location.latitude = activeEntry.location.latitude;
+    if (activeEntry.location.longitude) entryData.location.longitude = activeEntry.location.longitude;
+    if (activeEntry.location.address !== '') entryData.location.address = activeEntry.location.address;
+
+    const res = await fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/entry/${activeEntry.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(entryData),
+    });
+
+    if (res.status !== 200) {
+      return false;
+    }
+
+    const data = res.json();
+    return data;
+  }
+
+  async function deleteEntry() {
+    if (!router) {
+      return false;
+    }
+
+    const res = await fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/entry/${activeEntry.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (res.status !== 204) {
+      return false;
+    }
+
+    return true;
+  }
 
   if (id) {
     return (
@@ -120,6 +206,8 @@ function Trip() {
           setEntries={setEntries}
           activeEntry={activeEntry}
           setActiveEntry={setActiveEntry}
+          updateEntry={updateEntry}
+          deleteEntry={deleteEntry}
         />
 
         <NewEntryForm
@@ -127,6 +215,7 @@ function Trip() {
           setEntries={setEntries}
           newEntryData={newEntryData}
           setNewEntryData={setNewEntryData}
+          createEntry={createEntry}
         />
 
       </Layout>

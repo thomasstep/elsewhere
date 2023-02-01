@@ -584,7 +584,7 @@ function ElsewhereMap() {
                     variant="outlined"
                     onChange={(e) => handleActiveMarkerNotesTextFieldChange(e)}
                     multiline
-                    rowsMax={10}
+                    rows={10}
                   />
                 </Grid>
                 {

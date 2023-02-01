@@ -89,12 +89,12 @@ function Map({
 }
 
 Map.propTypes = {
-  onClick: PropTypes.func.isRequired,
-  onIdle: PropTypes.func.isRequired,
+  onClick: PropTypes.func,
+  onIdle: PropTypes.func,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node).isRequired,
     PropTypes.node.isRequired,
-  ]).isRequired,
+  ]),
   // eslint-disable-next-line react/forbid-prop-types
   style: PropTypes.object.isRequired,
 };

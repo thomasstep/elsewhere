@@ -16,6 +16,8 @@ function EntryInfo({
   setEntries,
   activeEntry,
   setActiveEntry,
+  updateEntry,
+  deleteEntry,
 }) {
   // Boolean tells whether the entry has been edited
   const [edited, setEdited] = useState(false);
@@ -91,7 +93,7 @@ function EntryInfo({
                     setEdited(true);
                   }}
                   multiline
-                  rowsMax={10}
+                  rows={10}
                 />
               </Grid>
             </Grid>
@@ -115,10 +117,18 @@ function EntryInfo({
               variant="contained"
               // className={classes.saveButton}
               startIcon={<SaveIcon />}
-              onClick={() => {
+              onClick={async () => {
                 if (!edited) {
-
+                  return;
                 } else {
+                  // Make API call
+                  const updateRes = await updateEntry();
+                  if (!updateRes) {
+                    // TODO show error
+                    return;
+                  }
+
+                  // Update state accordingly
                   const newEntries = Array.from(entries);
                   const index = newEntries.findIndex((entry) => activeEntry.id === entry.id);
                   if (index >= 0) {
@@ -137,7 +147,15 @@ function EntryInfo({
               variant="contained"
               // className={classes.deleteButton}
               startIcon={<DeleteIcon />}
-              onClick={() => {
+              onClick={async () => {
+                // Make API call
+                const deleteRes = await deleteEntry();
+                if (!deleteRes) {
+                  // TODO show error
+                  return;
+                }
+
+                // Update state accordingly
                 const newEntries = Array.from(entries);
                 const index = newEntries.findIndex((entry) => activeEntry.id === entry.id);
                 if (index >= 0) {
@@ -155,6 +173,7 @@ function EntryInfo({
       </Box>
     );
   }
+
   // TODO make this an error page
   return <LoadingPage />;
 }
@@ -165,6 +184,8 @@ EntryInfo.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   activeEntry: PropTypes.object.isRequired,
   setActiveEntry: PropTypes.func.isRequired,
+  updateEntry: PropTypes.func.isRequired,
+  deleteEntry: PropTypes.func.isRequired,
 };
 
 export default EntryInfo;
