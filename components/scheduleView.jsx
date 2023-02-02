@@ -6,6 +6,7 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 
 import LoadingPage from './loadingPage';
+import Schedule from './schedule';
 
 function ScheduleView({
   entries,
@@ -36,10 +37,16 @@ function ScheduleView({
         noTime.push(entry);
       }
     });
-    withTime = withTime.sort((a, b) => a.startTimestamp - b.endTimestamp)
-    return (
+    withTime = withTime.sort((a, b) => a.startTimestamp - b.startTimestamp);
 
-      <Box>
+    return (
+      <Box
+        sx={{
+          height: '100vh',
+          overflow: 'hidden',
+          overflowY: 'scroll',
+        }}
+      >
         <Grid
           container
           direction="column"
@@ -61,7 +68,10 @@ function ScheduleView({
                 {
                   noTime.map((entry) => {
                     return (
-                      <Typography variant="body1">
+                      <Typography
+                        id={entry.id}
+                        variant="body1"
+                      >
                         No time: {JSON.stringify(entry)}
                       </Typography>
                     );
@@ -70,7 +80,10 @@ function ScheduleView({
                 {
                   withTime.map((entry) => {
                     return (
-                      <Typography variant="body1">
+                      <Typography
+                        id={entry.id}
+                        variant="body1"
+                      >
                         Has time: {JSON.stringify(entry)}
                       </Typography>
                     );
@@ -80,6 +93,11 @@ function ScheduleView({
             </Grid>
           </Grid>
         </Grid>
+        <Schedule
+          entries={withTime}
+          startKey={'startTimestamp'}
+          endKey={'endTimestamp'}
+        />
       </Box>
     );
   }

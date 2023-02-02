@@ -71,6 +71,11 @@ function MapView({
       >
 
         {entries.length ? entries.map((entry) => {
+          if (
+            !entry.location
+            || !entry.location.latitude
+            || !entry.location.longitude) return null;
+
           let animate = null;
           if (entry.id === activeEntry.id) {
             animate = true;

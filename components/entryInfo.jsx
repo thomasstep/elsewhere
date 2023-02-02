@@ -45,8 +45,8 @@ function EntryInfo({
               <Grid item>
                 <TextField
                   id="filled-basic"
-                  value={activeEntry.name}
-                  label="Marker Name"
+                  value={activeEntry.name ? activeEntry.name : ''}
+                  label="Name"
                   variant="outlined"
                   onChange={(e) => {
                     setActiveEntry({
@@ -82,7 +82,7 @@ function EntryInfo({
               <Grid item>
                 <TextField
                   id="filled-basic"
-                  value={activeEntry.notes}
+                  value={activeEntry.notes ? activeEntry.notes : ''}
                   label="Notes"
                   variant="outlined"
                   onChange={(e) => {
@@ -101,14 +101,96 @@ function EntryInfo({
 
           {/* Lat field */}
           <Grid item xs={12}>
-            <Typography variant="h5">Latitude</Typography>
-            <Typography variant="body1">{activeEntry.location ? activeEntry.location.latitude : null}</Typography>
+            <TextField
+              id="filled-basic"
+              value={activeEntry.location ? activeEntry.location.latitude : ''}
+              label="Latitude"
+              variant="outlined"
+              onChange={(e) => {
+                setActiveEntry({
+                  ...activeEntry,
+                  location: {
+                    ...activeEntry.location,
+                    latitude: e.target.value,
+                  },
+                });
+                setEdited(true);
+              }}
+            />
           </Grid>
 
           {/* Lng field */}
           <Grid item xs={12}>
-            <Typography variant="h5">Longitude</Typography>
-            <Typography variant="body1">{activeEntry.location ? activeEntry.location.longitude : null}</Typography>
+            <TextField
+              id="filled-basic"
+              value={activeEntry.location ? activeEntry.location.longitude : ''}
+              label="Longitude"
+              variant="outlined"
+              onChange={(e) => {
+                setActiveEntry({
+                  ...activeEntry,
+                  location: {
+                    ...activeEntry.location,
+                    longitude: e.target.value,
+                  },
+                });
+                setEdited(true);
+              }}
+            />
+          </Grid>
+
+          {/* Address field */}
+          <Grid item xs={12}>
+            <TextField
+              id="filled-basic"
+              value={activeEntry.location ? activeEntry.location.address : ''}
+              label="Address"
+              variant="outlined"
+              onChange={(e) => {
+                setActiveEntry({
+                  ...activeEntry,
+                  location: {
+                    ...activeEntry.location,
+                    address: e.target.value,
+                  },
+                });
+                setEdited(true);
+              }}
+            />
+          </Grid>
+
+          {/* Start time field */}
+          <Grid item xs={12}>
+            <TextField
+              id="filled-basic"
+              value={activeEntry.startTimestamp ? activeEntry.startTimestamp : ''}
+              label="Start time"
+              variant="outlined"
+              onChange={(e) => {
+                setActiveEntry({
+                  ...activeEntry,
+                  startTimestamp: e.target.value,
+                });
+                setEdited(true);
+              }}
+            />
+          </Grid>
+
+          {/* End time field */}
+          <Grid item xs={12}>
+            <TextField
+              id="filled-basic"
+              value={activeEntry.endTimestamp ? activeEntry.endTimestamp : ''}
+              label="End time"
+              variant="outlined"
+              onChange={(e) => {
+                setActiveEntry({
+                  ...activeEntry,
+                  endTimestamp: e.target.value,
+                });
+                setEdited(true);
+              }}
+            />
           </Grid>
 
           {/* Save and delete buttons */}

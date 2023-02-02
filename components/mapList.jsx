@@ -13,10 +13,10 @@ function MapList({ maps }) {
       {maps.map(({ id, name }) => (
         <React.Fragment key={id}>
           <ListItem button>
-            <Link href="/map/[id]" as={`/map/${id}`}>
+            <Link href="/trip/[id]" as={`/trip/${id}`}>
               <ListItemText primary={name} />
             </Link>
-            <Link href="/map/[id]/settings" as={`/map/${id}/settings`}>
+            <Link href="/trip/[id]/settings" as={`/trip/${id}/settings`}>
               <SettingsIcon />
             </Link>
           </ListItem>
