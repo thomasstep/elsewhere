@@ -1,10 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import { LocalConvenienceStoreOutlined } from '@mui/icons-material';
 
 
 function getDateFromISOString(isoString) {
@@ -34,7 +33,21 @@ function Schedule({
   startKey = 'start',
   endKey = 'end',
 }) {
-  if (entries.length > 0) {
+  const hours = ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'];
+  const dateHeight = 40; // In px
+  const hourHeight = 40; // In px
+  const minuteHeight = hourHeight / 60;
+
+  const [days, setDays] = useState([]);
+  const [scheduleHeight, setScheduleHeight] = useState(0);
+  const [entryOffsets, setEntryOffsets] = useState({});
+
+  useEffect(() => {
+    if (entries.length < 1) return;
+
+    /**
+     * Get the earliest and latest of all entries
+     */
     let earliestEntry = entries[0];
     let latestEntry = entries[0];
     entries.forEach((entry) => {
@@ -51,14 +64,14 @@ function Schedule({
 
     // Get px heights
     const days = getDateRange(earliestEntry[startKey], latestEntry[endKey]);
-    const hours = ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'];
-    const dateHeight = 40; // In px
-    const hourHeight = 40; // In px
-    const minuteHeight = hourHeight / 60;
+    setDays(days);
     // One height unit for each hour per day plus on height unit for each day
     const scheduleHeight = (days.length) * 25 * hourHeight;
+    setScheduleHeight(scheduleHeight);
 
-    // Get entry px heights and offsets
+    /**
+     * Get entry px heights and vertical offsets
+     */
     const entryOffsets = {};
     const earliestDay = new Date(Date.UTC(earliestEntry[startKey].getUTCFullYear(), earliestEntry[startKey].getUTCMonth(), earliestEntry[startKey].getUTCDate()));
     entries.forEach((entry) => {
@@ -93,7 +106,10 @@ function Schedule({
       };
     });
 
-    // const sortedByStartTime = entries.sort((a, b) => a[startKey] - b[endKey]);
+    /**
+     * Get entry widths and horizontal offsets
+     * TODO this whole piece of the operation could use some optimization
+     */
     const sorted = entries.sort((a, b) => {
       // If two events start at the same time, the one with a later start
       //  time goes first
@@ -184,15 +200,15 @@ function Schedule({
     });
     // Add horizontal offsets to entryOffsets
     Object.entries(entryMetadata).forEach(([id, metadata]) => {
-      console.log(id, metadata)
       const width = 100/metadata.maxCollisions;
       entryOffsets[id].width = `${width}%`;
       entryOffsets[id].left = `calc(${width * metadata.position}% + 0px)`;
-    })
-    console.log(matrix)
-    console.log(entryMetadata)
-    // TODO calculate width and offset based on metadata
+    });
 
+    setEntryOffsets(entryOffsets);
+  }, [entries.length]);
+
+  if (entries.length > 0) {
     return (
       <Box
         sx={{

@@ -47,52 +47,7 @@ function ScheduleView({
           overflowY: 'scroll',
         }}
       >
-        <Grid
-          container
-          direction="column"
-          justify="center"
-          alignItems="baseline"
-          wrap="nowrap"
-          spacing={6}
-        >
-          {/* Name field */}
-          <Grid item xs={12}>
-            <Grid
-              container
-              direction="row"
-              justify="center"
-              alignItems="center"
-              spacing={2}
-            >
-              <Grid item>
-                {
-                  noTime.map((entry) => {
-                    return (
-                      <Typography
-                        id={entry.id}
-                        variant="body1"
-                      >
-                        No time: {JSON.stringify(entry)}
-                      </Typography>
-                    );
-                  })
-                }
-                {
-                  withTime.map((entry) => {
-                    return (
-                      <Typography
-                        id={entry.id}
-                        variant="body1"
-                      >
-                        Has time: {JSON.stringify(entry)}
-                      </Typography>
-                    );
-                  })
-                }
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
+        {/* TODO show entries without any times */}
         <Schedule
           entries={withTime}
           startKey={'startTimestamp'}
