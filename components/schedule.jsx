@@ -35,7 +35,6 @@ function Schedule({
   endKey = 'end',
 }) {
   if (entries.length > 0) {
-    const sortedEntries = entries.sort((a, b) => a[startKey] - b[endKey]);
     let earliestEntry = entries[0];
     let latestEntry = entries[0];
     entries.forEach((entry) => {
@@ -47,6 +46,8 @@ function Schedule({
         latestEntry = entry;
       }
     });
+
+    const entryMetadata = {};
 
     // Get px heights
     const days = getDateRange(earliestEntry[startKey], latestEntry[endKey]);
@@ -80,13 +81,108 @@ function Schedule({
       // Calculate minutes from earliest, then multiply by minute height
       topOffset += (msTimeFromEarliest / (1000 * 60)) * minuteHeight;
 
+      // Add to metadata cache for use in horizontal calculations
+      entryMetadata[entry.id] = {
+        msTimeFromEarliest,
+        msDuration,
+      };
+
       entryOffsets[entry.id] = {
         top: `${topOffset}px`,
         height: `${height}px`,
       };
-      console.log(`ID: ${entry.id}; minDuration: ${msDuration / (1000 * 60)}; minute tfe: ${msTimeFromEarliest / (1000 * 60)}; days fe: ${endDaysFromEarliest}`)
     });
-    console.log(entryOffsets);
+
+    // const sortedByStartTime = entries.sort((a, b) => a[startKey] - b[endKey]);
+    const sorted = entries.sort((a, b) => {
+      // If two events start at the same time, the one with a later start
+      //  time goes first
+      if (a[startKey].getTime() === b[startKey].getTime()) {
+        return b[endKey] - a[endKey];
+      }
+
+      return a[startKey] - b[startKey];
+    });
+    const sortedIds = sorted.map((entry) => entry.id);
+
+    const blockResolution = 5; // minutes, detail to which we calculate overlapping
+    const blocksPerDay = (24 * 60) / blockResolution;
+    const totalBlocks = blocksPerDay * days.length;
+    const entryLength = entries.length;
+    const columns = [];
+    for (let i = 0; i < entryLength; i++) {
+      columns.push(0);
+    }
+
+    let matrix = [];
+    for (let i = 0; i < totalBlocks; i++) {
+      matrix.push(Array.from(columns));
+    }
+
+    // Seed matrix
+    sortedIds.forEach((entryId, entryIndex) => {
+      const blocksFromEarliest = entryMetadata[entryId].msTimeFromEarliest / (1000 * 60 * blockResolution);
+      const blockDuration = entryMetadata[entryId].msDuration / (1000 * 60 * blockResolution);
+      let startingBlock = blocksFromEarliest;
+      for (let i = 0; i < blockDuration; i++) {
+        matrix[startingBlock][entryIndex] = 1;
+        startingBlock += 1;
+      }
+
+      entryMetadata[entryId].blocksFromEarliest = blocksFromEarliest;
+      entryMetadata[entryId].blockDuration = blockDuration;
+    });
+    // Seed matrix with collision values
+    matrix = matrix.map((row) => {
+      // Calculate collisions per row
+      const collisions = row.reduce(
+        (accumulator, currentValue) => accumulator + currentValue,
+        0,
+      );
+      // Change each entry's value to collisions in row
+      return row.map((entry) => {
+        if (entry) {
+          return collisions;
+        }
+        return 0;
+      });
+    });
+    // Find max collisions per entry; 1 means no collisions
+    sorted.forEach((entry, entryIndex) => {
+      const {
+        blocksFromEarliest,
+        blockDuration,
+      } = entryMetadata[entry.id];
+      let maxCollisions = 1;
+      for (let i = blocksFromEarliest; i <= blockDuration; i++) {
+        const collisions = matrix[i][entryIndex];
+        if (collisions > maxCollisions) {
+          maxCollisions = collisions;
+        }
+      }
+      entryMetadata[entry.id].maxCollisions = maxCollisions;
+    });
+    // Determine position relative to overlaps
+    matrix.forEach((row) => {
+      // Check if row contains an entry's max collisions and note its position
+      let position = 0;
+      row.forEach((collisions, entryIndex) => {
+        if (collisions === entryMetadata[sortedIds[entryIndex]].maxCollisions) {
+          // If the overlap already has a position don't give it a new one,
+          //  but push the position for subsequent entries
+          const currentPositionDefined = entryMetadata[sortedIds[entryIndex]].position;
+          if (currentPositionDefined) {
+            position = currentPositionDefined + 1
+          } else {
+            entryMetadata[sortedIds[entryIndex]].position = position;
+            position += 1;
+          }
+        }
+      })
+    });
+    console.log(matrix)
+    console.log(entryMetadata)
+    // TODO calculate width and offset based on metadata
 
     return (
       <Box

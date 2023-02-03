@@ -28,7 +28,7 @@ function MapList({ maps }) {
 }
 
 MapList.propTypes = {
-  maps: PropTypes.arrayOf(PropTypes.string).isRequired,
+  maps: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
 export default MapList;
