@@ -154,11 +154,13 @@ function Schedule({
         blockDuration,
       } = entryMetadata[entry.id];
       let maxCollisions = 1;
-      for (let i = blocksFromEarliest; i <= blockDuration; i++) {
-        const collisions = matrix[i][entryIndex];
+      let startingBlock = blocksFromEarliest;
+      for (let i = 0; i < blockDuration; i++) {
+        const collisions = matrix[startingBlock][entryIndex];
         if (collisions > maxCollisions) {
           maxCollisions = collisions;
         }
+        startingBlock += 1;
       }
       entryMetadata[entry.id].maxCollisions = maxCollisions;
     });
@@ -180,6 +182,13 @@ function Schedule({
         }
       })
     });
+    // Add horizontal offsets to entryOffsets
+    Object.entries(entryMetadata).forEach(([id, metadata]) => {
+      console.log(id, metadata)
+      const width = 100/metadata.maxCollisions;
+      entryOffsets[id].width = `${width}%`;
+      entryOffsets[id].left = `calc(${width * metadata.position}% + 0px)`;
+    })
     console.log(matrix)
     console.log(entryMetadata)
     // TODO calculate width and offset based on metadata
