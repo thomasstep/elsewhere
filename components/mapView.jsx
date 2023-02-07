@@ -82,6 +82,7 @@ function MapView({
           }
 
           const googleMarker = (
+            // TODO https://developers.google.com/maps/documentation/javascript/advanced-markers/accessible-markers#make_a_marker_draggable
             <Marker
               key={entry.id}
               position={{
@@ -104,20 +105,20 @@ function MapView({
           && newEntryData.location.latitude
           && newEntryData.location.longitude
           ? (
-              <Marker
-                key={"new-entry"}
-                position={{
-                  lat: newEntryData.location.latitude,
-                  lng: newEntryData.location.longitude,
-                }}
-                label={{
-                  text: "\ue145",
-                  fontFamily: "Material Icons",
-                  color: "#ffffff",
-                  fontSize: "18px",
-                }}
-              />
-            )
+            <Marker
+              key="new-entry"
+              position={{
+                lat: newEntryData.location.latitude,
+                lng: newEntryData.location.longitude,
+              }}
+              label={{
+                text: '\ue145',
+                fontFamily: 'Material Icons',
+                color: '#ffffff',
+                fontSize: '18px',
+              }}
+            />
+          )
           : null}
 
       </Map>
@@ -126,6 +127,7 @@ function MapView({
 }
 
 MapView.propTypes = {
+  // eslint-disable-next-line react/forbid-prop-types
   entries: PropTypes.arrayOf(PropTypes.object).isRequired,
   // eslint-disable-next-line react/forbid-prop-types
   activeEntry: PropTypes.object.isRequired,

@@ -2,18 +2,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
 
 import LoadingPage from './loadingPage';
 import Schedule from './schedule';
 
 function ScheduleView({
   entries,
-  activeEntry,
-  setActiveEntry,
-  newEntryData,
-  setNewEntryData,
+  // activeEntry,
+  // setActiveEntry,
+  // newEntryData,
+  // setNewEntryData,
 }) {
   if (entries.length > 0) {
     const noTime = [];
@@ -50,8 +48,8 @@ function ScheduleView({
         {/* TODO show entries without any times */}
         <Schedule
           entries={withTime}
-          startKey={'startTimestamp'}
-          endKey={'endTimestamp'}
+          startKey="startTimestamp"
+          endKey="endTimestamp"
         />
       </Box>
     );
@@ -62,13 +60,14 @@ function ScheduleView({
 }
 
 ScheduleView.propTypes = {
+  // eslint-disable-next-line react/forbid-prop-types
   entries: PropTypes.arrayOf(PropTypes.object).isRequired,
   // eslint-disable-next-line react/forbid-prop-types
-  activeEntry: PropTypes.object.isRequired,
-  setActiveEntry: PropTypes.func.isRequired,
+  // activeEntry: PropTypes.object.isRequired,
+  // setActiveEntry: PropTypes.func.isRequired,
   // eslint-disable-next-line react/forbid-prop-types
-  newEntryData: PropTypes.object.isRequired,
-  setNewEntryData: PropTypes.func.isRequired,
+  // newEntryData: PropTypes.object.isRequired,
+  // setNewEntryData: PropTypes.func.isRequired,
 };
 
 export default ScheduleView;

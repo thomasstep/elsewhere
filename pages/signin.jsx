@@ -78,7 +78,7 @@ function SignIn() {
             id="filled-basic"
             value={signInEmail}
             label="Email address"
-            variant="outlined"
+            variant="standard"
             onChange={(e) => handleSignInEmailFieldChange(e)}
           />
         </Grid>
@@ -87,7 +87,7 @@ function SignIn() {
             id="filled-basic"
             value={signInPassword}
             label="Password"
-            variant="outlined"
+            variant="standard"
             type="password"
             onChange={(e) => handleSignInPasswordFieldChange(e)}
           />
@@ -101,7 +101,13 @@ function SignIn() {
           </Button>
         </Grid>
         <Grid item xs={12}>
-          <Link href="/forgot-password">Forgot your password?</Link>
+          <Button
+            variant="contained"
+            component={Link}
+            href="/forgot-password"
+          >
+            Forgot your password?
+          </Button>
         </Grid>
       </Grid>
     </Layout>

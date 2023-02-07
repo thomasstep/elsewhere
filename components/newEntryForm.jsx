@@ -43,7 +43,7 @@ function NewEntryForm({
                   id="filled-basic"
                   value={newEntryData.name}
                   label="Marker Name"
-                  variant="outlined"
+                  variant="standard"
                   onChange={(e) => {
                     setNewEntryData({
                       ...newEntryData,
@@ -69,7 +69,7 @@ function NewEntryForm({
                   id="filled-basic"
                   value={newEntryData.notes}
                   label="Notes"
-                  variant="outlined"
+                  variant="standard"
                   onChange={(e) => {
                     setNewEntryData({
                       ...newEntryData,
@@ -124,7 +124,7 @@ function NewEntryForm({
               // className={classes.deleteButton}
               startIcon={<DeleteIcon />}
               onClick={() => {
-                setNewEntryData({})
+                setNewEntryData({});
               }}
             >
               Cancel
@@ -139,6 +139,7 @@ function NewEntryForm({
 }
 
 NewEntryForm.propTypes = {
+  // eslint-disable-next-line react/forbid-prop-types
   entries: PropTypes.arrayOf(PropTypes.object).isRequired,
   setEntries: PropTypes.func.isRequired,
   // eslint-disable-next-line react/forbid-prop-types

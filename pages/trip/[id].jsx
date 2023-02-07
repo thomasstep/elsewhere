@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 
 // import { makeStyles } from '@mui/styles';
 import { Wrapper, Status } from '@googlemaps/react-wrapper';
@@ -16,8 +16,8 @@ import {
   applicationId,
   jwtCookieName,
   googleMapsKey,
-  newEntryFormView,
-  mapView,
+  // newEntryFormView,
+  // mapView,
 } from '../../utils/config';
 import {
   getCookie,
@@ -45,9 +45,9 @@ function Trip() {
   // entries is an array of entry objects; shape determined by API
   const [entries, setEntries] = useState([]);
   // Represents which data view to show: a map of entries, a schedule with entries
-  const [activeDataView, setActiveDataView] = useState(mapView);
+  // const [activeDataView, setActiveDataView] = useState(mapView);
   // Represents which form view to show: creating a new entry, active entry information
-  const [activeFormView, setActiveFormView] = useState(newEntryFormView);
+  // const [activeFormView, setActiveFormView] = useState(newEntryFormView);
   // activeEntry is the data of the actively selected entry
   const [activeEntry, setActiveEntry] = useState({});
   // newEntryData is the data that will be sent for a new entry being created
@@ -95,7 +95,7 @@ function Trip() {
         })
         .then((data) => {
           setEntries(data);
-          console.log(data)
+          console.log(data);
         })
         .catch((err) => {
           // TODO handle error
@@ -126,19 +126,28 @@ function Trip() {
     return data;
   }
 
+  const createEntryCallback = useCallback(() => {
+    createEntry();
+  });
+
   async function updateEntry() {
     if (!router) {
       return false;
     }
 
     // Build request data
-    const entryData = {location: {}};
+    const entryData = { location: {} };
     if (activeEntry.name !== '') entryData.name = activeEntry.name;
     if (activeEntry.startTimestamp !== '') entryData.startTimestamp = activeEntry.startTimestamp;
     if (activeEntry.endTimestamp !== '') entryData.endTimestamp = activeEntry.endTimestamp;
     if (activeEntry.notes !== '') entryData.notes = activeEntry.notes;
-    if (activeEntry.location.latitude) entryData.location.latitude = activeEntry.location.latitude;
-    if (activeEntry.location.longitude) entryData.location.longitude = activeEntry.location.longitude;
+    if (activeEntry.location.latitude) {
+      entryData.location.latitude = activeEntry.location.latitude;
+    }
+
+    if (activeEntry.location.longitude) {
+      entryData.location.longitude = activeEntry.location.longitude;
+    }
     if (activeEntry.location.address !== '') entryData.location.address = activeEntry.location.address;
 
     const res = await fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/entry/${activeEntry.id}`, {
@@ -157,6 +166,10 @@ function Trip() {
     const data = res.json();
     return data;
   }
+
+  const updateEntryCallback = useCallback(() => {
+    updateEntry();
+  });
 
   async function deleteEntry() {
     if (!router) {
@@ -177,6 +190,10 @@ function Trip() {
 
     return true;
   }
+
+  const deleteEntryCallback = useCallback(() => {
+    deleteEntry();
+  });
 
   if (id) {
     return (
@@ -206,8 +223,8 @@ function Trip() {
           setEntries={setEntries}
           activeEntry={activeEntry}
           setActiveEntry={setActiveEntry}
-          updateEntry={updateEntry}
-          deleteEntry={deleteEntry}
+          updateEntry={updateEntryCallback}
+          deleteEntry={deleteEntryCallback}
         />
 
         <NewEntryForm
@@ -215,7 +232,7 @@ function Trip() {
           setEntries={setEntries}
           newEntryData={newEntryData}
           setNewEntryData={setNewEntryData}
-          createEntry={createEntry}
+          createEntry={createEntryCallback}
         />
 
       </Layout>

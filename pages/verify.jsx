@@ -71,7 +71,7 @@ function Verify() {
             id="filled-basic"
             value={token}
             label="Code"
-            variant="outlined"
+            variant="standard"
             type="text"
             onChange={(e) => handleTokenFieldChange(e)}
           />

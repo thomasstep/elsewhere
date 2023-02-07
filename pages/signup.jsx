@@ -61,7 +61,7 @@ function SignUp() {
             id="filled-basic"
             value={signUpEmail}
             label="Email address"
-            variant="outlined"
+            variant="standard"
             onChange={(e) => handleSignUpEmailFieldChange(e)}
           />
         </Grid>
@@ -70,7 +70,7 @@ function SignUp() {
             id="filled-basic"
             value={signUpPassword}
             label="Password"
-            variant="outlined"
+            variant="standard"
             type="password"
             onChange={(e) => handleSignUpPasswordFieldChange(e)}
           />
@@ -84,7 +84,13 @@ function SignUp() {
           </Button>
         </Grid>
         <Grid item xs={12}>
-          <Link href="/verify">Need to verify your email?</Link>
+          <Button
+            variant="contained"
+            component={Link}
+            href="/verify"
+          >
+            Need to verify your email?
+          </Button>
         </Grid>
       </Grid>
     </Layout>

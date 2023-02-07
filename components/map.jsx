@@ -99,4 +99,10 @@ Map.propTypes = {
   style: PropTypes.object.isRequired,
 };
 
+Map.defaultProps = {
+  onClick: () => {},
+  onIdle: () => {},
+  children: null,
+};
+
 export default Map;

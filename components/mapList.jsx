@@ -28,6 +28,7 @@ function MapList({ maps }) {
 }
 
 MapList.propTypes = {
+  // eslint-disable-next-line react/forbid-prop-types
   maps: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 

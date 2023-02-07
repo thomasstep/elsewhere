@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 
 function Marker({
   onClick,
@@ -36,6 +37,7 @@ function Marker({
   //  one and adding a new one
   useEffect(() => {
     if (marker && clickListener) {
+      // eslint-disable-next-line no-undef
       google.maps.event.removeListener(clickListener);
       const clk = marker.addListener('click', (e) => {
         onClick(e);
@@ -45,5 +47,13 @@ function Marker({
   }, [marker, onClick]);
   return null;
 }
+
+Marker.propTypes = {
+  onClick: PropTypes.func,
+};
+
+Marker.defaultProps = {
+  onClick: () => {},
+};
 
 export default Marker;

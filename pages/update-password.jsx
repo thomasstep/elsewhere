@@ -71,7 +71,7 @@ function UpdatePassword() {
             id="filled-basic"
             value={password}
             label="Password"
-            variant="outlined"
+            variant="standard"
             type="password"
             onChange={(e) => handlePasswordFieldChange(e)}
           />
@@ -81,7 +81,7 @@ function UpdatePassword() {
             id="filled-basic"
             value={token}
             label="Token"
-            variant="outlined"
+            variant="standard"
             type="text"
             onChange={(e) => handleTokenFieldChange(e)}
           />

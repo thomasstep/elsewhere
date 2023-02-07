@@ -240,7 +240,7 @@ function ElsewhereMapSettings() {
                       id="filled-basic"
                       value={editedMapName}
                       label="Map Name"
-                      variant="outlined"
+                      variant="standard"
                       onChange={(e) => handleMapNameTextFieldChange(e)}
                     />
                   </Grid>
@@ -307,7 +307,7 @@ function ElsewhereMapSettings() {
                   id="filled-basic"
                   value={travelPartnerTextField}
                   label="Email"
-                  variant="outlined"
+                  variant="standard"
                   onChange={(e) => handleTravelBuddyTextFieldChange(e)}
                 />
               </Grid>

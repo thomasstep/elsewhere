@@ -5,21 +5,22 @@ import Link from 'next/link';
 
 // Menu bar
 import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-
-// Floating menu
 import Drawer from '@mui/material/Drawer';
-import Fab from '@mui/material/Fab';
+import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import HomeIcon from '@mui/icons-material/Home';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+// Icons
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import AddIcon from '@mui/icons-material/Add';
+import HomeIcon from '@mui/icons-material/Home';
+import LoginIcon from '@mui/icons-material/Login';
+import LogoutIcon from '@mui/icons-material/Logout';
+import MenuIcon from '@mui/icons-material/Menu';
 
 // const useStyles = makeStyles((theme) => ({
 //   fab: {
@@ -52,7 +53,7 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 function Header(props) {
   const [open, setOpen] = useState(false);
-  const { mapPage, session } = props;
+  const { session } = props;
   // const classes = useStyles(props);
 
   function toggleDrawer(event) {
@@ -71,41 +72,53 @@ function Header(props) {
         onKeyDown={(e) => toggleDrawer(e)}
       >
         <List>
-          <Link href="/">
-            <ListItem button key="Home">
-              <ListItemIcon><HomeIcon /></ListItemIcon>
+          <ListItem key="Home">
+            <ListItemButton component={Link} href="/">
+              <ListItemIcon>
+                <HomeIcon />
+              </ListItemIcon>
               <ListItemText primary="Home" />
-            </ListItem>
-          </Link>
-          <Link href="/profile">
-            <ListItem button key="Profile">
-              <ListItemIcon><AccountBoxIcon /></ListItemIcon>
-              <ListItemText primary="Profile" />
-            </ListItem>
-          </Link>
+            </ListItemButton>
+          </ListItem>
           {
             session
               ? (
-                <Link href="/signout">
-                  <ListItem button key="Sign Out">
-                    <ListItemIcon><ExitToAppIcon /></ListItemIcon>
-                    <ListItemText primary="Sign Out" />
+                <>
+                  <ListItem key="Profile">
+                    <ListItemButton component={Link} href="/profile">
+                      <ListItemIcon>
+                        <AccountBoxIcon />
+                      </ListItemIcon>
+                      <ListItemText primary="Profile" />
+                    </ListItemButton>
                   </ListItem>
-                </Link>
+                  <ListItem key="Sign Out">
+                    <ListItemButton component={Link} href="/signout">
+                      <ListItemIcon>
+                        <LogoutIcon />
+                      </ListItemIcon>
+                      <ListItemText primary="Sign Out" />
+                    </ListItemButton>
+                  </ListItem>
+                </>
               ) : (
                 <>
-                  <Link href="/signin">
-                    <ListItem button key="Sign In">
-                      <ListItemIcon><ExitToAppIcon /></ListItemIcon>
+                  <ListItem key="Sign In">
+                    <ListItemButton component={Link} href="/signin">
+                      <ListItemIcon>
+                        <LoginIcon />
+                      </ListItemIcon>
                       <ListItemText primary="Sign In" />
-                    </ListItem>
-                  </Link>
-                  <Link href="/signup">
-                    <ListItem button key="Sign Up">
-                      <ListItemIcon><ExitToAppIcon /></ListItemIcon>
+                    </ListItemButton>
+                  </ListItem>
+                  <ListItem key="Sign Up">
+                    <ListItemButton component={Link} href="/signup">
+                      <ListItemIcon>
+                        <AddIcon />
+                      </ListItemIcon>
                       <ListItemText primary="Sign Up" />
-                    </ListItem>
-                  </Link>
+                    </ListItemButton>
+                  </ListItem>
                 </>
               )
           }
@@ -114,49 +127,37 @@ function Header(props) {
     </Drawer>
   );
 
-  return mapPage ? (
+  return (
     <>
-      <Fab
-        onClick={(e) => toggleDrawer(e)}
-        // className={classes.fab}
-      >
-        <MenuIcon />
-      </Fab>
+      <AppBar>
+        <Toolbar>
+          <IconButton
+            onClick={(e) => toggleDrawer(e)}
+            // className={classes.iconButton}
+            edge="start"
+            aria-label="menu"
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography
+            variant="h5"
+            // className={classes.typography}
+          >
+            Elsewhere
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <Toolbar />
       {navigationDrawer}
     </>
-  )
-    : (
-      <>
-        <AppBar>
-          <Toolbar>
-            <IconButton
-              onClick={(e) => toggleDrawer(e)}
-              // className={classes.iconButton}
-              edge="start"
-              aria-label="menu"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography
-              variant="h5"
-              // className={classes.typography}
-            >
-              Elsewhere
-            </Typography>
-          </Toolbar>
-        </AppBar>
-        {navigationDrawer}
-      </>
-    );
+  );
 }
 
 Header.propTypes = {
-  mapPage: PropTypes.bool,
   session: PropTypes.string,
 };
 
 Header.defaultProps = {
-  mapPage: false,
   session: null,
 };
 

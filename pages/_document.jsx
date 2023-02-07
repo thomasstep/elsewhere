@@ -8,7 +8,7 @@ import Document, {
   NextScript,
 } from 'next/document';
 // import { ServerStyleSheets } from '@mui/material/styles';
-import theme from '../lib/theme';
+import theme from '../utils/theme';
 
 export default class MyDocument extends Document {
   render() {

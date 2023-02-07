@@ -49,7 +49,7 @@ function ForgotPassword() {
             id="filled-basic"
             value={signInEmail}
             label="Email address"
-            variant="outlined"
+            variant="standard"
             onChange={(e) => handleSignInEmailFieldChange(e)}
           />
         </Grid>

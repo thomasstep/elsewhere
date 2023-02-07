@@ -152,7 +152,7 @@ function Profile() {
                   id="filled-basic"
                   value={newMapNameField}
                   label="New map name"
-                  variant="outlined"
+                  variant="standard"
                   onChange={(e) => handleNewMapNameFieldChange(e)}
                 />
               </Grid>

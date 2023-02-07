@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
 
 
 function getDateFromISOString(isoString) {
@@ -20,7 +19,7 @@ function getDateRange(startTs, endTs) {
 
   const dates = [getDateFromISOString(startDate.toISOString())];
 
-  for(let i = 1; i < daysBetween + 1; i++) {
+  for (let i = 1; i < daysBetween + 1; i += 1) {
     startDate.setDate(startDate.getDate() + 1);
     dates.push(getDateFromISOString(startDate.toISOString()));
   }
@@ -63,17 +62,23 @@ function Schedule({
     const entryMetadata = {};
 
     // Get px heights
-    const days = getDateRange(earliestEntry[startKey], latestEntry[endKey]);
-    setDays(days);
+    const dateRange = getDateRange(earliestEntry[startKey], latestEntry[endKey]);
+    setDays(dateRange);
     // One height unit for each hour per day plus on height unit for each day
-    const scheduleHeight = (days.length) * 25 * hourHeight;
-    setScheduleHeight(scheduleHeight);
+    const schHeight = (days.length) * 25 * hourHeight;
+    setScheduleHeight(schHeight);
 
     /**
      * Get entry px heights and vertical offsets
      */
-    const entryOffsets = {};
-    const earliestDay = new Date(Date.UTC(earliestEntry[startKey].getUTCFullYear(), earliestEntry[startKey].getUTCMonth(), earliestEntry[startKey].getUTCDate()));
+    const calcedOffsets = {};
+    const earliestDay = new Date(
+      Date.UTC(
+        earliestEntry[startKey].getUTCFullYear(),
+        earliestEntry[startKey].getUTCMonth(),
+        earliestEntry[startKey].getUTCDate(),
+      ),
+    );
     entries.forEach((entry) => {
       const startDaysFromEarliest = getDateRange(earliestDay, entry[startKey]).length;
       const endDaysFromEarliest = getDateRange(earliestDay, entry[endKey]).length;
@@ -100,7 +105,7 @@ function Schedule({
         msDuration,
       };
 
-      entryOffsets[entry.id] = {
+      calcedOffsets[entry.id] = {
         top: `${topOffset}px`,
         height: `${height}px`,
       };
@@ -126,21 +131,22 @@ function Schedule({
     const totalBlocks = blocksPerDay * days.length;
     const entryLength = entries.length;
     const columns = [];
-    for (let i = 0; i < entryLength; i++) {
+    for (let i = 0; i < entryLength; i += 1) {
       columns.push(0);
     }
 
     let matrix = [];
-    for (let i = 0; i < totalBlocks; i++) {
+    for (let i = 0; i < totalBlocks; i += 1) {
       matrix.push(Array.from(columns));
     }
 
     // Seed matrix
     sortedIds.forEach((entryId, entryIndex) => {
-      const blocksFromEarliest = entryMetadata[entryId].msTimeFromEarliest / (1000 * 60 * blockResolution);
+      const blocksFromEarliest = entryMetadata[entryId].msTimeFromEarliest
+        / (1000 * 60 * blockResolution);
       const blockDuration = entryMetadata[entryId].msDuration / (1000 * 60 * blockResolution);
       let startingBlock = blocksFromEarliest;
-      for (let i = 0; i < blockDuration; i++) {
+      for (let i = 0; i < blockDuration; i += 1) {
         matrix[startingBlock][entryIndex] = 1;
         startingBlock += 1;
       }
@@ -171,7 +177,7 @@ function Schedule({
       } = entryMetadata[entry.id];
       let maxCollisions = 1;
       let startingBlock = blocksFromEarliest;
-      for (let i = 0; i < blockDuration; i++) {
+      for (let i = 0; i < blockDuration; i += 1) {
         const collisions = matrix[startingBlock][entryIndex];
         if (collisions > maxCollisions) {
           maxCollisions = collisions;
@@ -190,22 +196,22 @@ function Schedule({
           //  but push the position for subsequent entries
           const currentPositionDefined = entryMetadata[sortedIds[entryIndex]].position;
           if (currentPositionDefined) {
-            position = currentPositionDefined + 1
+            position = currentPositionDefined + 1;
           } else {
             entryMetadata[sortedIds[entryIndex]].position = position;
             position += 1;
           }
         }
-      })
+      });
     });
-    // Add horizontal offsets to entryOffsets
+    // Add horizontal offsets to calcedOffsets
     Object.entries(entryMetadata).forEach(([id, metadata]) => {
-      const width = 100/metadata.maxCollisions;
-      entryOffsets[id].width = `${width}%`;
-      entryOffsets[id].left = `calc(${width * metadata.position}% + 0px)`;
+      const width = 100 / metadata.maxCollisions;
+      calcedOffsets[id].width = `${width}%`;
+      calcedOffsets[id].left = `calc(${width * metadata.position}% + 0px)`;
     });
 
-    setEntryOffsets(entryOffsets);
+    setEntryOffsets(calcedOffsets);
   }, [entries.length]);
 
   if (entries.length > 0) {
@@ -239,11 +245,34 @@ function Schedule({
             position: 'absolute',
           }}
         >
-          {days.map((day) => {
-            return (
-              <>
+          {days.map((day) => (
+            <>
+              <Grid
+                key={day}
+                item
+                xl={12}
+                sx={{
+                  width: '100%',
+                }}
+              >
                 <Grid
-                  key={day}
+                  container
+                  direction="row"
+                >
+                  <Grid
+                    item
+                    xl={1}
+                    sx={{
+                      height: `${dateHeight}px`,
+                    }}
+                  >
+                    {day}
+                  </Grid>
+                </Grid>
+              </Grid>
+              {hours.map((hour) => (
+                <Grid
+                  key={`${day}T${hour}`}
                   item
                   xl={12}
                   sx={{
@@ -258,45 +287,18 @@ function Schedule({
                       item
                       xl={1}
                       sx={{
-                        height: `${dateHeight}px`,
+                        height: `${hourHeight}px`,
+                        'border-width': '1px',
+                        'border-style': 'solid',
                       }}
                     >
-                      {day}
+                      {hour}
                     </Grid>
                   </Grid>
                 </Grid>
-                {hours.map((hour) => {
-                  return (
-                    <Grid
-                      key={`${day}T${hour}`}
-                      item
-                      xl={12}
-                      sx={{
-                        width: '100%',
-                      }}
-                    >
-                      <Grid
-                        container
-                        direction="row"
-                      >
-                        <Grid
-                          item
-                          xl={1}
-                          sx={{
-                            height: `${hourHeight}px`,
-                            'border-width': '1px',
-                            'border-style': 'solid',
-                          }}
-                        >
-                          {hour}
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                  );
-                })}
-              </>
-            );
-          })}
+              ))}
+            </>
+          ))}
         </Grid>
 
         {/* Schedule layer grid */}
@@ -322,9 +324,8 @@ function Schedule({
               position: 'relative',
             }}
           >
-            {entries.map((entry) => {
-              return (
-                <Box
+            {entries.map((entry) => (
+              <Box
                 sx={{
                   'border-style': 'solid',
                   position: 'absolute',
@@ -334,21 +335,26 @@ function Schedule({
               >
                 {entry.name || 'No name'}
               </Box>
-              );
-            })}
+            ))}
           </Grid>
         </Grid>
       </Box>
-    )
+    );
   }
 
   return null;
 }
 
 Schedule.propTypes = {
+  // eslint-disable-next-line react/forbid-prop-types
   entries: PropTypes.arrayOf(PropTypes.object).isRequired,
   startKey: PropTypes.string,
   endKey: PropTypes.string,
+};
+
+Schedule.defaultProps = {
+  startKey: 'start',
+  endKey: 'end',
 };
 
 export default Schedule;

@@ -47,7 +47,7 @@ function EntryInfo({
                   id="filled-basic"
                   value={activeEntry.name ? activeEntry.name : ''}
                   label="Name"
-                  variant="outlined"
+                  variant="standard"
                   onChange={(e) => {
                     setActiveEntry({
                       ...activeEntry,
@@ -84,7 +84,7 @@ function EntryInfo({
                   id="filled-basic"
                   value={activeEntry.notes ? activeEntry.notes : ''}
                   label="Notes"
-                  variant="outlined"
+                  variant="standard"
                   onChange={(e) => {
                     setActiveEntry({
                       ...activeEntry,
@@ -105,7 +105,7 @@ function EntryInfo({
               id="filled-basic"
               value={activeEntry.location ? activeEntry.location.latitude : ''}
               label="Latitude"
-              variant="outlined"
+              variant="standard"
               onChange={(e) => {
                 setActiveEntry({
                   ...activeEntry,
@@ -125,7 +125,7 @@ function EntryInfo({
               id="filled-basic"
               value={activeEntry.location ? activeEntry.location.longitude : ''}
               label="Longitude"
-              variant="outlined"
+              variant="standard"
               onChange={(e) => {
                 setActiveEntry({
                   ...activeEntry,
@@ -145,7 +145,7 @@ function EntryInfo({
               id="filled-basic"
               value={activeEntry.location ? activeEntry.location.address : ''}
               label="Address"
-              variant="outlined"
+              variant="standard"
               onChange={(e) => {
                 setActiveEntry({
                   ...activeEntry,
@@ -165,7 +165,7 @@ function EntryInfo({
               id="filled-basic"
               value={activeEntry.startTimestamp ? activeEntry.startTimestamp : ''}
               label="Start time"
-              variant="outlined"
+              variant="standard"
               onChange={(e) => {
                 setActiveEntry({
                   ...activeEntry,
@@ -182,7 +182,7 @@ function EntryInfo({
               id="filled-basic"
               value={activeEntry.endTimestamp ? activeEntry.endTimestamp : ''}
               label="End time"
-              variant="outlined"
+              variant="standard"
               onChange={(e) => {
                 setActiveEntry({
                   ...activeEntry,
@@ -200,9 +200,7 @@ function EntryInfo({
               // className={classes.saveButton}
               startIcon={<SaveIcon />}
               onClick={async () => {
-                if (!edited) {
-                  return;
-                } else {
+                if (edited) {
                   // Make API call
                   const updateRes = await updateEntry();
                   if (!updateRes) {
@@ -261,6 +259,7 @@ function EntryInfo({
 }
 
 EntryInfo.propTypes = {
+  // eslint-disable-next-line react/forbid-prop-types
   entries: PropTypes.arrayOf(PropTypes.object).isRequired,
   setEntries: PropTypes.func.isRequired,
   // eslint-disable-next-line react/forbid-prop-types

@@ -5,8 +5,8 @@
   "scripts": {
     "build": "next build",
     "dev": "next",
-    "lint": "eslint --ext .js \"components/**\" \"lib/**\" \"pages/**\" \"utils/**\"",
-    "lintfix": "eslint --fix --ext .js \"components/**\" \"lib/**\" \"pages/**\" \"utils/**\"",
+    "lint": "eslint --ext .js \"components/**\" \"pages/**\" \"utils/**\"",
+    "lintfix": "eslint --fix --ext .js \"components/**\" \"pages/**\" \"utils/**\"",
     "start": "next start"
   },
   "dependencies": {
