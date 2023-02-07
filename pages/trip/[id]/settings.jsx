@@ -66,6 +66,8 @@ function ElsewhereMapSettings() {
       },
     })
       .then((res) => {
+        if (res.status === 401) router.push('/signin');
+        if (res.status === 403) router.push('/signin');
         if (res.status !== 200) router.push('/signin');
 
         return res.json();
@@ -108,7 +110,7 @@ function ElsewhereMapSettings() {
           }
         }
       });
-  }, [router]);
+  }, [router, token]);
 
   async function saveMapName() {
     if (mapName !== editedMapName) {

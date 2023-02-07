@@ -8,7 +8,6 @@ import AddIcon from '@mui/icons-material/Add';
 import Layout from '../components/layout';
 import MapList from '../components/mapList';
 import LoadingPage from '../components/loadingPage';
-// import { getErrorMessage } from '../lib/form';
 import {
   elsewhereApiUrl,
   authenticationServiceUrl,
@@ -19,34 +18,22 @@ import { getCookie } from '../utils/util';
 
 function Profile() {
   const [id, setId] = useState('');
-  // const [email, setEmail] = useState('');
   const [maps, setMaps] = useState([]);
   const [newMapNameField, setNewMapNameField] = useState('');
-  // const [errorMsg, setErrorMsg] = useState('');
+  // token is the auth token held in a cookie
+  const [token, setToken] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
-    const token = getCookie(jwtCookieName);
-    fetch(`${elsewhereApiUrl}/v1/trip`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => {
-        if (res.status === 403) router.push('/signin');
-        if (res.status !== 200) throw new Error('Unhandled status');
-        return res.json();
-      })
-      .then((data) => {
-        setMaps(data);
-      })
-      .catch(() => {
-        // TODO show error
-      });
+    const cookieToken = getCookie(jwtCookieName);
+    setToken(cookieToken);
   }, []);
 
   useEffect(() => {
-    const token = getCookie(jwtCookieName);
+    if (!token || !router.isReady) {
+      return;
+    }
+
     fetch(`${authenticationServiceUrl}/v1/applications/${applicationId}/users/me`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -63,7 +50,25 @@ function Profile() {
       .catch(() => {
         router.push('/signin');
       });
-  }, []);
+
+    fetch(`${elsewhereApiUrl}/v1/trip`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (res.status === 401) router.push('/signin');
+        if (res.status === 403) router.push('/signin');
+        if (res.status !== 200) throw new Error('Unhandled status');
+        return res.json();
+      })
+      .then((data) => {
+        setMaps(data);
+      })
+      .catch(() => {
+        // TODO show error
+      });
+  }, [router, token]);
 
   function handleNewMapNameFieldChange(event) {
     event.preventDefault();
@@ -76,7 +81,6 @@ function Profile() {
       name: newMapNameField,
     };
 
-    const token = getCookie(jwtCookieName);
     fetch(`${elsewhereApiUrl}/v1/trip`, {
       method: 'POST',
       headers: {
@@ -86,14 +90,16 @@ function Profile() {
       body: JSON.stringify(vars),
     })
       .then((res) => {
-        if (res.status !== 200) {
+        if (res.status !== 201) {
           throw new Error('Unhandled status');
         }
 
         return res.json();
       })
       .then((data) => {
-        setMaps([...maps, data]);
+        const newMaps = Array.from(maps);
+        newMaps.push(data);
+        setMaps(newMaps);
       })
       .catch(() => {
         // setErrorMsg(getErrorMessage(error));

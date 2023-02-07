@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -12,14 +12,12 @@ function MapList({ maps }) {
     <List component="nav">
       {maps.map(({ id, name }) => (
         <React.Fragment key={id}>
-          <ListItem button>
-            <Link href="/trip/[id]" as={`/trip/${id}`}>
-              <ListItemText primary={name} />
-            </Link>
-            <Link href="/trip/[id]/settings" as={`/trip/${id}/settings`}>
+          <ListItemButton component={Link} href={`/trip/${id}`}>
+            <ListItemText primary={name} />
+            <ListItemButton component={Link} href={`/trip/${id}/settings`}>
               <SettingsIcon />
-            </Link>
-          </ListItem>
+            </ListItemButton>
+          </ListItemButton>
           <Divider />
         </React.Fragment>
       ))}
