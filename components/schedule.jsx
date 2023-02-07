@@ -65,7 +65,7 @@ function Schedule({
     const dateRange = getDateRange(earliestEntry[startKey], latestEntry[endKey]);
     setDays(dateRange);
     // One height unit for each hour per day plus on height unit for each day
-    const schHeight = (days.length) * 25 * hourHeight;
+    const schHeight = (dateRange.length) * 25 * hourHeight;
     setScheduleHeight(schHeight);
 
     /**
@@ -128,7 +128,7 @@ function Schedule({
 
     const blockResolution = 5; // minutes, detail to which we calculate overlapping
     const blocksPerDay = (24 * 60) / blockResolution;
-    const totalBlocks = blocksPerDay * days.length;
+    const totalBlocks = blocksPerDay * dateRange.length;
     const entryLength = entries.length;
     const columns = [];
     for (let i = 0; i < entryLength; i += 1) {
@@ -246,7 +246,9 @@ function Schedule({
           }}
         >
           {days.map((day) => (
-            <>
+            <React.Fragment
+              key={day}
+            >
               <Grid
                 key={day}
                 item
@@ -288,8 +290,8 @@ function Schedule({
                       xl={1}
                       sx={{
                         height: `${hourHeight}px`,
-                        'border-width': '1px',
-                        'border-style': 'solid',
+                        borderWidth: '1px',
+                        borderStyle: 'solid',
                       }}
                     >
                       {hour}
@@ -297,7 +299,7 @@ function Schedule({
                   </Grid>
                 </Grid>
               ))}
-            </>
+            </React.Fragment>
           ))}
         </Grid>
 
@@ -326,8 +328,9 @@ function Schedule({
           >
             {entries.map((entry) => (
               <Box
+                key={entry.id}
                 sx={{
-                  'border-style': 'solid',
+                  borderStyle: 'solid',
                   position: 'absolute',
                   left: '80px',
                   ...entryOffsets[entry.id],

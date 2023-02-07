@@ -14,7 +14,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import Layout from '../../../components/layout';
-import LoadingPage from '../../../components/loadingPage';
+// import LoadingPage from '../../../components/loadingPage';
 import {
   elsewhereApiUrl,
   authenticationServiceUrl,
@@ -46,13 +46,20 @@ function ElsewhereMapSettings() {
   const [mapName, setMapName] = useState('');
   const [editedMapName, setEditedMapName] = useState('');
   const [writers, setWriters] = useState(null);
-  const [token, setToken] = useState(getCookie(jwtCookieName));
+  const [token, setToken] = useState(null);
   const [travelPartnerTextField, setTravelPartnerTextField] = useState('');
   // const classes = useStyles(props);
 
-  useEffect(async () => {
-    setToken(getCookie(jwtCookieName));
-    console.log(`TOKEN: ${token}`);
+  useEffect(() => {
+    const cookieToken = getCookie(jwtCookieName);
+    setToken(cookieToken);
+  }, []);
+
+  useEffect(() => {
+    if (!token || !router.isReady) {
+      return;
+    }
+
     fetch(`${authenticationServiceUrl}/v1/applications/${applicationId}/users/me`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -76,11 +83,11 @@ function ElsewhereMapSettings() {
       },
     })
       .then((res) => {
-        if (res.status !== 200) console.log('REFRESH');
+        if (res.status !== 200) console.log('error'); // TODO
 
         return res.json();
       })
-      .then(async (data) => {
+      .then((data) => {
         setMapName(data.name);
         // Initialize this so it doesn't automatically change map name to ''
         setEditedMapName(data.name);
@@ -89,18 +96,19 @@ function ElsewhereMapSettings() {
         for (const collaborator of data.collaborators) {
           if (collaborator !== data.createdBy) {
             // eslint-disable-next-line no-await-in-loop
-            const res = await fetch(`${authenticationServiceUrl}/v1/applications/${applicationId}/users?${new URLSearchParams({ id: collaborator })}`);
-            if (res.status === 200) {
-              // eslint-disable-next-line no-await-in-loop
-              const userData = await res.json();
-              newWriters.add(userData.email);
-            }
+            fetch(`${authenticationServiceUrl}/v1/applications/${applicationId}/users?${new URLSearchParams({ id: collaborator })}`)
+              .then((res) => {
+                if (res.status !== 200) console.log('error'); // TODO
+                return res.json();
+              })
+              .then((userData) => {
+                newWriters.add(userData.email);
+                setWriters(newWriters);
+              });
           }
         }
-        setWriters(newWriters);
-        console.log(`writers: ${newWriters}`);
       });
-  }, []);
+  }, [router]);
 
   async function saveMapName() {
     if (mapName !== editedMapName) {
@@ -170,9 +178,9 @@ function ElsewhereMapSettings() {
     })
       .then((res) => {
         if (res.status === 200) {
+          // TODO use a new array before setting writers
           writers.add(travelPartnerTextField);
           setWriters(writers); // Do I need to do this?
-          console.log(`added: ${writers}`);
         } else {
           // TODO return error
         }
@@ -196,159 +204,155 @@ function ElsewhereMapSettings() {
     })
       .then((res) => {
         if (res.status === 200) {
+          // TODO use a new array before setting writers
           writers.delete(email);
           setWriters(writers);
-          console.log(`deleted: ${writers}`);
         } else {
           // TODO return error
         }
       });
   }
 
-  if (writers) {
-    return (
-      <Layout session={id}>
-        <Grid
-          container
-          direction="column"
-          justify="space-evenly"
-          alignItems="stretch"
-          spacing={3}
-        >
+  return (
+    <Layout session={id}>
+      <Grid
+        container
+        direction="column"
+        justify="space-evenly"
+        alignItems="stretch"
+        spacing={3}
+      >
 
-          <Grid item xs={12}>
-            <Grid
-              container
-              direction="column"
-              justify="space-evenly"
-              alignItems="center"
-            >
-              <Grid item xs={12}>
-                <Typography variant="h3">Settings</Typography>
-              </Grid>
-              {/* Map Name */}
-              <Grid item xs={12}>
-                <Grid
-                  container
-                  direction="row"
-                  justify="center"
-                  alignItems="center"
-                  spacing={2}
-                >
-                  <Grid item>
-                    <TextField
-                      id="filled-basic"
-                      value={editedMapName}
-                      label="Map Name"
-                      variant="standard"
-                      onChange={(e) => handleMapNameTextFieldChange(e)}
-                    />
-                  </Grid>
-                  <Grid item>
-                    <IconButton
-                      aria-label="save"
-                      onClick={() => saveMapName()}
-                    >
-                      <SaveIcon />
-                    </IconButton>
-                  </Grid>
+        <Grid item xs={12}>
+          <Grid
+            container
+            direction="column"
+            justify="space-evenly"
+            alignItems="center"
+          >
+            <Grid item xs={12}>
+              <Typography variant="h3">Settings</Typography>
+            </Grid>
+            {/* Map Name */}
+            <Grid item xs={12}>
+              <Grid
+                container
+                direction="row"
+                justify="center"
+                alignItems="center"
+                spacing={2}
+              >
+                <Grid item>
+                  <TextField
+                    id="filled-basic"
+                    value={editedMapName}
+                    label="Map Name"
+                    variant="standard"
+                    onChange={(e) => handleMapNameTextFieldChange(e)}
+                  />
+                </Grid>
+                <Grid item>
+                  <IconButton
+                    aria-label="save"
+                    onClick={() => saveMapName()}
+                  >
+                    <SaveIcon />
+                  </IconButton>
                 </Grid>
               </Grid>
-
-              {/* Map ID */}
-              <Grid item xs={12}>
-                <Typography variant="body1">{`Map ID: ${router.query.id}`}</Typography>
-              </Grid>
             </Grid>
-          </Grid>
 
-          {/* Travel Partners */}
-          <Grid item xs={12}>
-            {
-            writers.size ? (
-              <>
-                <Typography variant="h5">Travel Partners</Typography>
-                <List component="nav">
-                  {Array.from(writers).map((email) => (
-                    <React.Fragment key={email}>
-                      <ListItem button>
-                        <ListItemText primary={email} />
-                        <IconButton
-                          aria-label="delete"
-                          // className={classes.deleteTravelPartnerButton}
-                          onClick={(e) => removeTravelPartner(e, email)}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </ListItem>
-                      <Divider />
-                    </React.Fragment>
-                  ))}
-                </List>
-              </>
-            )
-              : (
-                null
-              )
-            }
-          </Grid>
-
-          {/* Add Travel Partner */}
-          <Grid item xs={12}>
-            <Grid
-              container
-              direction="column"
-              justify="space-evenly"
-              alignItems="flex-start"
-              spacing={2}
-            >
-              <Grid item xs={12}>
-                <TextField
-                  id="filled-basic"
-                  value={travelPartnerTextField}
-                  label="Email"
-                  variant="standard"
-                  onChange={(e) => handleTravelBuddyTextFieldChange(e)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={(e) => addTravelPartner(e)}
-                >
-                  Add Travel Partner
-                </Button>
-              </Grid>
-            </Grid>
-          </Grid>
-
-          {/* Delete Map Button */}
-          <Grid item xs={12}>
-            <Grid
-              container
-              direction="column"
-              justify="space-evenly"
-              alignItems="center"
-            >
-              <Grid item xs={12}>
-                <Button
-                  variant="contained"
-                  // className={classes.deleteButton}
-                  startIcon={<DeleteIcon />}
-                  onClick={(e) => deleteMap(e)}
-                >
-                  Delete Map
-                </Button>
-              </Grid>
+            {/* Map ID */}
+            <Grid item xs={12}>
+              <Typography variant="body1">{`Map ID: ${router.query.id}`}</Typography>
             </Grid>
           </Grid>
         </Grid>
-      </Layout>
-    );
-  }
 
-  return <LoadingPage />;
+        {/* Travel Partners */}
+        <Grid item xs={12}>
+          {
+          writers && writers.size ? (
+            <>
+              <Typography variant="h5">Travel Partners</Typography>
+              <List component="nav">
+                {Array.from(writers).map((email) => (
+                  <React.Fragment key={email}>
+                    <ListItem button>
+                      <ListItemText primary={email} />
+                      <IconButton
+                        aria-label="delete"
+                        // className={classes.deleteTravelPartnerButton}
+                        onClick={(e) => removeTravelPartner(e, email)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </ListItem>
+                    <Divider />
+                  </React.Fragment>
+                ))}
+              </List>
+            </>
+          )
+            : (
+              null
+            )
+          }
+        </Grid>
+
+        {/* Add Travel Partner */}
+        <Grid item xs={12}>
+          <Grid
+            container
+            direction="column"
+            justify="space-evenly"
+            alignItems="flex-start"
+            spacing={2}
+          >
+            <Grid item xs={12}>
+              <TextField
+                id="filled-basic"
+                value={travelPartnerTextField}
+                label="Email"
+                variant="standard"
+                onChange={(e) => handleTravelBuddyTextFieldChange(e)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={(e) => addTravelPartner(e)}
+              >
+                Add Travel Partner
+              </Button>
+            </Grid>
+          </Grid>
+        </Grid>
+
+        {/* Delete Map Button */}
+        <Grid item xs={12}>
+          <Grid
+            container
+            direction="column"
+            justify="space-evenly"
+            alignItems="center"
+          >
+            <Grid item xs={12}>
+              <Button
+                variant="contained"
+                // className={classes.deleteButton}
+                startIcon={<DeleteIcon />}
+                onClick={(e) => deleteMap(e)}
+              >
+                Delete Map
+              </Button>
+            </Grid>
+          </Grid>
+        </Grid>
+      </Grid>
+    </Layout>
+  );
 }
 
 export default ElsewhereMapSettings;

@@ -61,7 +61,7 @@ function Trip() {
   }, []);
 
   useEffect(() => {
-    if (!token) {
+    if (!token || !router.isReady) {
       return;
     }
 
@@ -82,26 +82,23 @@ function Trip() {
         router.push('/signin');
       });
 
-    if (router.isReady) {
-      fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/entry`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((res) => {
-          if (res.status !== 200) throw new Error('Unhandled status code');
+    fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/entry`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (res.status !== 200) throw new Error('Unhandled status code');
 
-          return res.json();
-        })
-        .then((data) => {
-          setEntries(data);
-          console.log(data);
-        })
-        .catch((err) => {
-          // TODO handle error
-          console.error(err);
-        });
-    }
+        return res.json();
+      })
+      .then((data) => {
+        setEntries(data);
+      })
+      .catch((err) => {
+        // TODO handle error
+        console.error(err);
+      });
   }, [router]);
 
   async function createEntry() {
