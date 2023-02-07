@@ -194,6 +194,7 @@ function Trip() {
     deleteEntry();
   });
 
+  console.log(googleMapsKey);
   if (id) {
     return (
       <Layout session={id}>
