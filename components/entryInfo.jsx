@@ -8,7 +8,7 @@ import Grid from '@mui/material/Grid';
 import SaveIcon from '@mui/icons-material/Save';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { DateTime, Settings } from "luxon";
+import { DateTime, Settings } from 'luxon';
 
 import LoadingPage from './loadingPage';
 import DateTimeField from './dateTimeField';
@@ -177,7 +177,11 @@ function EntryInfo({
                 setEdited(true);
               }}
               value={activeEntry.startTimestamp ? activeEntry.startTimestamp : null}
-              maxDateTime={activeEntry.endTimestamp ? DateTime.fromISO(activeEntry.endTimestamp) : null}
+              maxDateTime={
+                activeEntry.endTimestamp
+                  ? DateTime.fromISO(activeEntry.endTimestamp)
+                  : null
+              }
             />
           </Grid>
 
@@ -195,7 +199,11 @@ function EntryInfo({
                 setEdited(true);
               }}
               value={activeEntry.endTimestamp ? activeEntry.endTimestamp : null}
-              minDateTime={activeEntry.startTimestamp ? DateTime.fromISO(activeEntry.startTimestamp) : null}
+              minDateTime={
+                activeEntry.startTimestamp
+                  ? DateTime.fromISO(activeEntry.startTimestamp)
+                  : null
+              }
             />
           </Grid>
 

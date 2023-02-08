@@ -7,7 +7,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Grid from '@mui/material/Grid';
 import SaveIcon from '@mui/icons-material/Save';
 import TextField from '@mui/material/TextField';
-import { DateTime, Settings } from "luxon";
+import { DateTime, Settings } from 'luxon';
 
 import LoadingPage from './loadingPage';
 import DateTimeField from './dateTimeField';
@@ -156,7 +156,11 @@ function NewEntryForm({
                 });
               }}
               value={newEntryData.startTimestamp ? newEntryData.startTimestamp : null}
-              maxDateTime={newEntryData.endTimestamp ? DateTime.fromISO(newEntryData.endTimestamp) : null}
+              maxDateTime={
+                newEntryData.endTimestamp
+                  ? DateTime.fromISO(newEntryData.endTimestamp)
+                  : null
+              }
             />
           </Grid>
 
@@ -173,7 +177,11 @@ function NewEntryForm({
                 });
               }}
               value={newEntryData.endTimestamp ? newEntryData.endTimestamp : null}
-              minDateTime={newEntryData.startTimestamp ? DateTime.fromISO(newEntryData.startTimestamp) : null}
+              minDateTime={
+                newEntryData.startTimestamp
+                  ? DateTime.fromISO(newEntryData.startTimestamp)
+                  : null
+              }
             />
           </Grid>
 

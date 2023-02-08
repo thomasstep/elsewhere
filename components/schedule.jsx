@@ -281,7 +281,7 @@ function Schedule({
               <Grid
                 key={day}
                 item
-                xl={12}
+                xs={12}
                 sx={{
                   width: '100%',
                 }}
@@ -292,7 +292,7 @@ function Schedule({
                 >
                   <Grid
                     item
-                    xl={1}
+                    xs={1}
                     sx={{
                       height: `${dateHeight}px`,
                     }}
@@ -305,7 +305,7 @@ function Schedule({
                 <Grid
                   key={`${day}T${hour}`}
                   item
-                  xl={12}
+                  xs={12}
                   sx={{
                     width: '100%',
                   }}
@@ -316,7 +316,7 @@ function Schedule({
                   >
                     <Grid
                       item
-                      xl={1}
+                      xs={1}
                       sx={{
                         height: `${hourHeight}px`,
                         borderWidth: '1px',
@@ -346,11 +346,11 @@ function Schedule({
         >
           <Grid
             item
-            xl={1}
+            xs={1}
           />
           <Grid
             item
-            xl={11}
+            xs={11}
             sx={{
               position: 'relative',
             }}

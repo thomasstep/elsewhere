@@ -13,7 +13,7 @@ function DateTimeField({
 }) {
   return (
     <LocalizationProvider dateAdapter={AdapterLuxon}>
-      <DateTimePicker {...props}/>
+      <DateTimePicker {...props} />
     </LocalizationProvider>
   );
 }
