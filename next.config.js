@@ -7,5 +7,6 @@ module.exports = {
     AUTH_SERVICE_APP_ID: process.env.AUTH_SERVICE_APP_ID,
     GOOGLE_MAPS_KEY: process.env.GOOGLE_MAPS_KEY,
     GOOGLE_PLACES_KEY: process.env.GOOGLE_PLACES_KEY,
+    DEBUG: process.env.DEBUG,
   },
 };

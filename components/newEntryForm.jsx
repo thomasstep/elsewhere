@@ -7,9 +7,12 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Grid from '@mui/material/Grid';
 import SaveIcon from '@mui/icons-material/Save';
 import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
+import { DateTime, Settings } from "luxon";
 
 import LoadingPage from './loadingPage';
+import DateTimeField from './dateTimeField';
+
+Settings.defaultZone = 'utc';
 
 function NewEntryForm({
   entries,
@@ -85,14 +88,93 @@ function NewEntryForm({
 
           {/* Lat field */}
           <Grid item xs={12}>
-            <Typography variant="h5">Latitude</Typography>
-            <Typography variant="body1">{newEntryData.location ? newEntryData.location.latitude : null}</Typography>
+            <TextField
+              id="filled-basic"
+              value={newEntryData.location ? newEntryData.location.latitude : ''}
+              label="Latitude"
+              variant="standard"
+              onChange={(e) => {
+                setNewEntryData({
+                  ...newEntryData,
+                  location: {
+                    ...newEntryData.location,
+                    latitude: e.target.value,
+                  },
+                });
+              }}
+            />
           </Grid>
 
           {/* Lng field */}
           <Grid item xs={12}>
-            <Typography variant="h5">Longitude</Typography>
-            <Typography variant="body1">{newEntryData.location ? newEntryData.location.longitude : null}</Typography>
+            <TextField
+              id="filled-basic"
+              value={newEntryData.location ? newEntryData.location.longitude : ''}
+              label="Longitude"
+              variant="standard"
+              onChange={(e) => {
+                setNewEntryData({
+                  ...newEntryData,
+                  location: {
+                    ...newEntryData.location,
+                    longitude: e.target.value,
+                  },
+                });
+              }}
+            />
+          </Grid>
+
+          {/* Address field */}
+          <Grid item xs={12}>
+            <TextField
+              id="filled-basic"
+              value={newEntryData.location ? newEntryData.location.address : ''}
+              label="Address"
+              variant="standard"
+              onChange={(e) => {
+                setNewEntryData({
+                  ...newEntryData,
+                  location: {
+                    ...newEntryData.location,
+                    address: e.target.value,
+                  },
+                });
+              }}
+            />
+          </Grid>
+
+          {/* Start time field */}
+          <Grid item xs={12}>
+            <DateTimeField
+              renderInput={(params) => <TextField {...params} />}
+              label="Start"
+              onChange={(val) => {
+                const isoString = val.toISO();
+                setNewEntryData({
+                  ...newEntryData,
+                  startTimestamp: isoString,
+                });
+              }}
+              value={newEntryData.startTimestamp ? newEntryData.startTimestamp : null}
+              maxDateTime={newEntryData.endTimestamp ? DateTime.fromISO(newEntryData.endTimestamp) : null}
+            />
+          </Grid>
+
+          {/* End time field */}
+          <Grid item xs={12}>
+            <DateTimeField
+              renderInput={(params) => <TextField {...params} />}
+              label="End"
+              onChange={(val) => {
+                const isoString = val.toISO();
+                setNewEntryData({
+                  ...newEntryData,
+                  endTimestamp: isoString,
+                });
+              }}
+              value={newEntryData.endTimestamp ? newEntryData.endTimestamp : null}
+              minDateTime={newEntryData.startTimestamp ? DateTime.fromISO(newEntryData.startTimestamp) : null}
+            />
           </Grid>
 
           {/* Save and delete buttons */}

@@ -8,8 +8,12 @@ import Grid from '@mui/material/Grid';
 import SaveIcon from '@mui/icons-material/Save';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import { DateTime, Settings } from "luxon";
 
 import LoadingPage from './loadingPage';
+import DateTimeField from './dateTimeField';
+
+Settings.defaultZone = 'utc';
 
 function EntryInfo({
   entries,
@@ -161,35 +165,37 @@ function EntryInfo({
 
           {/* Start time field */}
           <Grid item xs={12}>
-            <TextField
-              id="filled-basic"
-              value={activeEntry.startTimestamp ? activeEntry.startTimestamp : ''}
-              label="Start time"
-              variant="standard"
-              onChange={(e) => {
+            <DateTimeField
+              renderInput={(params) => <TextField {...params} />}
+              label="Start"
+              onChange={(val) => {
+                const isoString = val.toISO();
                 setActiveEntry({
                   ...activeEntry,
-                  startTimestamp: e.target.value,
+                  startTimestamp: isoString,
                 });
                 setEdited(true);
               }}
+              value={activeEntry.startTimestamp ? activeEntry.startTimestamp : null}
+              maxDateTime={activeEntry.endTimestamp ? DateTime.fromISO(activeEntry.endTimestamp) : null}
             />
           </Grid>
 
           {/* End time field */}
           <Grid item xs={12}>
-            <TextField
-              id="filled-basic"
-              value={activeEntry.endTimestamp ? activeEntry.endTimestamp : ''}
-              label="End time"
-              variant="standard"
-              onChange={(e) => {
+            <DateTimeField
+              renderInput={(params) => <TextField {...params} />}
+              label="End"
+              onChange={(val) => {
+                const isoString = val.toISO();
                 setActiveEntry({
                   ...activeEntry,
-                  endTimestamp: e.target.value,
+                  endTimestamp: isoString,
                 });
                 setEdited(true);
               }}
+              value={activeEntry.endTimestamp ? activeEntry.endTimestamp : null}
+              minDateTime={activeEntry.startTimestamp ? DateTime.fromISO(activeEntry.startTimestamp) : null}
             />
           </Grid>
 

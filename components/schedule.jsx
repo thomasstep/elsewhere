@@ -4,6 +4,9 @@ import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 
+import {
+  debug,
+} from '../utils/config';
 
 function getDateFromISOString(isoString) {
   const [date] = isoString.split('T');
@@ -46,10 +49,17 @@ function Schedule({
 
     /**
      * Get the earliest and latest of all entries
-     */
+     * Also validate entries
+    */
+    const validatedEntries = [];
     let earliestEntry = entries[0];
     let latestEntry = entries[0];
     entries.forEach((entry) => {
+      if (entry[startKey] > entry[endKey]) {
+        return;
+      }
+      validatedEntries.push(entry);
+
       if (entry[startKey] < earliestEntry[startKey]) {
         earliestEntry = entry;
       }
@@ -58,6 +68,7 @@ function Schedule({
         latestEntry = entry;
       }
     });
+    if (validatedEntries.length < 1) return;
 
     const entryMetadata = {};
 
@@ -79,7 +90,7 @@ function Schedule({
         earliestEntry[startKey].getUTCDate(),
       ),
     );
-    entries.forEach((entry) => {
+    validatedEntries.forEach((entry) => {
       const startDaysFromEarliest = getDateRange(earliestDay, entry[startKey]).length;
       const endDaysFromEarliest = getDateRange(earliestDay, entry[endKey]).length;
       const msDuration = entry[endKey].getTime() - entry[startKey].getTime();
@@ -89,6 +100,10 @@ function Schedule({
       //  we do not need to compensate
       height += (endDaysFromEarliest - startDaysFromEarliest) * dateHeight;
       height += (msDuration / (1000 * 60)) * minuteHeight;
+      // Check that end time is not before start time
+      if (height < 0) {
+        height = 0;
+      }
 
       const msTimeFromEarliest = entry[startKey].getTime() - earliestDay.getTime();
       let topOffset = 0;
@@ -115,7 +130,7 @@ function Schedule({
      * Get entry widths and horizontal offsets
      * TODO this whole piece of the operation could use some optimization
      */
-    const sorted = entries.sort((a, b) => {
+    const sorted = validatedEntries.sort((a, b) => {
       // If two events start at the same time, the one with a later start
       //  time goes first
       if (a[startKey].getTime() === b[startKey].getTime()) {
@@ -129,7 +144,7 @@ function Schedule({
     const blockResolution = 5; // minutes, detail to which we calculate overlapping
     const blocksPerDay = (24 * 60) / blockResolution;
     const totalBlocks = blocksPerDay * dateRange.length;
-    const entryLength = entries.length;
+    const entryLength = validatedEntries.length;
     const columns = [];
     for (let i = 0; i < entryLength; i += 1) {
       columns.push(0);
@@ -140,11 +155,25 @@ function Schedule({
       matrix.push(Array.from(columns));
     }
 
+    if (debug) {
+      console.group('MATRIX INIT');
+      console.log(matrix);
+      console.groupEnd();
+    }
+
     // Seed matrix
     sortedIds.forEach((entryId, entryIndex) => {
       const blocksFromEarliest = entryMetadata[entryId].msTimeFromEarliest
         / (1000 * 60 * blockResolution);
       const blockDuration = entryMetadata[entryId].msDuration / (1000 * 60 * blockResolution);
+      if (debug) {
+        console.group('SEED MATRIX');
+        console.log(entryMetadata[entryId]);
+        console.log(blocksFromEarliest);
+        console.log(blockDuration);
+        console.groupEnd();
+      }
+
       let startingBlock = blocksFromEarliest;
       for (let i = 0; i < blockDuration; i += 1) {
         matrix[startingBlock][entryIndex] = 1;
