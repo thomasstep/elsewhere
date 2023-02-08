@@ -142,6 +142,11 @@ function Header(props) {
           <Typography
             variant="h5"
             // className={classes.typography}
+            sx={{
+              align: 'center',
+              flexGrow: 1,
+              marginLeft: 2,
+            }}
           >
             Elsewhere
           </Typography>

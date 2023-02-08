@@ -5,13 +5,15 @@ import Box from '@mui/material/Box';
 
 import LoadingPage from './loadingPage';
 import Schedule from './schedule';
+import { activeEntryFormView } from '../utils/config';
 
 function ScheduleView({
   entries,
   // activeEntry,
-  // setActiveEntry,
+  setActiveEntry,
   // newEntryData,
   // setNewEntryData,
+  changeTab,
 }) {
   if (entries.length > 0) {
     const noTime = [];
@@ -50,6 +52,10 @@ function ScheduleView({
           entries={withTime}
           startKey="startTimestamp"
           endKey="endTimestamp"
+          entryOnClick={(e, entry) => {
+            setActiveEntry(entry);
+            changeTab(activeEntryFormView);
+          }}
         />
       </Box>
     );
@@ -64,10 +70,11 @@ ScheduleView.propTypes = {
   entries: PropTypes.arrayOf(PropTypes.object).isRequired,
   // eslint-disable-next-line react/forbid-prop-types
   // activeEntry: PropTypes.object.isRequired,
-  // setActiveEntry: PropTypes.func.isRequired,
+  setActiveEntry: PropTypes.func.isRequired,
   // eslint-disable-next-line react/forbid-prop-types
   // newEntryData: PropTypes.object.isRequired,
   // setNewEntryData: PropTypes.func.isRequired,
+  changeTab: PropTypes.func.isRequired,
 };
 
 export default ScheduleView;

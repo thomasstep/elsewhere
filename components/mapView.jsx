@@ -5,6 +5,10 @@ import Box from '@mui/material/Box';
 
 import Map from './map';
 import Marker from './marker';
+import {
+  activeEntryFormView,
+  newEntryFormView,
+} from '../utils/config';
 
 function MapView({
   entries,
@@ -12,6 +16,7 @@ function MapView({
   setActiveEntry,
   newEntryData,
   setNewEntryData,
+  changeTab,
 }) {
   // useEffect(() => {
   //   if (!entries.length > 0) {
@@ -57,6 +62,7 @@ function MapView({
                 longitude: e.latLng.lng(),
               },
             });
+            changeTab(newEntryFormView);
           }
         }}
         // onCenterChanged={(mp, m) => onMapCenterChanged(mp, m)}
@@ -91,6 +97,7 @@ function MapView({
               }}
               onClick={() => {
                 setActiveEntry(entry);
+                changeTab(activeEntryFormView);
               }}
               // eslint-disable-next-line no-undef
               animation={animate && google.maps.Animation.BOUNCE}
@@ -135,6 +142,7 @@ MapView.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   newEntryData: PropTypes.object.isRequired,
   setNewEntryData: PropTypes.func.isRequired,
+  changeTab: PropTypes.func.isRequired,
 };
 
 export default MapView;

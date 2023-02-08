@@ -5,8 +5,8 @@ module.exports = {
   googleMapsKey: process.env.GOOGLE_MAPS_KEY,
   debug: (process.env.DEBUG || 'false') === 'true',
   jwtCookieName: 'authToken',
-  newEntryFormView: 'new',
-  activeEntryFormView: 'active',
+  newEntryFormView: 'newEntry',
+  activeEntryFormView: 'activeEntry',
   mapView: 'map',
   scheduleView: 'schedule',
 };

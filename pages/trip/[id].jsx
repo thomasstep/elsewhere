@@ -1,8 +1,12 @@
 import { useRouter } from 'next/router';
 import React, { useEffect, useCallback, useState } from 'react';
+import PropTypes from 'prop-types';
 
 // import { makeStyles } from '@mui/styles';
 import { Wrapper, Status } from '@googlemaps/react-wrapper';
+import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 
 import Layout from '../../components/layout';
 import LoadingPage from '../../components/loadingPage';
@@ -16,8 +20,10 @@ import {
   applicationId,
   jwtCookieName,
   googleMapsKey,
-  // newEntryFormView,
-  // mapView,
+  mapView,
+  scheduleView,
+  activeEntryFormView,
+  newEntryFormView,
 } from '../../utils/config';
 import {
   getCookie,
@@ -38,6 +44,50 @@ const loadingRender = (status) => {
   }
 };
 
+
+function TabPanel(props) {
+  const {
+    children,
+    value,
+    index,
+    ...other
+  } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      // eslint-disable-next-line react/jsx-props-no-spreading
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
+
+TabPanel.propTypes = {
+  children: PropTypes.node,
+  index: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired,
+};
+
+TabPanel.defaultProps = {
+  children: null,
+};
+
+function a11yProps(index) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
+  };
+}
+
 function Trip() {
   const router = useRouter();
   // id is the user's ID; only dictates layout links
@@ -54,6 +104,8 @@ function Trip() {
   const [newEntryData, setNewEntryData] = useState({});
   // token is the auth token held in a cookie
   const [token, setToken] = useState(null);
+  // Controls the tabs
+  const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
     const cookieToken = getCookie(jwtCookieName);
@@ -194,45 +246,96 @@ function Trip() {
     deleteEntry();
   });
 
+  function changeTab(view) {
+    switch (view) {
+      case (mapView):
+        setActiveTab(0);
+        break;
+      case (scheduleView):
+        setActiveTab(1);
+        break;
+      case (activeEntryFormView):
+        setActiveTab(2);
+        break;
+      case (newEntryFormView):
+        setActiveTab(3);
+        break;
+      default:
+        break;
+    }
+  }
+
+  const changeTabCallback = useCallback((view) => {
+    changeTab(view);
+  });
+
   if (id) {
     return (
       <Layout session={id}>
 
-        <Wrapper apiKey={googleMapsKey} render={loadingRender}>
-          <MapView
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs
+            value={activeTab}
+            onChange={(e, newVal) => {
+              setActiveTab(newVal);
+            }}
+            variant="scrollable"
+            scrollButtons
+            allowScrollButtonsMobile
+          >
+            <Tab label="Map" {...a11yProps(0)} />
+            <Tab label="Schedule" {...a11yProps(1)} />
+            <Tab label="Selected Entry" {...a11yProps(2)} />
+            <Tab label="New Entry" {...a11yProps(3)} />
+          </Tabs>
+        </Box>
+
+
+        <TabPanel value={activeTab} index={0}>
+          <Wrapper apiKey={googleMapsKey} render={loadingRender}>
+            <MapView
+              entries={entries}
+              activeEntry={activeEntry}
+              setActiveEntry={setActiveEntry}
+              newEntryData={newEntryData}
+              setNewEntryData={setNewEntryData}
+              changeTab={changeTabCallback}
+            />
+          </Wrapper>
+        </TabPanel>
+
+        <TabPanel value={activeTab} index={1}>
+          <ScheduleView
             entries={entries}
             activeEntry={activeEntry}
             setActiveEntry={setActiveEntry}
             newEntryData={newEntryData}
             setNewEntryData={setNewEntryData}
+            changeTab={changeTabCallback}
           />
-        </Wrapper>
+        </TabPanel>
 
-        <ScheduleView
-          entries={entries}
-          activeEntry={activeEntry}
-          setActiveEntry={setActiveEntry}
-          newEntryData={newEntryData}
-          setNewEntryData={setNewEntryData}
-        />
+        <TabPanel value={activeTab} index={2}>
+          {/* TODO check that the active entry is not empty; otherwise, don't allow this view */}
+          <EntryInfo
+            entries={entries}
+            setEntries={setEntries}
+            activeEntry={activeEntry}
+            setActiveEntry={setActiveEntry}
+            updateEntry={updateEntryCallback}
+            deleteEntry={deleteEntryCallback}
+          />
+        </TabPanel>
 
-        {/* TODO check that the active entry is not empty; otherwise, don't allow this view */}
-        <EntryInfo
-          entries={entries}
-          setEntries={setEntries}
-          activeEntry={activeEntry}
-          setActiveEntry={setActiveEntry}
-          updateEntry={updateEntryCallback}
-          deleteEntry={deleteEntryCallback}
-        />
-
-        <NewEntryForm
-          entries={entries}
-          setEntries={setEntries}
-          newEntryData={newEntryData}
-          setNewEntryData={setNewEntryData}
-          createEntry={createEntryCallback}
-        />
+        <TabPanel value={activeTab} index={3}>
+          <NewEntryForm
+            entries={entries}
+            setEntries={setEntries}
+            newEntryData={newEntryData}
+            setNewEntryData={setNewEntryData}
+            createEntry={createEntryCallback}
+          />
+        </TabPanel>
 
       </Layout>
     );
