@@ -26,7 +26,7 @@ function EntryInfo({
   const [edited, setEdited] = useState(false);
   // Using truthy on purpose
   // eslint-disable-next-line eqeqeq
-  const activeEntryExists = activeEntry.id != false;
+  const activeEntryExists = typeof activeEntry.id === 'string' && activeEntry.id.length > 0;
 
   return (
     <Box>
@@ -51,7 +51,7 @@ function EntryInfo({
               <TextField
                 id="filled-basic"
                 value={activeEntry.name ? activeEntry.name : ''}
-                disabled={activeEntryExists}
+                disabled={!activeEntryExists}
                 label="Name"
                 variant="standard"
                 onChange={(e) => {
@@ -89,9 +89,9 @@ function EntryInfo({
               <TextField
                 id="filled-basic"
                 value={activeEntry.notes ? activeEntry.notes : ''}
-                disabled={activeEntryExists}
+                disabled={!activeEntryExists}
                 label="Notes"
-                variant="standard"
+                variant="outlined"
                 onChange={(e) => {
                   setActiveEntry({
                     ...activeEntry,
@@ -111,7 +111,7 @@ function EntryInfo({
           <TextField
             id="filled-basic"
             value={activeEntry.location ? activeEntry.location.latitude : ''}
-            disabled={activeEntryExists}
+            disabled={!activeEntryExists}
             label="Latitude"
             variant="standard"
             onChange={(e) => {
@@ -132,7 +132,7 @@ function EntryInfo({
           <TextField
             id="filled-basic"
             value={activeEntry.location ? activeEntry.location.longitude : ''}
-            disabled={activeEntryExists}
+            disabled={!activeEntryExists}
             label="Longitude"
             variant="standard"
             onChange={(e) => {
@@ -153,7 +153,7 @@ function EntryInfo({
           <TextField
             id="filled-basic"
             value={activeEntry.location ? activeEntry.location.address : ''}
-            disabled={activeEntryExists}
+            disabled={!activeEntryExists}
             label="Address"
             variant="standard"
             onChange={(e) => {
@@ -173,7 +173,7 @@ function EntryInfo({
         <Grid item xs={12}>
           <DateTimeField
             renderInput={(params) => <TextField {...params} />}
-            disabled={activeEntryExists}
+            disabled={!activeEntryExists}
             label="Start"
             onChange={(val) => {
               const isoString = val.toISO();
@@ -196,7 +196,7 @@ function EntryInfo({
         <Grid item xs={12}>
           <DateTimeField
             renderInput={(params) => <TextField {...params} />}
-            disabled={activeEntryExists}
+            disabled={!activeEntryExists}
             label="End"
             onChange={(val) => {
               const isoString = val.toISO();
@@ -219,7 +219,7 @@ function EntryInfo({
         <Grid item xs={12}>
           <Button
             variant="contained"
-            disabled={activeEntryExists}
+            disabled={!activeEntryExists}
             startIcon={<SaveIcon />}
             onClick={async () => {
               if (edited) {
@@ -247,7 +247,7 @@ function EntryInfo({
 
           <Button
             variant="contained"
-            disabled={activeEntryExists}
+            disabled={!activeEntryExists}
             startIcon={<DeleteIcon />}
             onClick={async () => {
               // Make API call

@@ -3,10 +3,11 @@ import PropTypes from 'prop-types';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
+import Paper from '@mui/material/Paper';
 
-import {
-  debug,
-} from '../utils/config';
+// import {
+//   debug,
+// } from '../utils/config';
 
 function getDateFromISOString(isoString) {
   const [date] = isoString.split('T');
@@ -32,8 +33,10 @@ function getDateRange(startTs, endTs) {
 
 function Schedule({
   entries,
-  startKey = 'start',
-  endKey = 'end',
+  activeEntry,
+  startKey,
+  endKey,
+  entryOnClick,
 }) {
   const hours = ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'];
   const dateHeight = 40; // In px
@@ -42,10 +45,12 @@ function Schedule({
 
   const [days, setDays] = useState([]);
   const [scheduleHeight, setScheduleHeight] = useState(0);
-  const [entryOffsets, setEntryOffsets] = useState({});
+  const [entrySx, setEntrySx] = useState({});
 
   useEffect(() => {
     if (entries.length < 1) return;
+
+    const calcedSx = {};
 
     /**
      * Get the earliest and latest of all entries
@@ -67,6 +72,16 @@ function Schedule({
       if (entry[endKey] > latestEntry[endKey]) {
         latestEntry = entry;
       }
+
+      // Initialize sx for each valid entry
+      calcedSx[entry.id] = {};
+
+      // Fade everything that is not the active entry
+      if (activeEntry.id) {
+        if (entry.id !== activeEntry.id) {
+          calcedSx[entry.id].opacity = '0.60';
+        }
+      }
     });
     if (validatedEntries.length < 1) return;
 
@@ -82,7 +97,6 @@ function Schedule({
     /**
      * Get entry px heights and vertical offsets
      */
-    const calcedOffsets = {};
     const earliestDay = new Date(
       Date.UTC(
         earliestEntry[startKey].getUTCFullYear(),
@@ -120,10 +134,8 @@ function Schedule({
         msDuration,
       };
 
-      calcedOffsets[entry.id] = {
-        top: `${topOffset}px`,
-        height: `${height}px`,
-      };
+      calcedSx[entry.id].top = `${topOffset}px`;
+      calcedSx[entry.id].height = `${height}px`;
     });
 
     /**
@@ -155,24 +167,24 @@ function Schedule({
       matrix.push(Array.from(columns));
     }
 
-    if (debug) {
-      console.group('MATRIX INIT');
-      console.log(matrix);
-      console.groupEnd();
-    }
+    // if (debug) {
+    //   console.group('MATRIX INIT');
+    //   console.log(matrix);
+    //   console.groupEnd();
+    // }
 
     // Seed matrix
     sortedIds.forEach((entryId, entryIndex) => {
       const blocksFromEarliest = entryMetadata[entryId].msTimeFromEarliest
         / (1000 * 60 * blockResolution);
       const blockDuration = entryMetadata[entryId].msDuration / (1000 * 60 * blockResolution);
-      if (debug) {
-        console.group('SEED MATRIX');
-        console.log(entryMetadata[entryId]);
-        console.log(blocksFromEarliest);
-        console.log(blockDuration);
-        console.groupEnd();
-      }
+      // if (debug) {
+      //   console.group(`SEED MATRIX ${entryId}`);
+      //   console.log(entryMetadata[entryId]);
+      //   console.log(blocksFromEarliest);
+      //   console.log(blockDuration);
+      //   console.groupEnd();
+      // }
 
       let startingBlock = blocksFromEarliest;
       for (let i = 0; i < blockDuration; i += 1) {
@@ -233,15 +245,16 @@ function Schedule({
         }
       });
     });
-    // Add horizontal offsets to calcedOffsets
+    // Add horizontal offsets to calcedSx
+    const spaceBetweenEntries = 2; // in px
     Object.entries(entryMetadata).forEach(([id, metadata]) => {
       const width = 100 / metadata.maxCollisions;
-      calcedOffsets[id].width = `${width}%`;
-      calcedOffsets[id].left = `calc(${width * metadata.position}% + 0px)`;
+      calcedSx[id].width = `calc(${width}% - ${spaceBetweenEntries}px)`;
+      calcedSx[id].left = `calc(${width * metadata.position}% + ${spaceBetweenEntries}px)`;
     });
 
-    setEntryOffsets(calcedOffsets);
-  }, [entries.length]);
+    setEntrySx(calcedSx);
+  }, [entries]);
 
   if (entries.length > 0) {
     return (
@@ -356,17 +369,18 @@ function Schedule({
             }}
           >
             {entries.map((entry) => (
-              <Box
+              <Paper
                 key={entry.id}
+                onClick={(e) => entryOnClick(e, entry)}
                 sx={{
-                  borderStyle: 'solid',
                   position: 'absolute',
-                  left: '80px',
-                  ...entryOffsets[entry.id],
+                  // borderColor: 'text.primary',
+                  bgcolor: 'primary.main',
+                  ...entrySx[entry.id],
                 }}
               >
                 {entry.name || 'No name'}
-              </Box>
+              </Paper>
             ))}
           </Grid>
         </Grid>
@@ -380,13 +394,18 @@ function Schedule({
 Schedule.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   entries: PropTypes.arrayOf(PropTypes.object).isRequired,
+  // eslint-disable-next-line react/forbid-prop-types
+  activeEntry: PropTypes.object,
   startKey: PropTypes.string,
   endKey: PropTypes.string,
+  entryOnClick: PropTypes.func,
 };
 
 Schedule.defaultProps = {
+  activeEntry: {},
   startKey: 'start',
   endKey: 'end',
+  entryOnClick: () => {},
 };
 
 export default Schedule;

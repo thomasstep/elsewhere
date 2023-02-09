@@ -24,6 +24,7 @@ import {
   scheduleView,
   activeEntryFormView,
   newEntryFormView,
+  debug,
 } from '../../utils/config';
 import {
   getCookie,
@@ -107,6 +108,14 @@ function Trip() {
   // Controls the tabs
   const [activeTab, setActiveTab] = useState(0);
 
+  if (debug) {
+    console.group('STATE UPDATE');
+    console.log(entries);
+    console.log(activeEntry);
+    console.log(newEntryData);
+    console.groupEnd();
+  }
+
   useEffect(() => {
     const cookieToken = getCookie(jwtCookieName);
     setToken(cookieToken);
@@ -177,9 +186,7 @@ function Trip() {
     return data;
   }
 
-  const createEntryCallback = useCallback(() => {
-    createEntry();
-  });
+  const createEntryCallback = useCallback(() => createEntry());
 
   async function updateEntry() {
     if (!router) {
@@ -218,9 +225,7 @@ function Trip() {
     return data;
   }
 
-  const updateEntryCallback = useCallback(() => {
-    updateEntry();
-  });
+  const updateEntryCallback = useCallback(() => updateEntry());
 
   async function deleteEntry() {
     if (!router) {
@@ -242,9 +247,7 @@ function Trip() {
     return true;
   }
 
-  const deleteEntryCallback = useCallback(() => {
-    deleteEntry();
-  });
+  const deleteEntryCallback = useCallback(() => deleteEntry());
 
   function changeTab(view) {
     switch (view) {

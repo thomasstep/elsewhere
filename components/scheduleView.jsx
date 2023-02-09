@@ -9,7 +9,7 @@ import { activeEntryFormView } from '../utils/config';
 
 function ScheduleView({
   entries,
-  // activeEntry,
+  activeEntry,
   setActiveEntry,
   // newEntryData,
   // setNewEntryData,
@@ -50,6 +50,7 @@ function ScheduleView({
         {/* TODO show entries without any times */}
         <Schedule
           entries={withTime}
+          activeEntry={activeEntry}
           startKey="startTimestamp"
           endKey="endTimestamp"
           entryOnClick={(e, entry) => {
@@ -69,7 +70,7 @@ ScheduleView.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   entries: PropTypes.arrayOf(PropTypes.object).isRequired,
   // eslint-disable-next-line react/forbid-prop-types
-  // activeEntry: PropTypes.object.isRequired,
+  activeEntry: PropTypes.object.isRequired,
   setActiveEntry: PropTypes.func.isRequired,
   // eslint-disable-next-line react/forbid-prop-types
   // newEntryData: PropTypes.object.isRequired,
