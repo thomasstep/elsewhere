@@ -24,6 +24,8 @@ function EntryInfo({
 }) {
   // Boolean tells whether the entry has been edited
   const [edited, setEdited] = useState(false);
+  // Timer so we don't spam update the mapView
+  // Timer so we don't spam update the scheduleView
   // Using truthy on purpose
   // eslint-disable-next-line eqeqeq
   const activeEntryExists = typeof activeEntry.id === 'string' && activeEntry.id.length > 0;

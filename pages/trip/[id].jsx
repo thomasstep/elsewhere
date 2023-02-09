@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 
 // import { makeStyles } from '@mui/styles';
 import { Wrapper, Status } from '@googlemaps/react-wrapper';
+import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
@@ -107,6 +108,10 @@ function Trip() {
   const [token, setToken] = useState(null);
   // Controls the tabs
   const [activeTab, setActiveTab] = useState(0);
+  // Controls badge visibility
+  const [activeBadge, setActiveBadge] = useState(null);
+  // Controls timer to smooth out active badge operation
+  const [activeBadgeTimer, setActiveBadgeTimer] = useState(null);
 
   if (debug) {
     console.group('STATE UPDATE');
@@ -163,6 +168,11 @@ function Trip() {
         console.error(err);
       });
   }, [router, token]);
+
+  /**
+   * Delayed state setting functions so we don't update constantly
+   */
+
 
   async function createEntry() {
     if (!router) {
@@ -249,27 +259,59 @@ function Trip() {
 
   const deleteEntryCallback = useCallback(() => deleteEntry());
 
-  function changeTab(view) {
+  function calloutTab(view) {
     switch (view) {
       case (mapView):
-        setActiveTab(0);
+        setActiveBadge(null);
+        clearTimeout(activeBadgeTimer);
+
+        setActiveBadge(0);
+        setActiveBadgeTimer(
+          setTimeout(() => {
+            setActiveBadge(null);
+          }, 3000),
+        );
         break;
       case (scheduleView):
-        setActiveTab(1);
+        setActiveBadge(null);
+        clearTimeout(activeBadgeTimer);
+
+        setActiveBadge(1);
+        setActiveBadgeTimer(
+          setTimeout(() => {
+            setActiveBadge(null);
+          }, 3000),
+        );
         break;
       case (activeEntryFormView):
-        setActiveTab(2);
+        setActiveBadge(null);
+        clearTimeout(activeBadgeTimer);
+
+        setActiveBadge(2);
+        setActiveBadgeTimer(
+          setTimeout(() => {
+            setActiveBadge(null);
+          }, 3000),
+        );
         break;
       case (newEntryFormView):
-        setActiveTab(3);
+        setActiveBadge(null);
+        clearTimeout(activeBadgeTimer);
+
+        setActiveBadge(3);
+        setActiveBadgeTimer(
+          setTimeout(() => {
+            setActiveBadge(null);
+          }, 3000),
+        );
         break;
       default:
         break;
     }
   }
 
-  const changeTabCallback = useCallback((view) => {
-    changeTab(view);
+  const calloutTabCallback = useCallback((view) => {
+    calloutTab(view);
   });
 
   if (id) {
@@ -286,10 +328,54 @@ function Trip() {
             scrollButtons
             allowScrollButtonsMobile
           >
-            <Tab label="Map" {...a11yProps(0)} />
-            <Tab label="Schedule" {...a11yProps(1)} />
-            <Tab label="Selected Entry" {...a11yProps(2)} />
-            <Tab label="New Entry" {...a11yProps(3)} />
+            <Tab
+              label={(
+                <Badge
+                  color="secondary"
+                  variant="dot"
+                  invisible={!(activeBadge === 0)}
+                >
+                  Map
+                </Badge>
+              )}
+              {...a11yProps(0)}
+            />
+            <Tab
+              label={(
+                <Badge
+                  color="secondary"
+                  variant="dot"
+                  invisible={!(activeBadge === 1)}
+                >
+                  Schedule
+                </Badge>
+              )}
+              {...a11yProps(1)}
+            />
+            <Tab
+              label={(
+                <Badge
+                  color="secondary"
+                  variant="dot"
+                  invisible={!(activeBadge === 2)}
+                >
+                  Selected Entry
+                </Badge>
+              )}
+              {...a11yProps(2)}
+            />
+            <Tab
+              label={(
+                <Badge
+                  color="secondary"
+                  variant="dot"
+                  invisible={!(activeBadge === 3)}
+                >
+                  New Entry
+                </Badge>
+              )}
+              {...a11yProps(3)}
+            />
           </Tabs>
         </Box>
 
@@ -302,7 +388,7 @@ function Trip() {
               setActiveEntry={setActiveEntry}
               newEntryData={newEntryData}
               setNewEntryData={setNewEntryData}
-              changeTab={changeTabCallback}
+              calloutTab={calloutTabCallback}
             />
           </Wrapper>
         </TabPanel>
@@ -314,7 +400,7 @@ function Trip() {
             setActiveEntry={setActiveEntry}
             newEntryData={newEntryData}
             setNewEntryData={setNewEntryData}
-            changeTab={changeTabCallback}
+            calloutTab={calloutTabCallback}
           />
         </TabPanel>
 

@@ -16,7 +16,7 @@ function MapView({
   setActiveEntry,
   newEntryData,
   setNewEntryData,
-  changeTab,
+  calloutTab,
 }) {
   // useEffect(() => {
   //   if (!entries.length > 0) {
@@ -48,11 +48,23 @@ function MapView({
         zoom={3}
         center={{ lat: 0, lng: 0 }}
         onClick={(e) => {
-          // Behavior: if there is an active entry, only unset the active entry
-          //           if there is no active entry, set new entry's location
+          // Behavior: if there is an active entry, unset the active entry
+          //           if there is the new entry is mapped, unset its location
+          //           if there is not an active entry or mapped new entry,
+          //             set new entry's location
           if (activeEntry.id) {
             // Unset active entry if click is not on a marker
             setActiveEntry({});
+          } else if (
+            newEntryData.location
+            && newEntryData.location.latitude
+            && newEntryData.location.longitude
+          ) {
+            // Reset new entry's location
+            setNewEntryData({
+              ...newEntryData,
+              location: {},
+            });
           } else {
             // Set new entry's location based on click
             setNewEntryData({
@@ -62,7 +74,7 @@ function MapView({
                 longitude: e.latLng.lng(),
               },
             });
-            changeTab(newEntryFormView);
+            calloutTab(newEntryFormView);
           }
         }}
         // onCenterChanged={(mp, m) => onMapCenterChanged(mp, m)}
@@ -97,7 +109,7 @@ function MapView({
               }}
               onClick={() => {
                 setActiveEntry(entry);
-                changeTab(activeEntryFormView);
+                calloutTab(activeEntryFormView);
               }}
               // eslint-disable-next-line no-undef
               animation={animate && google.maps.Animation.BOUNCE}
@@ -142,7 +154,7 @@ MapView.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   newEntryData: PropTypes.object.isRequired,
   setNewEntryData: PropTypes.func.isRequired,
-  changeTab: PropTypes.func.isRequired,
+  calloutTab: PropTypes.func.isRequired,
 };
 
 export default MapView;

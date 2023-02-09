@@ -13,7 +13,7 @@ function ScheduleView({
   setActiveEntry,
   // newEntryData,
   // setNewEntryData,
-  changeTab,
+  calloutTab,
 }) {
   if (entries.length > 0) {
     const noTime = [];
@@ -55,7 +55,7 @@ function ScheduleView({
           endKey="endTimestamp"
           entryOnClick={(e, entry) => {
             setActiveEntry(entry);
-            changeTab(activeEntryFormView);
+            calloutTab(activeEntryFormView);
           }}
         />
       </Box>
@@ -75,7 +75,7 @@ ScheduleView.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   // newEntryData: PropTypes.object.isRequired,
   // setNewEntryData: PropTypes.func.isRequired,
-  changeTab: PropTypes.func.isRequired,
+  calloutTab: PropTypes.func.isRequired,
 };
 
 export default ScheduleView;
