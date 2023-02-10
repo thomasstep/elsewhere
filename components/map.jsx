@@ -37,6 +37,7 @@ function useDeepCompareEffectForMaps(callback, dependencies) {
 }
 
 function Map({
+  bounds,
   onClick,
   newEntryData,
   setNewEntryData,
@@ -56,6 +57,7 @@ function Map({
     if (mapRef.current && !map) {
       // eslint-disable-next-line no-undef
       const newMap = new window.google.maps.Map(mapRef.current, {});
+
       setMap(newMap);
     }
   }, [mapRef, map]);
@@ -131,8 +133,12 @@ function Map({
       if (onIdle) {
         map.addListener('idle', () => onIdle(map));
       }
+
+      if (bounds) {
+        map.fitBounds(bounds);
+      }
     }
-  }, [map, onClick, onIdle]);
+  }, [map, bounds, onClick, onIdle]);
 
   return (
     <>
@@ -156,6 +162,8 @@ function Map({
 }
 
 Map.propTypes = {
+  // eslint-disable-next-line react/forbid-prop-types
+  bounds: PropTypes.object,
   onClick: PropTypes.func,
   // eslint-disable-next-line react/forbid-prop-types
   newEntryData: PropTypes.object,
@@ -170,6 +178,7 @@ Map.propTypes = {
 };
 
 Map.defaultProps = {
+  bounds: null,
   onClick: () => {},
   newEntryData: {},
   setNewEntryData: () => {},

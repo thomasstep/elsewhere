@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import Box from '@mui/material/Box';
@@ -18,29 +18,27 @@ function MapView({
   setNewEntryData,
   calloutTab,
 }) {
-  // useEffect(() => {
-  //   if (!entries.length > 0) {
-  //     return;
-  //   }
+  const [bounds, setBounds] = useState(null);
 
-  //   // eslint-disable-next-line no-undef
-  //   const bounds = new google.maps.LatLngBounds();
-  //   entries.forEach((entry) => {
-  //     if (!entry.location.latitude || !entry.location.longitude) {
-  //       return;
-  //     }
+  useEffect(() => {
+    if (!(entries.length > 0)) {
+      return;
+    }
 
-  //     bounds.extend({
-  //       lat: entry.location.latitude,
-  //       lng: entry.location.longitude,
-  //     });
-  //   });
-  //   map.fitBounds(bounds);
-  //   const boundsCenter = bounds.getCenter();
-  //   setMarkers(data);
-  //   setMapCenterLat(boundsCenter.lat());
-  //   setMapCenterLng(boundsCenter.lng());
-  // }, []);
+    // eslint-disable-next-line no-undef
+    const newBounds = new google.maps.LatLngBounds();
+    entries.forEach((entry) => {
+      if (!entry.location.latitude || !entry.location.longitude) {
+        return;
+      }
+
+      newBounds.extend({
+        lat: entry.location.latitude,
+        lng: entry.location.longitude,
+      });
+    });
+    setBounds(newBounds);
+  }, []);
 
   return (
     <Box>
@@ -48,6 +46,7 @@ function MapView({
       <Map
         zoom={3}
         center={{ lat: 0, lng: 0 }}
+        bounds={bounds}
         onClick={(e) => {
           // Behavior: if there is an active entry, unset the active entry
           //           if there is the new entry is mapped, unset its location
