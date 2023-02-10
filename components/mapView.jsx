@@ -44,6 +44,7 @@ function MapView({
 
   return (
     <Box>
+
       <Map
         zoom={3}
         center={{ lat: 0, lng: 0 }}
@@ -77,8 +78,9 @@ function MapView({
             calloutTab(newEntryFormView);
           }
         }}
-        // onCenterChanged={(mp, m) => onMapCenterChanged(mp, m)}
-        // onReady={(mp, m) => onMapReady(mp, m)}
+        // TODO is there a better way to do this instead of passing new entry data and setter?
+        newEntryData={newEntryData}
+        setNewEntryData={setNewEntryData}
         zoomControl={false}
         streetViewControl={false}
         fullscreenControl={false}

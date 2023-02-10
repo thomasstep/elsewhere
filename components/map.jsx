@@ -1,8 +1,11 @@
 // From: https://github.com/googlemaps/js-samples/blob/c1036e60d2f50056fba1617a1be507b00b6cac5a/dist/samples/react-map/docs/index.jsx
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { createCustomEqual } from 'fast-equals';
 import { isLatLngLiteral } from '@googlemaps/typescript-guards';
+import TextField from '@mui/material/TextField';
+
+import { debug } from '../utils/config';
 
 const deepCompareEqualsForMaps = createCustomEqual((deepEqual) => (a, b) => {
   if (
@@ -21,7 +24,7 @@ const deepCompareEqualsForMaps = createCustomEqual((deepEqual) => (a, b) => {
 });
 
 function useDeepCompareMemoize(value) {
-  const ref = React.useRef();
+  const ref = useRef();
 
   if (!deepCompareEqualsForMaps(value, ref.current)) {
     ref.current = value;
@@ -30,24 +33,85 @@ function useDeepCompareMemoize(value) {
 }
 
 function useDeepCompareEffectForMaps(callback, dependencies) {
-  React.useEffect(callback, dependencies.map(useDeepCompareMemoize));
+  useEffect(callback, dependencies.map(useDeepCompareMemoize));
 }
 
 function Map({
-  onClick, onIdle, children, style, ...options
+  onClick,
+  newEntryData,
+  setNewEntryData,
+  onIdle,
+  children,
+  style,
+  ...options
 }) {
-  // [START maps_react_map_component_add_map_hooks]
-  const ref = React.useRef(null);
-  const [map, setMap] = React.useState();
+  const mapRef = useRef(null);
+  const inputRef = useRef(null);
+  const autocompleteRef = useRef(null);
+  const [map, setMap] = useState();
+  const [autocompleteWidget, setAutocompleteWidget] = useState();
 
-  React.useEffect(() => {
-    if (ref.current && !map) {
+  // Setup map
+  useEffect(() => {
+    if (mapRef.current && !map) {
       // eslint-disable-next-line no-undef
-      setMap(new window.google.maps.Map(ref.current, {}));
+      const newMap = new window.google.maps.Map(mapRef.current, {});
+      setMap(newMap);
     }
-  }, [ref, map]);
-  // [END maps_react_map_component_add_map_hooks]
-  // [START maps_react_map_component_options_hook]
+  }, [mapRef, map]);
+
+  // Setup autocomplete
+  useEffect(() => {
+    if (inputRef.current && !autocompleteWidget) {
+      // eslint-disable-next-line no-undef
+      const acw = new google.maps.places.Autocomplete(inputRef.current);
+      autocompleteRef.current = acw;
+      setAutocompleteWidget(acw);
+    }
+  }, [inputRef, autocompleteWidget]);
+
+  // Additional map-dependent autocomplete setup
+  // This is where new entries are updated
+  useEffect(() => {
+    if (map && autocompleteWidget) {
+      autocompleteWidget.bindTo('bounds', map);
+      autocompleteWidget.addListener('place_changed', () => {
+        const place = autocompleteWidget.getPlace();
+
+        if (!place.geometry || !place.geometry.location) {
+          // User entered the name of a Place that was not suggested and
+          // pressed the Enter key, or the Place Details request failed.
+          // window.alert("No details available for input: '" + place.name + "'");
+          return;
+        }
+
+        // If the place has a geometry, then present it on a map.
+        if (place.geometry.viewport) {
+          map.fitBounds(place.geometry.viewport);
+        } else {
+          map.setCenter(place.geometry.location);
+          map.setZoom(17);
+        }
+
+        if (debug) {
+          console.group('PLACE UPDATE');
+          console.log(place);
+          console.groupEnd();
+        }
+
+        setNewEntryData({
+          ...newEntryData,
+          name: place.name,
+          location: {
+            latitude: place.geometry.location.lat(),
+            longitude: place.geometry.location.lng(),
+            address: place.formatted_address,
+          },
+        });
+      });
+    }
+  });
+
   // because React does not do deep comparisons, a custom hook is used
   // see discussion in https://github.com/googlemaps/js-samples/issues/946
   useDeepCompareEffectForMaps(() => {
@@ -55,9 +119,8 @@ function Map({
       map.setOptions(options);
     }
   }, [map, options]);
-  // [END maps_react_map_component_options_hook]
-  // [START maps_react_map_component_event_hooks]
-  React.useEffect(() => {
+
+  useEffect(() => {
     if (map) {
       // eslint-disable-next-line no-undef
       ['click', 'idle'].forEach((eventName) => google.maps.event.clearListeners(map, eventName));
@@ -70,11 +133,16 @@ function Map({
       }
     }
   }, [map, onClick, onIdle]);
-  // [END maps_react_map_component_event_hooks]
-  // [START maps_react_map_component_return]
+
   return (
     <>
-      <div ref={ref} style={style} />
+      <TextField
+        inputRef={inputRef}
+        sx={{
+          pb: 3,
+        }}
+      />
+      <div ref={mapRef} style={style} />
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
           // set the map prop on the child component
@@ -85,11 +153,13 @@ function Map({
       })}
     </>
   );
-  // [END maps_react_map_component_return]
 }
 
 Map.propTypes = {
   onClick: PropTypes.func,
+  // eslint-disable-next-line react/forbid-prop-types
+  newEntryData: PropTypes.object,
+  setNewEntryData: PropTypes.func,
   onIdle: PropTypes.func,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node).isRequired,
@@ -101,6 +171,8 @@ Map.propTypes = {
 
 Map.defaultProps = {
   onClick: () => {},
+  newEntryData: {},
+  setNewEntryData: () => {},
   onIdle: () => {},
   children: null,
 };

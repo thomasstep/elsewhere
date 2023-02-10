@@ -381,7 +381,11 @@ function Trip() {
 
 
         <TabPanel value={activeTab} index={0}>
-          <Wrapper apiKey={googleMapsKey} render={loadingRender}>
+          <Wrapper
+            apiKey={googleMapsKey}
+            render={loadingRender}
+            libraries={['places']}
+          >
             <MapView
               entries={entries}
               activeEntry={activeEntry}
