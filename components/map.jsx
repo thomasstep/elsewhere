@@ -59,6 +59,14 @@ function Map({
       const newMap = new window.google.maps.Map(mapRef.current, {});
 
       setMap(newMap);
+
+      if (bounds) {
+        if (debug) {
+          console.log('FITTING MAP INITIAL BOUNDS');
+        }
+
+        newMap.fitBounds(bounds);
+      }
     }
   }, [mapRef, map]);
 
@@ -96,7 +104,7 @@ function Map({
         }
 
         if (debug) {
-          console.group('PLACE UPDATE');
+          console.groupCollapsed('PLACE UPDATE');
           console.log(place);
           console.groupEnd();
         }
@@ -133,12 +141,18 @@ function Map({
       if (onIdle) {
         map.addListener('idle', () => onIdle(map));
       }
-
-      if (bounds) {
-        map.fitBounds(bounds);
-      }
     }
-  }, [map, bounds, onClick, onIdle]);
+  }, [map, onClick, onIdle]);
+
+  useEffect(() => {
+    if (map && bounds) {
+      if (debug) {
+        console.log('FITTING MAP BOUNDS');
+      }
+
+      map.fitBounds(bounds);
+    }
+  }, [map, bounds]);
 
   return (
     <>

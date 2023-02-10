@@ -8,6 +8,7 @@ import Marker from './marker';
 import {
   activeEntryFormView,
   newEntryFormView,
+  debug,
 } from '../utils/config';
 
 function MapView({
@@ -37,6 +38,11 @@ function MapView({
         lng: entry.location.longitude,
       });
     });
+    if (debug) {
+      console.groupCollapsed('MAP VIEW BOUNDS SET');
+      console.log(newBounds);
+      console.groupEnd();
+    }
     setBounds(newBounds);
   }, []);
 

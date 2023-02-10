@@ -168,7 +168,7 @@ function Schedule({
     }
 
     // if (debug) {
-    //   console.group('MATRIX INIT');
+    //   console.groupCollapsed('MATRIX INIT');
     //   console.log(matrix);
     //   console.groupEnd();
     // }
@@ -179,7 +179,7 @@ function Schedule({
         / (1000 * 60 * blockResolution);
       const blockDuration = entryMetadata[entryId].msDuration / (1000 * 60 * blockResolution);
       // if (debug) {
-      //   console.group(`SEED MATRIX ${entryId}`);
+      //   console.groupCollapsed(`SEED MATRIX ${entryId}`);
       //   console.log(entryMetadata[entryId]);
       //   console.log(blocksFromEarliest);
       //   console.log(blockDuration);

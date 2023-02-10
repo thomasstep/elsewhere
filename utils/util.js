@@ -1,5 +1,5 @@
 function setCookie(name, value) {
-  const newCookie = `${name}=${value}; max-age=${60 * 60 * 24}; secure; samesite=strict`;
+  const newCookie = `${name}=${value}; max-age=${60 * 60 * 5}; secure; samesite=strict; path=/`;
   document.cookie = newCookie;
 }
 

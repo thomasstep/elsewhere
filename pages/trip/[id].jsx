@@ -114,7 +114,7 @@ function Trip() {
   const [activeBadgeTimer, setActiveBadgeTimer] = useState(null);
 
   if (debug) {
-    console.group('STATE UPDATE');
+    console.groupCollapsed('STATE UPDATE');
     console.log(entries);
     console.log(activeEntry);
     console.log(newEntryData);
