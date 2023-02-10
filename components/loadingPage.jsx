@@ -9,10 +9,12 @@ function LoadingPage() {
       spacing={0}
       direction="column"
       alignItems="center"
-      justify="center"
+      justifyContent="center"
       style={{ minHeight: '100vh' }}
     >
-      <CircularProgress />
+      <Grid item xs={2}>
+        <CircularProgress />
+      </Grid>
     </Grid>
   );
 }
