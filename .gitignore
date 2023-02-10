@@ -63,3 +63,5 @@ typings/
 .now
 
 server.*
+
+.DS_Store

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
+import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
 import { useRouter } from 'next/router';
 import Layout from '../components/layout';
+import { jwtCookieName } from '../utils/config';
+import { setCookie } from '../utils/util';
 
 function SignIn() {
   const [signInEmail, setSignInEmail] = useState('');
@@ -30,18 +32,22 @@ function SignIn() {
     };
 
     try {
-      const res = await fetch('/api/local/signin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      const resJson = await res.json();
-      if (resJson.done && resJson.verified) {
+      const authServiceUrl = process.env.AUTH_SERVICE_URL;
+      const applicationId = process.env.AUTH_SERVICE_APP_ID;
+      const res = await fetch(`${authServiceUrl}/v1/applications/${applicationId}/users/token?${new URLSearchParams(body)}`);
+      if (res.status === 200) {
+        const resJson = await res.json();
+        setCookie(jwtCookieName, resJson.token);
         router.push('/profile');
       }
-      if (!resJson.verified) {
-        router.push('/verify');
+      if (res.status === 401) {
+        // TODO say wrong password
       }
+      if (res.status === 404) {
+        // TODO say user not found with given email, do you need to verify?
+      }
+      // If no previous cases were hit, we don't know what happened
+      // TODO say there was an error, try again
     } catch (err) {
       // Do something?
     }
@@ -56,7 +62,7 @@ function SignIn() {
         alignItems="center"
         spacing={5}
       >
-        <Grid item xs={12}>
+        {/* <Grid item xs={12}>
           <Button
             variant="contained"
             href="/api/google/signin"
@@ -65,14 +71,14 @@ function SignIn() {
           </Button>
         </Grid>
 
-        <hr style={{ width: '100%' }} />
-        {/* This is username and password authentication */}
+        <hr style={{ width: '100%' }} /> */}
+
         <Grid item xs={12}>
           <TextField
             id="filled-basic"
             value={signInEmail}
             label="Email address"
-            variant="outlined"
+            variant="standard"
             onChange={(e) => handleSignInEmailFieldChange(e)}
           />
         </Grid>
@@ -81,7 +87,7 @@ function SignIn() {
             id="filled-basic"
             value={signInPassword}
             label="Password"
-            variant="outlined"
+            variant="standard"
             type="password"
             onChange={(e) => handleSignInPasswordFieldChange(e)}
           />
@@ -89,13 +95,19 @@ function SignIn() {
         <Grid item xs={12}>
           <Button
             variant="contained"
-            onClick={handleEmailPasswordSignIn}
+            onClick={(e) => handleEmailPasswordSignIn(e)}
           >
-            Sign In With Email
+            Sign In
           </Button>
         </Grid>
         <Grid item xs={12}>
-          <Link href="/forgot-password">Forgot your password?</Link>
+          <Button
+            variant="contained"
+            component={Link}
+            href="/forgot-password"
+          >
+            Forgot your password?
+          </Button>
         </Grid>
       </Grid>
     </Layout>

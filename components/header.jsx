@@ -1,59 +1,60 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
-import { makeStyles } from '@material-ui/core/styles';
+// import { makeStyles } from '@mui/styles';
 
 // Menu bar
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
+import AppBar from '@mui/material/AppBar';
+import Drawer from '@mui/material/Drawer';
+import IconButton from '@mui/material/IconButton';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+// Icons
+import AccountBoxIcon from '@mui/icons-material/AccountBox';
+import AddIcon from '@mui/icons-material/Add';
+import HomeIcon from '@mui/icons-material/Home';
+import LoginIcon from '@mui/icons-material/Login';
+import LogoutIcon from '@mui/icons-material/Logout';
+import MenuIcon from '@mui/icons-material/Menu';
 
-// Floating menu
-import Drawer from '@material-ui/core/Drawer';
-import Fab from '@material-ui/core/Fab';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import HomeIcon from '@material-ui/icons/Home';
-import AccountBoxIcon from '@material-ui/icons/AccountBox';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-
-const useStyles = makeStyles((theme) => ({
-  fab: {
-    left: 'calc(50% - 28px)',
-    top: theme.spacing(1),
-    position: 'fixed',
-    zIndex: theme.zIndex.appBar,
-    backgroundColor: theme.palette.primary.main,
-    '&:hover': {
-      backgroundColor: theme.palette.primary.dark,
-    },
-  },
-  appBar: {
-    position: 'static',
-  },
-  iconButton: {
-    '&:hover': {
-      backgroundColor: theme.palette.primary.dark,
-    },
-  },
-  menuIcon: {
-    color: 'white',
-  },
-  typography: {
-    flexGrow: 1,
-    align: 'center',
-    marginLeft: theme.spacing(2),
-  },
-}));
+// const useStyles = makeStyles((theme) => ({
+//   fab: {
+//     left: 'calc(50% - 28px)',
+//     top: theme.spacing(1),
+//     position: 'fixed',
+//     zIndex: theme.zIndex.appBar,
+//     backgroundColor: theme.palette.primary.main,
+//     '&:hover': {
+//       backgroundColor: theme.palette.primary.dark,
+//     },
+//   },
+//   appBar: {
+//     position: 'static',
+//   },
+//   iconButton: {
+//     '&:hover': {
+//       backgroundColor: theme.palette.primary.dark,
+//     },
+//   },
+//   menuIcon: {
+//     color: 'white',
+//   },
+//   typography: {
+//     flexGrow: 1,
+//     align: 'center',
+//     marginLeft: theme.spacing(2),
+//   },
+// }));
 
 function Header(props) {
   const [open, setOpen] = useState(false);
-  const { mapPage, session } = props;
-  const classes = useStyles(props);
+  const { session } = props;
+  // const classes = useStyles(props);
 
   function toggleDrawer(event) {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -71,34 +72,54 @@ function Header(props) {
         onKeyDown={(e) => toggleDrawer(e)}
       >
         <List>
-          <Link href="/">
-            <ListItem button key="Home">
-              <ListItemIcon><HomeIcon /></ListItemIcon>
+          <ListItem key="Home">
+            <ListItemButton component={Link} href="/">
+              <ListItemIcon>
+                <HomeIcon />
+              </ListItemIcon>
               <ListItemText primary="Home" />
-            </ListItem>
-          </Link>
-          <Link href="/profile">
-            <ListItem button key="Profile">
-              <ListItemIcon><AccountBoxIcon /></ListItemIcon>
-              <ListItemText primary="Profile" />
-            </ListItem>
-          </Link>
+            </ListItemButton>
+          </ListItem>
           {
             session
               ? (
-                <Link href="/signout">
-                  <ListItem button key="Sign Out">
-                    <ListItemIcon><ExitToAppIcon /></ListItemIcon>
-                    <ListItemText primary="Sign Out" />
+                <>
+                  <ListItem key="Profile">
+                    <ListItemButton component={Link} href="/profile">
+                      <ListItemIcon>
+                        <AccountBoxIcon />
+                      </ListItemIcon>
+                      <ListItemText primary="Profile" />
+                    </ListItemButton>
                   </ListItem>
-                </Link>
+                  <ListItem key="Sign Out">
+                    <ListItemButton component={Link} href="/signout">
+                      <ListItemIcon>
+                        <LogoutIcon />
+                      </ListItemIcon>
+                      <ListItemText primary="Sign Out" />
+                    </ListItemButton>
+                  </ListItem>
+                </>
               ) : (
-                <Link href="/signin">
-                  <ListItem button key="Sign In">
-                    <ListItemIcon><ExitToAppIcon /></ListItemIcon>
-                    <ListItemText primary="Sign In" />
+                <>
+                  <ListItem key="Sign In">
+                    <ListItemButton component={Link} href="/signin">
+                      <ListItemIcon>
+                        <LoginIcon />
+                      </ListItemIcon>
+                      <ListItemText primary="Sign In" />
+                    </ListItemButton>
                   </ListItem>
-                </Link>
+                  <ListItem key="Sign Up">
+                    <ListItemButton component={Link} href="/signup">
+                      <ListItemIcon>
+                        <AddIcon />
+                      </ListItemIcon>
+                      <ListItemText primary="Sign Up" />
+                    </ListItemButton>
+                  </ListItem>
+                </>
               )
           }
         </List>
@@ -106,41 +127,42 @@ function Header(props) {
     </Drawer>
   );
 
-  return mapPage ? (
+  return (
     <>
-      <Fab onClick={(e) => toggleDrawer(e)} className={classes.fab}>
-        <MenuIcon className={classes.menuIcon} />
-      </Fab>
+      <AppBar>
+        <Toolbar>
+          <IconButton
+            onClick={(e) => toggleDrawer(e)}
+            // className={classes.iconButton}
+            edge="start"
+            aria-label="menu"
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography
+            variant="h5"
+            // className={classes.typography}
+            sx={{
+              align: 'center',
+              flexGrow: 1,
+              marginLeft: 2,
+            }}
+          >
+            Elsewhere
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <Toolbar />
       {navigationDrawer}
     </>
-  )
-    : (
-      <>
-        <AppBar className={classes.appBar}>
-          <Toolbar>
-            <IconButton onClick={(e) => toggleDrawer(e)} className={classes.iconButton} edge="start" aria-label="menu">
-              <MenuIcon className={classes.menuIcon} />
-            </IconButton>
-            <Typography
-              variant="h5"
-              className={classes.typography}
-            >
-              Elsewhere
-            </Typography>
-          </Toolbar>
-        </AppBar>
-        {navigationDrawer}
-      </>
-    );
+  );
 }
 
 Header.propTypes = {
-  mapPage: PropTypes.bool,
   session: PropTypes.string,
 };
 
 Header.defaultProps = {
-  mapPage: false,
   session: null,
 };
 
