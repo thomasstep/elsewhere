@@ -43,8 +43,9 @@ function MapView({
       console.log(newBounds);
       console.groupEnd();
     }
+
     setBounds(newBounds);
-  }, []);
+  }, [entries]);
 
   return (
     <Box>
