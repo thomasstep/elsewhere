@@ -14,12 +14,12 @@ import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 // Icons
-import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import AddIcon from '@mui/icons-material/Add';
 import HomeIcon from '@mui/icons-material/Home';
 import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
+import PublicIcon from '@mui/icons-material/Public';
 
 function Header(props) {
   const [open, setOpen] = useState(false);
@@ -53,12 +53,12 @@ function Header(props) {
             session
               ? (
                 <>
-                  <ListItem key="Profile">
-                    <ListItemButton component={Link} href="/profile">
+                  <ListItem key="Trips">
+                    <ListItemButton component={Link} href="/trips">
                       <ListItemIcon>
-                        <AccountBoxIcon />
+                        <PublicIcon />
                       </ListItemIcon>
-                      <ListItemText primary="Profile" />
+                      <ListItemText primary="Trips" />
                     </ListItemButton>
                   </ListItem>
                   <ListItem key="Sign Out">

@@ -21,7 +21,7 @@ import { getCookie } from '../utils/util';
 function Profile() {
   const [id, setId] = useState('');
   const [maps, setMaps] = useState([]);
-  const [newMapNameField, setNewMapNameField] = useState('');
+  const [newTripNameField, setNewTripNameField] = useState('');
   // token is the auth token held in a cookie
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -73,15 +73,15 @@ function Profile() {
       });
   }, [router, token]);
 
-  function handleNewMapNameFieldChange(event) {
+  function handleNewTripNameFieldChange(event) {
     event.preventDefault();
-    setNewMapNameField(event.target.value);
+    setNewTripNameField(event.target.value);
   }
 
-  async function addNewMap(event) {
+  async function createTrip(event) {
     event.preventDefault();
     const vars = {
-      name: newMapNameField,
+      name: newTripNameField,
     };
 
     setLoading(true);
@@ -130,20 +130,14 @@ function Profile() {
             alignItems="center"
           >
             <Grid item xs={12}>
-              <Typography variant="h3">Profile</Typography>
+              <Typography variant="h3">Trips</Typography>
             </Grid>
-            {/* <Grid item xs={12}>
-              <Typography variant="h5">{email}</Typography>
-            </Grid> */}
           </Grid>
 
           <Grid item xs={12}>
             {
               maps.length ? (
-                <>
-                  <Typography variant="h5">Your maps</Typography>
-                  <MapList maps={maps} />
-                </>
+                <MapList maps={maps} />
               )
                 : null
             }
@@ -158,24 +152,24 @@ function Profile() {
               spacing={2}
             >
               <Grid item xs={12}>
-                <Typography variant="h5">Create a new map</Typography>
+                <Typography variant="h5">Create a new trip</Typography>
               </Grid>
               <Grid item xs={12}>
                 <TextField
                   id="filled-basic"
-                  value={newMapNameField}
-                  label="New map name"
+                  value={newTripNameField}
+                  label="Name"
                   variant="standard"
-                  onChange={(e) => handleNewMapNameFieldChange(e)}
+                  onChange={(e) => handleNewTripNameFieldChange(e)}
                 />
               </Grid>
               <Grid item xs={12}>
                 <Button
                   variant="contained"
                   startIcon={<AddIcon />}
-                  onClick={(e) => addNewMap(e)}
+                  onClick={(e) => createTrip(e)}
                 >
-                  Add New Map
+                  Create
                 </Button>
               </Grid>
             </Grid>

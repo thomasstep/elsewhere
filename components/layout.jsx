@@ -11,11 +11,9 @@ function Layout(props) {
     <Box>
       <Header session={session} />
       <Box
-        mt={3}
-        px={5}
         sx={{
           mt: {
-            xs: 3,
+            xs: 5,
           },
           px: {
             xs: 1,
