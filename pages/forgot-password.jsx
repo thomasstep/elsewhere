@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import Grid from '@mui/material/Grid';
+import Backdrop from '@mui/material/Backdrop';
 import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import { useRouter } from 'next/router';
 import Layout from '../components/layout';
 
 function ForgotPassword() {
   const [signInEmail, setSignInEmail] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   function handleSignInEmailFieldChange(event) {
@@ -57,12 +60,21 @@ function ForgotPassword() {
         <Grid item xs={12}>
           <Button
             variant="contained"
-            onClick={(e) => handleRequestPasswordResetLink(e)}
+            onClick={(e) => {
+              setLoading(true);
+              handleRequestPasswordResetLink(e);
+            }}
           >
             Request Password Reset Link
           </Button>
         </Grid>
       </Grid>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress />
+      </Backdrop>
     </Layout>
   );
 }

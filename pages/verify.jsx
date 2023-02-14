@@ -1,8 +1,10 @@
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Grid from '@mui/material/Grid';
+import Backdrop from '@mui/material/Backdrop';
 import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Layout from '../components/layout';
@@ -11,6 +13,7 @@ function Verify() {
   const router = useRouter();
   const [token, setToken] = useState('');
   const [verified, setVerified] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   function handleTokenFieldChange(event) {
     setToken(event.target.value);
@@ -79,7 +82,10 @@ function Verify() {
         <Grid item xs={12}>
           <Button
             variant="contained"
-            onClick={(e) => verifyToken(e)}
+            onClick={(e) => {
+              setLoading(true);
+              verifyToken(e);
+            }}
           >
             Verify Code
           </Button>
@@ -88,6 +94,12 @@ function Verify() {
           {successMessage}
         </Grid>
       </Grid>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress />
+      </Backdrop>
     </Layout>
   );
 }

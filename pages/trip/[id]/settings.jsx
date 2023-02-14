@@ -1,9 +1,11 @@
 import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
 // import { makeStyles } from '@mui/styles';
+import Backdrop from '@mui/material/Backdrop';
+import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
 import DeleteIcon from '@mui/icons-material/Delete';
 import TextField from '@mui/material/TextField';
 import AddIcon from '@mui/icons-material/Add';
@@ -25,30 +27,15 @@ import {
   getCookie,
 } from '../../../utils/util';
 
-// const useStyles = makeStyles((theme) => ({
-//   deleteButton: {
-//     color: 'white',
-//     backgroundColor: theme.palette.error.main,
-//     '&:hover': {
-//       backgroundColor: theme.palette.error.dark,
-//     },
-//   },
-//   deleteTravelPartnerButton: {
-//     '&:hover': {
-//       backgroundColor: theme.palette.error.main,
-//     },
-//   },
-// }));
-
 function ElsewhereMapSettings() {
   const router = useRouter();
   const [id, setId] = useState('');
   const [mapName, setMapName] = useState('');
   const [editedMapName, setEditedMapName] = useState('');
-  const [writers, setWriters] = useState(null);
+  const [writers, setWriters] = useState(new Set());
   const [token, setToken] = useState(null);
   const [travelPartnerTextField, setTravelPartnerTextField] = useState('');
-  // const classes = useStyles(props);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const cookieToken = getCookie(jwtCookieName);
@@ -118,6 +105,7 @@ function ElsewhereMapSettings() {
         name: editedMapName,
       };
 
+      setLoading(true);
       fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}`, {
         method: 'PUT',
         headers: {
@@ -133,6 +121,9 @@ function ElsewhereMapSettings() {
           } else {
             // TODO return error
           }
+        })
+        .finally(() => {
+          setLoading(false);
         });
     }
   }
@@ -170,6 +161,7 @@ function ElsewhereMapSettings() {
       email: travelPartnerTextField,
     };
 
+    setLoading(true);
     fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/collaborator`, {
       method: 'PUT',
       headers: {
@@ -180,12 +172,15 @@ function ElsewhereMapSettings() {
     })
       .then((res) => {
         if (res.status === 200) {
-          // TODO use a new array before setting writers
-          writers.add(travelPartnerTextField);
-          setWriters(writers); // Do I need to do this?
+          const newWriters = new Set(writers);
+          newWriters.add(travelPartnerTextField);
+          setWriters(newWriters); // Do I need to do this?
         } else {
           // TODO return error
         }
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }
 
@@ -196,6 +191,7 @@ function ElsewhereMapSettings() {
       email,
     };
 
+    setLoading(true);
     fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/collaborator`, {
       method: 'DELETE',
       headers: {
@@ -206,12 +202,15 @@ function ElsewhereMapSettings() {
     })
       .then((res) => {
         if (res.status === 200) {
-          // TODO use a new array before setting writers
-          writers.delete(email);
-          setWriters(writers);
+          const newWriters = new Set(writers);
+          newWriters.delete(email);
+          setWriters(newWriters);
         } else {
           // TODO return error
         }
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }
 
@@ -274,7 +273,7 @@ function ElsewhereMapSettings() {
         {/* Travel Partners */}
         <Grid item xs={12}>
           {
-          writers && writers.size ? (
+          writers.size ? (
             <>
               <Typography variant="h5">Travel Partners</Typography>
               <List component="nav">
@@ -353,6 +352,12 @@ function ElsewhereMapSettings() {
           </Grid>
         </Grid>
       </Grid>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress />
+      </Backdrop>
     </Layout>
   );
 }
