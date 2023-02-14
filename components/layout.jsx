@@ -6,22 +6,25 @@ import Box from '@mui/material/Box';
 import Header from './header';
 
 function Layout(props) {
-  const { children, mapPage, session } = props;
+  const { children, session } = props;
   return (
     <Box>
-      <Header mapPage={mapPage} session={session} />
-      {
-        mapPage ? (
-          <Box>
-            {children}
-          </Box>
-        )
-          : (
-            <Box mt={3} px={5}>
-              {children}
-            </Box>
-          )
-      }
+      <Header session={session} />
+      <Box
+        mt={3}
+        px={5}
+        sx={{
+          mt: {
+            xs: 3,
+          },
+          px: {
+            xs: 1,
+            md: 5,
+          },
+        }}
+      >
+        {children}
+      </Box>
     </Box>
   );
 }
@@ -31,13 +34,11 @@ Layout.propTypes = {
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node,
   ]).isRequired,
-  mapPage: PropTypes.bool,
   // eslint-disable-next-line react/forbid-prop-types
   session: PropTypes.string,
 };
 
 Layout.defaultProps = {
-  mapPage: false,
   session: null,
 };
 

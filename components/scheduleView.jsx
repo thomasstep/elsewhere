@@ -40,13 +40,7 @@ function ScheduleView({
     withTime = withTime.sort((a, b) => a.startTimestamp - b.startTimestamp);
 
     return (
-      <Box
-        sx={{
-          height: '100vh',
-          overflow: 'hidden',
-          overflowY: 'scroll',
-        }}
-      >
+      <Box>
         {/* TODO show entries without any times */}
         <Schedule
           entries={withTime}

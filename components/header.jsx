@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
-// import { makeStyles } from '@mui/styles';
 
 // Menu bar
 import AppBar from '@mui/material/AppBar';
@@ -22,39 +21,9 @@ import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 
-// const useStyles = makeStyles((theme) => ({
-//   fab: {
-//     left: 'calc(50% - 28px)',
-//     top: theme.spacing(1),
-//     position: 'fixed',
-//     zIndex: theme.zIndex.appBar,
-//     backgroundColor: theme.palette.primary.main,
-//     '&:hover': {
-//       backgroundColor: theme.palette.primary.dark,
-//     },
-//   },
-//   appBar: {
-//     position: 'static',
-//   },
-//   iconButton: {
-//     '&:hover': {
-//       backgroundColor: theme.palette.primary.dark,
-//     },
-//   },
-//   menuIcon: {
-//     color: 'white',
-//   },
-//   typography: {
-//     flexGrow: 1,
-//     align: 'center',
-//     marginLeft: theme.spacing(2),
-//   },
-// }));
-
 function Header(props) {
   const [open, setOpen] = useState(false);
   const { session } = props;
-  // const classes = useStyles(props);
 
   function toggleDrawer(event) {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -133,7 +102,6 @@ function Header(props) {
         <Toolbar>
           <IconButton
             onClick={(e) => toggleDrawer(e)}
-            // className={classes.iconButton}
             edge="start"
             aria-label="menu"
           >
@@ -141,7 +109,6 @@ function Header(props) {
           </IconButton>
           <Typography
             variant="h5"
-            // className={classes.typography}
             sx={{
               align: 'center',
               flexGrow: 1,

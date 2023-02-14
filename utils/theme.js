@@ -37,9 +37,20 @@ const theme = createTheme({
     // fontWeightRegular: 300,
     // fontWeightMedium: 400,
   },
-  // shape: {
-  //   borderRadius: 0,
-  // },
+  components: {
+    MuiDivider: {
+      styleOverrides: {
+        textAlignLeft: {
+          '&::before': {
+            width: '0%',
+          },
+          '&::after': {
+            width: '100%',
+          },
+        },
+      },
+    },
+  },
 });
 
 export default theme;

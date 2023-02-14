@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 
@@ -9,9 +10,12 @@ import Paper from '@mui/material/Paper';
 //   debug,
 // } from '../utils/config';
 
-function getDateFromISOString(isoString) {
-  const [date] = isoString.split('T');
-  return date;
+function formatDate(date) {
+  return new Intl.DateTimeFormat('en', {
+    timeZone: 'UTC',
+    month: 'short',
+    day: 'numeric',
+  }).format(date);
 }
 
 function getDateRange(startTs, endTs) {
@@ -21,11 +25,13 @@ function getDateRange(startTs, endTs) {
   const oneDayInMs = (1000 * 60 * 60 * 24);
   const daysBetween = ((endDate - startDate) / oneDayInMs);
 
-  const dates = [getDateFromISOString(startDate.toISOString())];
+  const dates = [formatDate(startDate)];
 
   for (let i = 1; i < daysBetween + 1; i += 1) {
     startDate.setDate(startDate.getDate() + 1);
-    dates.push(getDateFromISOString(startDate.toISOString()));
+    // Since setDays is what is directly rendered
+    //   getDateRange needs to produce the correct text
+    dates.push(formatDate(startDate));
   }
 
   return dates;
@@ -38,7 +44,31 @@ function Schedule({
   endKey,
   entryOnClick,
 }) {
-  const hours = ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'];
+  // Date constitutes as midnight/00:00 in the time layer
+  const hours = [
+    '01:00',
+    '02:00',
+    '03:00',
+    '04:00',
+    '05:00',
+    '06:00',
+    '07:00',
+    '08:00',
+    '09:00',
+    '10:00',
+    '11:00',
+    '12:00',
+    '13:00',
+    '14:00',
+    '15:00',
+    '16:00',
+    '17:00',
+    '18:00',
+    '19:00',
+    '20:00',
+    '21:00',
+    '22:00',
+    '23:00'];
   const dateHeight = 40; // In px
   const hourHeight = 40; // In px
   const minuteHeight = hourHeight / 60;
@@ -88,6 +118,8 @@ function Schedule({
     const entryMetadata = {};
 
     // Get px heights
+    // Since setDays is what is directly rendered
+    //   getDateRange needs to produce the correct text
     const dateRange = getDateRange(earliestEntry[startKey], latestEntry[endKey]);
     setDays(dateRange);
     // One height unit for each hour per day plus on height unit for each day
@@ -121,10 +153,12 @@ function Schedule({
 
       const msTimeFromEarliest = entry[startKey].getTime() - earliestDay.getTime();
       let topOffset = 0;
-      // Calculate offset for dates
+
+      // Calculate offset for dates; currently disabled
       // Everything will have at least 1 dateHeight of offset
       //  because the first row on the schedule is the earliest date
-      topOffset += startDaysFromEarliest * dateHeight;
+      // topOffset += startDaysFromEarliest * dateHeight;
+
       // Calculate minutes from earliest, then multiply by minute height
       topOffset += (msTimeFromEarliest / (1000 * 60)) * minuteHeight;
 
@@ -257,16 +291,30 @@ function Schedule({
   }, [entries]);
 
   if (entries.length > 0) {
+    const dividerStyle = {
+      position: 'absolute',
+      width: '100%',
+      // Body's line height is 1.5rem
+      // This offsets the "divider with text" enough to
+      //   line up with the top of the grid item
+      top: '-0.75rem',
+    };
+
     return (
       <Box
         sx={{
           position: 'relative',
+          height: '100vh',
+          overflow: 'hidden',
+          overflowY: 'scroll',
+          // Offset the top of the box for the first divider
+          paddingTop: '0.75rem',
         }}
       >
         {/*
           The component has two layers,
             a standard time layer and a schedule layer.
-          The standard layer contains the days split up by hour.
+          The time layer contains the days split up by hour.
           The schedule layer is a single grid item that uses boxes
             and absolute positioning to overlay entries in their appropriate
             time slots.
@@ -276,7 +324,7 @@ function Schedule({
             eleven columns of leeway and of course as many rows as needed.
         */}
 
-        {/* Standard layer grid */}
+        {/* Time layer grid */}
         <Grid
           container
           direction="column"
@@ -305,12 +353,19 @@ function Schedule({
                 >
                   <Grid
                     item
-                    xs={1}
+                    xs={12}
                     sx={{
-                      height: `${dateHeight}px`,
+                      height: `${hourHeight}px`,
+                      position: 'relative',
                     }}
                   >
-                    {day}
+                    <Divider
+                      textAlign="left"
+                      variant="fullWidth"
+                      sx={dividerStyle}
+                    >
+                      {day}
+                    </Divider>
                   </Grid>
                 </Grid>
               </Grid>
@@ -320,7 +375,9 @@ function Schedule({
                   item
                   xs={12}
                   sx={{
+                    height: `${hourHeight}px`,
                     width: '100%',
+                    position: 'relative',
                   }}
                 >
                   <Grid
@@ -329,14 +386,19 @@ function Schedule({
                   >
                     <Grid
                       item
-                      xs={1}
+                      xs={12}
                       sx={{
                         height: `${hourHeight}px`,
-                        borderWidth: '1px',
-                        borderStyle: 'solid',
+                        position: 'relative',
                       }}
                     >
-                      {hour}
+                      <Divider
+                        textAlign="left"
+                        variant="fullWidth"
+                        sx={dividerStyle}
+                      >
+                        {hour}
+                      </Divider>
                     </Grid>
                   </Grid>
                 </Grid>
@@ -359,11 +421,13 @@ function Schedule({
         >
           <Grid
             item
-            xs={1}
+            xs={2}
+            sm={1}
           />
           <Grid
             item
-            xs={11}
+            xs={10}
+            sm={11}
             sx={{
               position: 'relative',
             }}
