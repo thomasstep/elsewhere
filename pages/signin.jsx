@@ -79,6 +79,7 @@ function SignIn() {
             value={signInEmail}
             label="Email address"
             variant="standard"
+            type="email"
             onChange={(e) => handleSignInEmailFieldChange(e)}
           />
         </Grid>

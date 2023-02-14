@@ -69,7 +69,6 @@ function Schedule({
     '21:00',
     '22:00',
     '23:00'];
-  const dateHeight = 40; // In px
   const hourHeight = 40; // In px
   const minuteHeight = hourHeight / 60;
 
@@ -122,8 +121,8 @@ function Schedule({
     //   getDateRange needs to produce the correct text
     const dateRange = getDateRange(earliestEntry[startKey], latestEntry[endKey]);
     setDays(dateRange);
-    // One height unit for each hour per day plus on height unit for each day
-    const schHeight = (dateRange.length) * 25 * hourHeight;
+    // One height unit for each hour per day
+    const schHeight = (dateRange.length) * 24 * hourHeight;
     setScheduleHeight(schHeight);
 
     /**
@@ -137,14 +136,16 @@ function Schedule({
       ),
     );
     validatedEntries.forEach((entry) => {
-      const startDaysFromEarliest = getDateRange(earliestDay, entry[startKey]).length;
-      const endDaysFromEarliest = getDateRange(earliestDay, entry[endKey]).length;
+      // const startDaysFromEarliest = getDateRange(earliestDay, entry[startKey]).length;
+      // const endDaysFromEarliest = getDateRange(earliestDay, entry[endKey]).length;
       const msDuration = entry[endKey].getTime() - entry[startKey].getTime();
       let height = 0;
       // Calculate height of dates passed
+      // Currently disabled because date is midnight
       // If an entry is less than one day in length,
       //  we do not need to compensate
-      height += (endDaysFromEarliest - startDaysFromEarliest) * dateHeight;
+      // height += (endDaysFromEarliest - startDaysFromEarliest) * dateHeight;
+
       height += (msDuration / (1000 * 60)) * minuteHeight;
       // Check that end time is not before start time
       if (height < 0) {
@@ -154,7 +155,8 @@ function Schedule({
       const msTimeFromEarliest = entry[startKey].getTime() - earliestDay.getTime();
       let topOffset = 0;
 
-      // Calculate offset for dates; currently disabled
+      // Calculate offset for dates
+      // Currently disabled because date is midnight
       // Everything will have at least 1 dateHeight of offset
       //  because the first row on the schedule is the earliest date
       // topOffset += startDaysFromEarliest * dateHeight;
@@ -438,8 +440,8 @@ function Schedule({
                 onClick={(e) => entryOnClick(e, entry)}
                 sx={{
                   position: 'absolute',
-                  // borderColor: 'text.primary',
                   bgcolor: 'primary.main',
+                  p: 1,
                   ...entrySx[entry.id],
                 }}
               >
