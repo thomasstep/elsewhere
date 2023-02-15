@@ -129,6 +129,10 @@ function ElsewhereTripSettings() {
             setSnackbarOpen(true);
           }
         })
+        .catch(() => {
+          setSnackbarMessage('Could not remove travel partner. Please try again later.');
+          setSnackbarOpen(true);
+        })
         .finally(() => {
           setLoading(false);
         });
@@ -151,6 +155,10 @@ function ElsewhereTripSettings() {
           setSnackbarMessage('Could not delete trip. Please try again later.');
           setSnackbarOpen(true);
         }
+      })
+      .catch(() => {
+        setSnackbarMessage('Could not delete trip. Please try again later.');
+        setSnackbarOpen(true);
       });
   }
 
@@ -188,6 +196,10 @@ function ElsewhereTripSettings() {
           setSnackbarOpen(true);
         }
       })
+      .catch(() => {
+        setSnackbarMessage('Could not add travel partner. Please try again later.');
+        setSnackbarOpen(true);
+      })
       .finally(() => {
         setLoading(false);
       });
@@ -219,6 +231,10 @@ function ElsewhereTripSettings() {
           setSnackbarOpen(true);
         }
       })
+      .catch(() => {
+        setSnackbarMessage('Could not remove travel partner. Please try again later.');
+        setSnackbarOpen(true);
+      })
       .finally(() => {
         setLoading(false);
       });
@@ -240,6 +256,7 @@ function ElsewhereTripSettings() {
             direction="column"
             justify="space-evenly"
             alignItems="center"
+            spacing={2}
           >
             <Grid item xs={12}>
               <Typography variant="h3">Settings</Typography>
@@ -271,11 +288,6 @@ function ElsewhereTripSettings() {
                   </IconButton>
                 </Grid>
               </Grid>
-            </Grid>
-
-            {/* Trip ID */}
-            <Grid item xs={12}>
-              <Typography variant="body1">{`Trip ID: ${router.query.id}`}</Typography>
             </Grid>
           </Grid>
         </Grid>
@@ -352,7 +364,7 @@ function ElsewhereTripSettings() {
             <Grid item xs={12}>
               <Button
                 variant="contained"
-                // className={classes.deleteButton}
+                color="error"
                 startIcon={<DeleteIcon />}
                 onClick={(e) => deleteTrip(e)}
               >
