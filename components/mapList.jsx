@@ -15,13 +15,13 @@ function MapList({ maps }) {
       {maps.map(({ id, name }) => (
         <ListItem
           key={id}
-          secondaryAction={
+          secondaryAction={(
             <Link href={`/trip/${id}/settings`}>
               <IconButton>
                 <SettingsIcon />
               </IconButton>
             </Link>
-          }
+          )}
           disablePadding
         >
           <ListItemButton
