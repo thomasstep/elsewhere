@@ -1,41 +1,47 @@
 import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
-// import { makeStyles } from '@mui/styles';
+
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import SaveIcon from '@mui/icons-material/Save';
+
+import Alert from '@mui/material/Alert';
 import Backdrop from '@mui/material/Backdrop';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
+import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
-import DeleteIcon from '@mui/icons-material/Delete';
-import TextField from '@mui/material/TextField';
-import AddIcon from '@mui/icons-material/Add';
-import SaveIcon from '@mui/icons-material/Save';
+import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
+import Snackbar from '@mui/material/Snackbar';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+
 import Layout from '../../../components/layout';
-// import LoadingPage from '../../../components/loadingPage';
 import {
-  elsewhereApiUrl,
-  authenticationServiceUrl,
   applicationId,
+  authenticationServiceUrl,
+  elsewhereApiUrl,
   jwtCookieName,
+  snackbarAutoCloseTime,
 } from '../../../utils/config';
 import {
   getCookie,
 } from '../../../utils/util';
 
-function ElsewhereMapSettings() {
+function ElsewhereTripSettings() {
   const router = useRouter();
   const [id, setId] = useState('');
-  const [mapName, setMapName] = useState('');
-  const [editedMapName, setEditedMapName] = useState('');
+  const [tripName, setTripName] = useState('');
+  const [editedTripName, setEditedTripName] = useState('');
   const [writers, setWriters] = useState(new Set());
   const [token, setToken] = useState(null);
   const [travelPartnerTextField, setTravelPartnerTextField] = useState('');
   const [loading, setLoading] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   useEffect(() => {
     const cookieToken = getCookie(jwtCookieName);
@@ -77,9 +83,9 @@ function ElsewhereMapSettings() {
         return res.json();
       })
       .then((data) => {
-        setMapName(data.name);
-        // Initialize this so it doesn't automatically change map name to ''
-        setEditedMapName(data.name);
+        setTripName(data.name);
+        // Initialize this so it doesn't automatically change trip name to ''
+        setEditedTripName(data.name);
         const newWriters = new Set();
         // eslint-disable-next-line no-restricted-syntax
         for (const collaborator of data.collaborators) {
@@ -99,10 +105,10 @@ function ElsewhereMapSettings() {
       });
   }, [router, token]);
 
-  async function saveMapName() {
-    if (mapName !== editedMapName) {
+  async function saveTripName() {
+    if (tripName !== editedTripName) {
       const updates = {
-        name: editedMapName,
+        name: editedTripName,
       };
 
       setLoading(true);
@@ -116,10 +122,11 @@ function ElsewhereMapSettings() {
       })
         .then((res) => {
           if (res.status === 200) {
-            setMapName(editedMapName);
-            setEditedMapName(editedMapName);
+            setTripName(editedTripName);
+            setEditedTripName(editedTripName);
           } else {
-            // TODO return error
+            setSnackbarMessage('Could not update trip name. Please try again later.');
+            setSnackbarOpen(true);
           }
         })
         .finally(() => {
@@ -128,7 +135,7 @@ function ElsewhereMapSettings() {
     }
   }
 
-  async function deleteMap(event) {
+  async function deleteTrip(event) {
     event.preventDefault();
 
     fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}`, {
@@ -139,9 +146,10 @@ function ElsewhereMapSettings() {
     })
       .then((res) => {
         if (res.status === 204) {
-          router.push('/profile');
+          router.push('/trips');
         } else {
-          // TODO return error
+          setSnackbarMessage('Could not delete trip. Please try again later.');
+          setSnackbarOpen(true);
         }
       });
   }
@@ -150,8 +158,8 @@ function ElsewhereMapSettings() {
     setTravelPartnerTextField(event.target.value);
   }
 
-  function handleMapNameTextFieldChange(event) {
-    setEditedMapName(event.target.value);
+  function handleTripNameTextFieldChange(event) {
+    setEditedTripName(event.target.value);
   }
 
   async function addTravelPartner(event) {
@@ -174,9 +182,10 @@ function ElsewhereMapSettings() {
         if (res.status === 200) {
           const newWriters = new Set(writers);
           newWriters.add(travelPartnerTextField);
-          setWriters(newWriters); // Do I need to do this?
+          setWriters(newWriters);
         } else {
-          // TODO return error
+          setSnackbarMessage('Could not add travel partner. Please try again later.');
+          setSnackbarOpen(true);
         }
       })
       .finally(() => {
@@ -206,7 +215,8 @@ function ElsewhereMapSettings() {
           newWriters.delete(email);
           setWriters(newWriters);
         } else {
-          // TODO return error
+          setSnackbarMessage('Could not remove travel partner. Please try again later.');
+          setSnackbarOpen(true);
         }
       })
       .finally(() => {
@@ -234,7 +244,7 @@ function ElsewhereMapSettings() {
             <Grid item xs={12}>
               <Typography variant="h3">Settings</Typography>
             </Grid>
-            {/* Map Name */}
+            {/* Trip Name */}
             <Grid item xs={12}>
               <Grid
                 container
@@ -246,16 +256,16 @@ function ElsewhereMapSettings() {
                 <Grid item>
                   <TextField
                     id="filled-basic"
-                    value={editedMapName}
-                    label="Map Name"
+                    value={editedTripName}
+                    label="Trip Name"
                     variant="standard"
-                    onChange={(e) => handleMapNameTextFieldChange(e)}
+                    onChange={(e) => handleTripNameTextFieldChange(e)}
                   />
                 </Grid>
                 <Grid item>
                   <IconButton
                     aria-label="save"
-                    onClick={() => saveMapName()}
+                    onClick={() => saveTripName()}
                   >
                     <SaveIcon />
                   </IconButton>
@@ -263,9 +273,9 @@ function ElsewhereMapSettings() {
               </Grid>
             </Grid>
 
-            {/* Map ID */}
+            {/* Trip ID */}
             <Grid item xs={12}>
-              <Typography variant="body1">{`Map ID: ${router.query.id}`}</Typography>
+              <Typography variant="body1">{`Trip ID: ${router.query.id}`}</Typography>
             </Grid>
           </Grid>
         </Grid>
@@ -331,7 +341,7 @@ function ElsewhereMapSettings() {
           </Grid>
         </Grid>
 
-        {/* Delete Map Button */}
+        {/* Delete Trip Button */}
         <Grid item xs={12}>
           <Grid
             container
@@ -344,22 +354,52 @@ function ElsewhereMapSettings() {
                 variant="contained"
                 // className={classes.deleteButton}
                 startIcon={<DeleteIcon />}
-                onClick={(e) => deleteMap(e)}
+                onClick={(e) => deleteTrip(e)}
               >
-                Delete Map
+                Delete Trip
               </Button>
             </Grid>
           </Grid>
         </Grid>
       </Grid>
+
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={loading}
       >
         <CircularProgress />
       </Backdrop>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={snackbarAutoCloseTime}
+        onClose={(event, reason) => {
+          if (reason === 'clickaway') {
+            return;
+          }
+
+          setSnackbarOpen(false);
+        }}
+      >
+        <Alert
+          severity="error"
+          variant="outlined"
+          onClose={(event, reason) => {
+            if (reason === 'clickaway') {
+              return;
+            }
+
+            setSnackbarOpen(false);
+          }}
+          sx={{
+            width: '100%',
+          }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Layout>
   );
 }
 
-export default ElsewhereMapSettings;
+export default ElsewhereTripSettings;

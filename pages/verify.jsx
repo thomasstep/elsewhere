@@ -9,7 +9,11 @@ import Grid from '@mui/material/Grid';
 import Snackbar from '@mui/material/Snackbar';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+
 import Layout from '../components/layout';
+import {
+  snackbarAutoCloseTime,
+} from '../utils/config';
 
 function Verify() {
   const router = useRouter();
@@ -110,7 +114,7 @@ function Verify() {
 
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={60000}
+        autoHideDuration={snackbarAutoCloseTime}
         onClose={(event, reason) => {
           if (reason === 'clickaway') {
             return;

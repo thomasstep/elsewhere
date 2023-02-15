@@ -6,7 +6,11 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import Snackbar from '@mui/material/Snackbar';
 import TextField from '@mui/material/TextField';
+
 import Layout from '../components/layout';
+import {
+  snackbarAutoCloseTime,
+} from '../utils/config';
 
 function UpdatePassword() {
   const [token, setToken] = useState('');
@@ -102,7 +106,7 @@ function UpdatePassword() {
 
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={60000}
+        autoHideDuration={snackbarAutoCloseTime}
         onClose={(event, reason) => {
           if (reason === 'clickaway') {
             return;

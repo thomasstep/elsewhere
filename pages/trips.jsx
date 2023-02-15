@@ -1,30 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Alert from '@mui/material/Alert';
 import Backdrop from '@mui/material/Backdrop';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
+import Snackbar from '@mui/material/Snackbar';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import AddIcon from '@mui/icons-material/Add';
+
 import Layout from '../components/layout';
 import MapList from '../components/mapList';
 import LoadingPage from '../components/loadingPage';
 import {
-  elsewhereApiUrl,
-  authenticationServiceUrl,
   applicationId,
+  authenticationServiceUrl,
+  elsewhereApiUrl,
   jwtCookieName,
+  snackbarAutoCloseTime,
 } from '../utils/config';
 import { getCookie } from '../utils/util';
 
-function Profile() {
+function Trips() {
   const [id, setId] = useState('');
   const [maps, setMaps] = useState([]);
   const [newTripNameField, setNewTripNameField] = useState('');
   // token is the auth token held in a cookie
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -106,7 +112,8 @@ function Profile() {
         setMaps(newMaps);
       })
       .catch(() => {
-        // setErrorMsg(getErrorMessage(error));
+        setSnackbarMessage('Could not create a new trip. Please try again later.');
+        setSnackbarOpen(true);
       })
       .finally(() => {
         setLoading(false);
@@ -175,12 +182,42 @@ function Profile() {
             </Grid>
           </Grid>
         </Grid>
+
         <Backdrop
           sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
           open={loading}
         >
           <CircularProgress />
         </Backdrop>
+
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={snackbarAutoCloseTime}
+          onClose={(event, reason) => {
+            if (reason === 'clickaway') {
+              return;
+            }
+
+            setSnackbarOpen(false);
+          }}
+        >
+          <Alert
+            severity="error"
+            variant="outlined"
+            onClose={(event, reason) => {
+              if (reason === 'clickaway') {
+                return;
+              }
+
+              setSnackbarOpen(false);
+            }}
+            sx={{
+              width: '100%',
+            }}
+          >
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
       </Layout>
     );
   }
@@ -188,4 +225,4 @@ function Profile() {
   return <LoadingPage />;
 }
 
-export default Profile;
+export default Trips;

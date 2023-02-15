@@ -9,7 +9,11 @@ import Snackbar from '@mui/material/Snackbar';
 import TextField from '@mui/material/TextField';
 import { useRouter } from 'next/router';
 import Layout from '../components/layout';
-import { jwtCookieName } from '../utils/config';
+
+import {
+  snackbarAutoCloseTime,
+  jwtCookieName,
+} from '../utils/config';
 import { setCookie } from '../utils/util';
 
 function SignIn() {
@@ -57,7 +61,7 @@ function SignIn() {
         // Successful sign in
         const resJson = await res.json();
         setCookie(jwtCookieName, resJson.token);
-        router.push('/profile');
+        router.push('/trips');
       }
     } catch (err) {
       setSnackbarOpen(true);
@@ -126,7 +130,7 @@ function SignIn() {
 
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={60000}
+        autoHideDuration={snackbarAutoCloseTime}
         onClose={(event, reason) => {
           if (reason === 'clickaway') {
             return;

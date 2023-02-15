@@ -8,7 +8,11 @@ import Grid from '@mui/material/Grid';
 import Snackbar from '@mui/material/Snackbar';
 import TextField from '@mui/material/TextField';
 import { useRouter } from 'next/router';
+
 import Layout from '../components/layout';
+import {
+  snackbarAutoCloseTime,
+} from '../utils/config';
 
 function SignUp() {
   const [signUpEmail, setSignUpEmail] = useState('');
@@ -116,7 +120,7 @@ function SignUp() {
 
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={60000}
+        autoHideDuration={snackbarAutoCloseTime}
         onClose={(event, reason) => {
           if (reason === 'clickaway') {
             return;
