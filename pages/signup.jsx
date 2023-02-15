@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Alert from '@mui/material/Alert';
 import Backdrop from '@mui/material/Backdrop';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
+import Snackbar from '@mui/material/Snackbar';
 import TextField from '@mui/material/TextField';
 import { useRouter } from 'next/router';
 import Layout from '../components/layout';
@@ -12,6 +14,9 @@ function SignUp() {
   const [signUpEmail, setSignUpEmail] = useState('');
   const [signUpPassword, setSignUpPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  // eslint-disable-next-line no-unused-vars
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const router = useRouter();
 
   function handleSignUpEmailFieldChange(event) {
@@ -40,13 +45,14 @@ function SignUp() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
-      if (res.status === 204) {
+      if (res.status !== 204) {
+        setSnackbarOpen(true);
+      } else {
+        // Successful sign up
         router.push('/verify');
       }
-      // If no previous cases were hit, we don't know what happened
-      // TODO say there was an error, try again
     } catch (err) {
-      // Do something?
+      setSnackbarOpen(true);
     }
   }
 
@@ -100,12 +106,42 @@ function SignUp() {
           </Button>
         </Grid>
       </Grid>
+
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={loading}
       >
         <CircularProgress />
       </Backdrop>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={60000}
+        onClose={(event, reason) => {
+          if (reason === 'clickaway') {
+            return;
+          }
+
+          setSnackbarOpen(false);
+        }}
+      >
+        <Alert
+          severity="error"
+          variant="outlined"
+          onClose={(event, reason) => {
+            if (reason === 'clickaway') {
+              return;
+            }
+
+            setSnackbarOpen(false);
+          }}
+          sx={{
+            width: '100%',
+          }}
+        >
+          {snackbarMessage || 'Could not sign up. Please try again later.'}
+        </Alert>
+      </Snackbar>
     </Layout>
   );
 }

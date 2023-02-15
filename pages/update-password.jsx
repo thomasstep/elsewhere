@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
+import Alert from '@mui/material/Alert';
 import Backdrop from '@mui/material/Backdrop';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
+import Snackbar from '@mui/material/Snackbar';
 import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
 import Layout from '../components/layout';
 
 function UpdatePassword() {
-  const [resetSuccess, setResetSuccess] = useState(null);
   const [token, setToken] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('error');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   function handlePasswordFieldChange(event) {
     setPassword(event.target.value);
@@ -36,28 +39,16 @@ function UpdatePassword() {
         body: JSON.stringify(body),
       });
       if (res.status === 200) {
-        setResetSuccess(true);
+        setSnackbarSeverity('success');
+        setSnackbarMessage('Password successfully reset.');
       } else {
-        setResetSuccess(false);
+        setSnackbarSeverity('error');
+        setSnackbarMessage('Password could not be reset.');
       }
     } catch (err) {
-      // Do something?
-      setResetSuccess(false);
+      setSnackbarSeverity('error');
+      setSnackbarMessage('Password could not be reset.');
     }
-  }
-
-  let successMessage = null;
-
-  if (resetSuccess === true) {
-    successMessage = (
-      <Typography variant="body1">Password successfully reset.</Typography>
-    );
-  }
-
-  if (resetSuccess === false) {
-    successMessage = (
-      <Typography variant="body1">Password could not be reset.</Typography>
-    );
   }
 
   return (
@@ -100,16 +91,43 @@ function UpdatePassword() {
             Reset Password
           </Button>
         </Grid>
-        <Grid item xs={12}>
-          {successMessage}
-        </Grid>
       </Grid>
+
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={loading}
       >
         <CircularProgress />
       </Backdrop>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={60000}
+        onClose={(event, reason) => {
+          if (reason === 'clickaway') {
+            return;
+          }
+
+          setSnackbarOpen(false);
+        }}
+      >
+        <Alert
+          severity={snackbarSeverity}
+          variant="outlined"
+          onClose={(event, reason) => {
+            if (reason === 'clickaway') {
+              return;
+            }
+
+            setSnackbarOpen(false);
+          }}
+          sx={{
+            width: '100%',
+          }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Layout>
   );
 }

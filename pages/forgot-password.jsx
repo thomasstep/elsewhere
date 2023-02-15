@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import Alert from '@mui/material/Alert';
 import Backdrop from '@mui/material/Backdrop';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
+import Snackbar from '@mui/material/Snackbar';
 import TextField from '@mui/material/TextField';
 import { useRouter } from 'next/router';
 import Layout from '../components/layout';
@@ -10,6 +12,9 @@ import Layout from '../components/layout';
 function ForgotPassword() {
   const [signInEmail, setSignInEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  // eslint-disable-next-line no-unused-vars
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const router = useRouter();
 
   function handleSignInEmailFieldChange(event) {
@@ -28,13 +33,14 @@ function ForgotPassword() {
       const authServiceUrl = process.env.AUTH_SERVICE_URL;
       const applicationId = process.env.AUTH_SERVICE_APP_ID;
       const res = await fetch(`${authServiceUrl}/v1/applications/${applicationId}/users/password/reset?${new URLSearchParams(body)}`);
-      if (res.status === 200) {
+      if (res.status !== 200) {
+        setSnackbarOpen(true);
+      } else {
+        // Email successfully sent
         router.push('/update-password');
       }
-      // If no previous cases were hit, we don't know what happened
-      // TODO say there was an error, try again
     } catch (err) {
-      // Do something?
+      setSnackbarOpen(true);
     }
   }
 
@@ -69,12 +75,42 @@ function ForgotPassword() {
           </Button>
         </Grid>
       </Grid>
+
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={loading}
       >
         <CircularProgress />
       </Backdrop>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={60000}
+        onClose={(event, reason) => {
+          if (reason === 'clickaway') {
+            return;
+          }
+
+          setSnackbarOpen(false);
+        }}
+      >
+        <Alert
+          severity="error"
+          variant="outlined"
+          onClose={(event, reason) => {
+            if (reason === 'clickaway') {
+              return;
+            }
+
+            setSnackbarOpen(false);
+          }}
+          sx={{
+            width: '100%',
+          }}
+        >
+          {snackbarMessage || 'Could not send email. Please try again later.'}
+        </Alert>
+      </Snackbar>
     </Layout>
   );
 }
