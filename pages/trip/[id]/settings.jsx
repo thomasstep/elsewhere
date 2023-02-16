@@ -78,9 +78,9 @@ function ElsewhereTripSettings() {
       },
     })
       .then((res) => {
-        if (res.status !== 200) console.log('error'); // TODO
+        if (res.status === 200) return res.json();
 
-        return res.json();
+        throw new Error('Unhandled status');
       })
       .then((data) => {
         setTripName(data.name);
@@ -93,15 +93,24 @@ function ElsewhereTripSettings() {
             // eslint-disable-next-line no-await-in-loop
             fetch(`${authenticationServiceUrl}/v1/applications/${applicationId}/users?${new URLSearchParams({ id: collaborator })}`)
               .then((res) => {
-                if (res.status !== 200) console.log('error'); // TODO
-                return res.json();
+                if (res.status === 200) return res.json();
+
+                throw new Error('Unhandled status');
               })
               .then((userData) => {
                 newWriters.add(userData.email);
                 setWriters(newWriters);
+              })
+              .catch(() => {
+                setSnackbarMessage('Could not read travel partner info. Please try again later.');
+                setSnackbarOpen(true);
               });
           }
         }
+      })
+      .catch(() => {
+        setSnackbarMessage('Could not read trip info. Please try again later.');
+        setSnackbarOpen(true);
       });
   }, [router, token]);
 

@@ -9,10 +9,10 @@ import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
 import SettingsIcon from '@mui/icons-material/Settings';
 
-function MapList({ maps }) {
+function TripList({ trips }) {
   return (
     <List component="nav">
-      {maps.map(({ id, name }) => (
+      {trips.map(({ id, name }) => (
         <ListItem
           key={id}
           secondaryAction={(
@@ -39,9 +39,9 @@ function MapList({ maps }) {
   );
 }
 
-MapList.propTypes = {
+TripList.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
-  maps: PropTypes.arrayOf(PropTypes.object).isRequired,
+  trips: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
-export default MapList;
+export default TripList;

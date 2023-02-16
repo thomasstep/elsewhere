@@ -11,7 +11,7 @@ import Typography from '@mui/material/Typography';
 import AddIcon from '@mui/icons-material/Add';
 
 import Layout from '../components/layout';
-import MapList from '../components/mapList';
+import TripList from '../components/tripList';
 import LoadingPage from '../components/loadingPage';
 import {
   applicationId,
@@ -24,7 +24,7 @@ import { getCookie } from '../utils/util';
 
 function Trips() {
   const [id, setId] = useState('');
-  const [maps, setMaps] = useState([]);
+  const [trips, setTrips] = useState([]);
   const [newTripNameField, setNewTripNameField] = useState('');
   // token is the auth token held in a cookie
   const [token, setToken] = useState(null);
@@ -72,10 +72,11 @@ function Trips() {
         return res.json();
       })
       .then((data) => {
-        setMaps(data);
+        setTrips(data);
       })
       .catch(() => {
-        // TODO show error
+        setSnackbarMessage('Could not load trips. Please reload or try again later.');
+        setSnackbarOpen(true);
       });
   }, [router, token]);
 
@@ -107,9 +108,9 @@ function Trips() {
         return res.json();
       })
       .then((data) => {
-        const newMaps = Array.from(maps);
-        newMaps.push(data);
-        setMaps(newMaps);
+        const newTrips = Array.from(trips);
+        newTrips.push(data);
+        setTrips(newTrips);
       })
       .catch(() => {
         setSnackbarMessage('Could not create a new trip. Please try again later.');
@@ -143,8 +144,8 @@ function Trips() {
 
           <Grid item xs={12}>
             {
-              maps.length ? (
-                <MapList maps={maps} />
+              trips.length ? (
+                <TripList trips={trips} />
               )
                 : null
             }

@@ -21,6 +21,9 @@ function EntryInfo({
   setActiveEntry,
   updateEntry,
   deleteEntry,
+  setSnackbarMessage,
+  setSnackbarSeverity,
+  setSnackbarOpen,
 }) {
   // Boolean tells whether the entry has been edited
   const [edited, setEdited] = useState(false);
@@ -228,7 +231,9 @@ function EntryInfo({
                 // Make API call
                 const updateRes = await updateEntry();
                 if (!updateRes) {
-                  // TODO show error
+                  setSnackbarSeverity('error');
+                  setSnackbarMessage('Could not update entry. Please try again later.');
+                  setSnackbarOpen(true);
                   return;
                 }
 
@@ -239,7 +244,9 @@ function EntryInfo({
                   newEntries[index] = activeEntry;
                   setEntries(newEntries);
                 } else {
-                  // TODO show error because entry was not found
+                  setSnackbarSeverity('error');
+                  setSnackbarMessage('The updates were saved, but there was a problem updating the page. Please reload the page for updated information.');
+                  setSnackbarOpen(true);
                 }
               }
             }}
@@ -255,7 +262,9 @@ function EntryInfo({
               // Make API call
               const deleteRes = await deleteEntry();
               if (!deleteRes) {
-                // TODO show error
+                setSnackbarSeverity('error');
+                setSnackbarMessage('Could not delete entry. Please try again later.');
+                setSnackbarOpen(true);
                 return;
               }
 
@@ -266,7 +275,9 @@ function EntryInfo({
                 newEntries.splice(index, 1);
                 setEntries(newEntries);
               } else {
-                // TODO show error because entry was not found
+                setSnackbarSeverity('error');
+                setSnackbarMessage('The entry was deleted, but there was a problem updating the page. Please reload the page for updated information.');
+                setSnackbarOpen(true);
               }
             }}
           >
@@ -287,6 +298,15 @@ EntryInfo.propTypes = {
   setActiveEntry: PropTypes.func.isRequired,
   updateEntry: PropTypes.func.isRequired,
   deleteEntry: PropTypes.func.isRequired,
+  setSnackbarMessage: PropTypes.func,
+  setSnackbarSeverity: PropTypes.func,
+  setSnackbarOpen: PropTypes.func,
+};
+
+EntryInfo.defaultProps = {
+  setSnackbarMessage: () => {},
+  setSnackbarSeverity: () => {},
+  setSnackbarOpen: () => {},
 };
 
 export default EntryInfo;

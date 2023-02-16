@@ -19,6 +19,9 @@ function NewEntryForm({
   newEntryData,
   setNewEntryData,
   createEntry,
+  setSnackbarMessage,
+  setSnackbarSeverity,
+  setSnackbarOpen,
 }) {
   return (
     <Box>
@@ -193,7 +196,9 @@ function NewEntryForm({
               // Make API call
               const createRes = await createEntry();
               if (!createRes) {
-                // TODO show error
+                setSnackbarSeverity('error');
+                setSnackbarMessage('Could not save entry. Please try again later.');
+                setSnackbarOpen(true);
                 return;
               }
 
@@ -231,6 +236,15 @@ NewEntryForm.propTypes = {
   newEntryData: PropTypes.object.isRequired,
   setNewEntryData: PropTypes.func.isRequired,
   createEntry: PropTypes.func.isRequired,
+  setSnackbarMessage: PropTypes.func,
+  setSnackbarSeverity: PropTypes.func,
+  setSnackbarOpen: PropTypes.func,
+};
+
+NewEntryForm.defaultProps = {
+  setSnackbarMessage: () => {},
+  setSnackbarSeverity: () => {},
+  setSnackbarOpen: () => {},
 };
 
 export default NewEntryForm;

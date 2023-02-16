@@ -4,8 +4,11 @@ import PropTypes from 'prop-types';
 
 // import { makeStyles } from '@mui/styles';
 import { Wrapper, Status } from '@googlemaps/react-wrapper';
+
+import Alert from '@mui/material/Alert';
 import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
+import Snackbar from '@mui/material/Snackbar';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 
@@ -16,16 +19,17 @@ import MapView from '../../components/mapView';
 import NewEntryForm from '../../components/newEntryForm';
 import ScheduleView from '../../components/scheduleView';
 import {
-  elsewhereApiUrl,
-  authenticationServiceUrl,
-  applicationId,
-  jwtCookieName,
-  googleMapsKey,
-  mapView,
-  scheduleView,
   activeEntryFormView,
-  newEntryFormView,
+  applicationId,
+  authenticationServiceUrl,
   debug,
+  elsewhereApiUrl,
+  googleMapsKey,
+  jwtCookieName,
+  mapView,
+  newEntryFormView,
+  scheduleView,
+  snackbarAutoCloseTime,
 } from '../../utils/config';
 import {
   getCookie,
@@ -119,6 +123,10 @@ function Trip() {
   const [activeBadge, setActiveBadge] = useState(null);
   // Controls timer to smooth out active badge operation
   const [activeBadgeTimer, setActiveBadgeTimer] = useState(null);
+  // Controls the snackbar for error or success info
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('error');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   if (debug) {
     console.groupCollapsed('STATE UPDATE');
@@ -171,14 +179,11 @@ function Trip() {
         setEntries(data);
       })
       .catch((err) => {
-        // TODO handle error
+        setSnackbarMessage('Could not load entries. Please reload or try again later.');
+        setSnackbarOpen(true);
         console.error(err);
       });
   }, [router, token]);
-
-  /**
-   * Delayed state setting functions so we don't update constantly
-   */
 
 
   async function createEntry() {
@@ -416,7 +421,6 @@ function Trip() {
         </TabPanel>
 
         <TabPanel value={activeTab} index={2}>
-          {/* TODO check that the active entry is not empty; otherwise, don't allow this view */}
           <EntryInfo
             entries={entries}
             setEntries={setEntries}
@@ -424,6 +428,9 @@ function Trip() {
             setActiveEntry={setActiveEntry}
             updateEntry={updateEntryCallback}
             deleteEntry={deleteEntryCallback}
+            setSnackbarMessage={setSnackbarMessage}
+            setSnackbarSeverity={setSnackbarSeverity}
+            setSnackbarOpen={setSnackbarOpen}
           />
         </TabPanel>
 
@@ -434,8 +441,40 @@ function Trip() {
             newEntryData={newEntryData}
             setNewEntryData={setNewEntryData}
             createEntry={createEntryCallback}
+            setSnackbarMessage={setSnackbarMessage}
+            setSnackbarSeverity={setSnackbarSeverity}
+            setSnackbarOpen={setSnackbarOpen}
           />
         </TabPanel>
+
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={snackbarAutoCloseTime}
+          onClose={(event, reason) => {
+            if (reason === 'clickaway') {
+              return;
+            }
+
+            setSnackbarOpen(false);
+          }}
+        >
+          <Alert
+            severity={snackbarSeverity}
+            variant="outlined"
+            onClose={(event, reason) => {
+              if (reason === 'clickaway') {
+                return;
+              }
+
+              setSnackbarOpen(false);
+            }}
+            sx={{
+              width: '100%',
+            }}
+          >
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
 
       </Layout>
     );
