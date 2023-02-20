@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
 import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
@@ -75,8 +76,10 @@ function Schedule({
   const [days, setDays] = useState([]);
   const [scheduleHeight, setScheduleHeight] = useState(0);
   const [entrySx, setEntrySx] = useState({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     if (entries.length < 1) return;
 
     const calcedSx = {};
@@ -176,7 +179,7 @@ function Schedule({
 
     /**
      * Get entry widths and horizontal offsets
-     * TODO this whole piece of the operation could use some optimization
+     * TODO this whole piece of the operation could use some optimization ASAP
      */
     const sorted = validatedEntries.sort((a, b) => {
       // If two events start at the same time, the one with a later start
@@ -290,7 +293,25 @@ function Schedule({
     });
 
     setEntrySx(calcedSx);
+    setLoading(false);
   }, [entries]);
+
+  if (loading) {
+    return (
+      <Grid
+        container
+        spacing={0}
+        direction="column"
+        alignItems="center"
+        justifyContent="center"
+        style={{ minHeight: '100vh' }}
+      >
+        <Grid item xs={2}>
+          <CircularProgress />
+        </Grid>
+      </Grid>
+    );
+  }
 
   if (entries.length > 0) {
     const dividerStyle = {
@@ -342,7 +363,6 @@ function Schedule({
               key={day}
             >
               <Grid
-                key={day}
                 item
                 xs={12}
                 sx={{
@@ -454,6 +474,7 @@ function Schedule({
     );
   }
 
+  // TODO saying something about creating a new entry with times
   return null;
 }
 

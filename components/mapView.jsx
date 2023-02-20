@@ -29,7 +29,10 @@ function MapView({
     // eslint-disable-next-line no-undef
     const newBounds = new google.maps.LatLngBounds();
     entries.forEach((entry) => {
-      if (!entry.location.latitude || !entry.location.longitude) {
+      if (
+        !entry.location
+        || !entry.location.latitude
+        || !entry.location.longitude) {
         return;
       }
 

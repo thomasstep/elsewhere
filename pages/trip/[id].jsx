@@ -221,14 +221,22 @@ function Trip() {
     if (activeEntry.startTimestamp !== '') entryData.startTimestamp = activeEntry.startTimestamp;
     if (activeEntry.endTimestamp !== '') entryData.endTimestamp = activeEntry.endTimestamp;
     if (activeEntry.notes !== '') entryData.notes = activeEntry.notes;
-    if (activeEntry.location.latitude) {
+    if (
+      activeEntry.location
+      && activeEntry.location.latitude) {
       entryData.location.latitude = activeEntry.location.latitude;
     }
 
-    if (activeEntry.location.longitude) {
+    if (
+      activeEntry.location
+      && activeEntry.location.longitude) {
       entryData.location.longitude = activeEntry.location.longitude;
     }
-    if (activeEntry.location.address !== '') entryData.location.address = activeEntry.location.address;
+    if (
+      activeEntry.location
+      && activeEntry.location.address !== '') {
+      entryData.location.address = activeEntry.location.address;
+    }
 
     const res = await fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/entry/${activeEntry.id}`, {
       method: 'PUT',
