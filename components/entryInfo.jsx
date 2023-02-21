@@ -154,6 +154,7 @@ function EntryInfo({
         </Grid>
 
         {/* Address field */}
+        {/* TODO make this a search field like the map's */}
         <Grid item xs={12}>
           <TextField
             id="filled-basic"

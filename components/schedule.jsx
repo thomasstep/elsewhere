@@ -7,9 +7,10 @@ import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 
-// import {
-//   debug,
-// } from '../utils/config';
+import {
+  dateTimeMinuteStep,
+  debug,
+} from '../utils/config';
 
 function formatDate(date) {
   return new Intl.DateTimeFormat('en', {
@@ -72,6 +73,7 @@ function Schedule({
     '23:00'];
   const hourHeight = 40; // In px
   const minuteHeight = hourHeight / 60;
+  const timerLabel = 'scheduleAlgo';
 
   const [days, setDays] = useState([]);
   const [scheduleHeight, setScheduleHeight] = useState(0);
@@ -81,6 +83,10 @@ function Schedule({
   useEffect(() => {
     setLoading(true);
     if (entries.length < 1) return;
+
+    if (debug) {
+      console.time(timerLabel);
+    }
 
     const calcedSx = {};
 
@@ -181,119 +187,239 @@ function Schedule({
      * Get entry widths and horizontal offsets
      * TODO this whole piece of the operation could use some optimization ASAP
      */
-    const sorted = validatedEntries.sort((a, b) => {
-      // If two events start at the same time, the one with a later start
-      //  time goes first
-      if (a[startKey].getTime() === b[startKey].getTime()) {
-        return b[endKey] - a[endKey];
-      }
-
-      return a[startKey] - b[startKey];
-    });
-    const sortedIds = sorted.map((entry) => entry.id);
-
-    const blockResolution = 5; // minutes, detail to which we calculate overlapping
-    const blocksPerDay = (24 * 60) / blockResolution;
-    const totalBlocks = blocksPerDay * dateRange.length;
-    const entryLength = validatedEntries.length;
-    const columns = [];
-    for (let i = 0; i < entryLength; i += 1) {
-      columns.push(0);
-    }
-
-    let matrix = [];
-    for (let i = 0; i < totalBlocks; i += 1) {
-      matrix.push(Array.from(columns));
-    }
-
-    // if (debug) {
-    //   console.groupCollapsed('MATRIX INIT');
-    //   console.log(matrix);
-    //   console.groupEnd();
-    // }
-
-    // Seed matrix
-    sortedIds.forEach((entryId, entryIndex) => {
-      const blocksFromEarliest = entryMetadata[entryId].msTimeFromEarliest
-        / (1000 * 60 * blockResolution);
-      const blockDuration = entryMetadata[entryId].msDuration / (1000 * 60 * blockResolution);
-      // if (debug) {
-      //   console.groupCollapsed(`SEED MATRIX ${entryId}`);
-      //   console.log(entryMetadata[entryId]);
-      //   console.log(blocksFromEarliest);
-      //   console.log(blockDuration);
-      //   console.groupEnd();
-      // }
-
-      let startingBlock = blocksFromEarliest;
-      for (let i = 0; i < blockDuration; i += 1) {
-        matrix[startingBlock][entryIndex] = 1;
-        startingBlock += 1;
-      }
-
-      entryMetadata[entryId].blocksFromEarliest = blocksFromEarliest;
-      entryMetadata[entryId].blockDuration = blockDuration;
-    });
-    // Seed matrix with collision values
-    matrix = matrix.map((row) => {
-      // Calculate collisions per row
-      const collisions = row.reduce(
-        (accumulator, currentValue) => accumulator + currentValue,
-        0,
-      );
-      // Change each entry's value to collisions in row
-      return row.map((entry) => {
-        if (entry) {
-          return collisions;
+    {
+      const sorted = validatedEntries.sort((a, b) => {
+        // If two events start at the same time, the one with a later end
+        //  time goes first
+        if (a[startKey].getTime() === b[startKey].getTime()) {
+          return b[endKey] - a[endKey];
         }
-        return 0;
+
+        return a[startKey] - b[startKey];
       });
-    });
-    // Find max collisions per entry; 1 means no collisions
-    sorted.forEach((entry, entryIndex) => {
-      const {
-        blocksFromEarliest,
-        blockDuration,
-      } = entryMetadata[entry.id];
-      let maxCollisions = 1;
-      let startingBlock = blocksFromEarliest;
-      for (let i = 0; i < blockDuration; i += 1) {
-        const collisions = matrix[startingBlock][entryIndex];
-        if (collisions > maxCollisions) {
-          maxCollisions = collisions;
-        }
-        startingBlock += 1;
+      const sortedIds = sorted.map((entry) => entry.id);
+
+      const blockResolution = dateTimeMinuteStep; // minutes, detail to which we calculate overlapping
+      const blocksPerDay = (24 * 60) / blockResolution;
+      const totalBlocks = blocksPerDay * dateRange.length;
+      const entryLength = validatedEntries.length;
+      const columns = [];
+      for (let i = 0; i < entryLength; i += 1) {
+        columns.push(0);
       }
-      entryMetadata[entry.id].maxCollisions = maxCollisions;
-    });
-    // Determine position relative to overlaps
-    matrix.forEach((row) => {
-      // Check if row contains an entry's max collisions and note its position
-      let position = 0;
-      row.forEach((collisions, entryIndex) => {
-        if (collisions === entryMetadata[sortedIds[entryIndex]].maxCollisions) {
-          // If the overlap already has a position don't give it a new one,
-          //  but push the position for subsequent entries
-          const currentPositionDefined = entryMetadata[sortedIds[entryIndex]].position;
-          if (currentPositionDefined) {
-            position = currentPositionDefined + 1;
-          } else {
-            entryMetadata[sortedIds[entryIndex]].position = position;
+
+      let matrix = [];
+      for (let i = 0; i < totalBlocks; i += 1) {
+        matrix.push(Array.from(columns));
+      }
+
+      // Seed matrix
+      // TODO figure out how to reduce size of matrix here like what happens in next step
+      sortedIds.forEach((entryId, entryIndex) => {
+        const blocksFromEarliest = entryMetadata[entryId].msTimeFromEarliest
+          / (1000 * 60 * blockResolution);
+        const blockDuration = entryMetadata[entryId].msDuration / (1000 * 60 * blockResolution);
+
+        let startingBlock = blocksFromEarliest;
+        for (let i = 0; i < blockDuration; i += 1) {
+          matrix[startingBlock][entryIndex] = 1;
+          startingBlock += 1;
+        }
+
+        entryMetadata[entryId].blocksFromEarliest = blocksFromEarliest;
+        entryMetadata[entryId].blockDuration = blockDuration;
+      });
+
+      // Seed matrix with collision values
+      // Reduce size of matrix
+      // No duplicate rows after one another
+      // No zero rows
+      const reducedMatrix = [];
+      matrix.forEach((row, i) => {
+        // Check to see if we have a duplicate row compared to previous
+        if (
+          i > 0
+          && row.every((val, j) => val === matrix[i - 1][j])
+        ) {
+          return;
+        }
+
+        // Calculate collisions per row
+        const collisions = row.reduce(
+          (accumulator, currentValue) => accumulator + currentValue,
+          0,
+        );
+
+        // There's nothing on this row and we don't need to keep it
+        if (collisions === 0) {
+          return;
+        }
+
+        // There's only one entry on this row
+        if (collisions === 1) {
+          reducedMatrix.push(row);
+          return;
+        }
+
+        // Change each entry's value to collisions in row
+        const collisionRow = row.map((entry) => {
+          if (entry) {
+            return collisions;
+          }
+
+          return 0;
+        });
+        reducedMatrix.push(collisionRow);
+      });
+
+      if (debug) {
+        console.groupCollapsed('REDUCED MATRIX');
+        console.log(reducedMatrix);
+        console.groupEnd();
+      }
+
+      reducedMatrix.forEach((row) => {
+        let position = 0;
+        row.forEach((collisions, entryIndex) => {
+          const entryId = sortedIds[entryIndex];
+          const currentMaxCollisions = entryMetadata[entryId].maxCollisions || 0;
+          // When we find the max collisions, set it and position
+          if (collisions > currentMaxCollisions) {
+            entryMetadata[entryId].maxCollisions = collisions;
+            entryMetadata[entryId].position = position;
+          }
+
+          // Keep track of how many entries we have already seen
+          if (collisions > 0) {
             position += 1;
           }
-        }
+        });
       });
-    });
-    // Add horizontal offsets to calcedSx
-    const spaceBetweenEntries = 2; // in px
-    Object.entries(entryMetadata).forEach(([id, metadata]) => {
-      const width = 100 / metadata.maxCollisions;
-      calcedSx[id].width = `calc(${width}% - ${spaceBetweenEntries}px)`;
-      calcedSx[id].left = `calc(${width * metadata.position}% + ${spaceBetweenEntries}px)`;
-    });
 
-    setEntrySx(calcedSx);
-    setLoading(false);
+      // Add horizontal offsets to calcedSx
+      const spaceBetweenEntries = 2; // in px
+      Object.entries(entryMetadata).forEach(([id, metadata]) => {
+        const width = 100 / metadata.maxCollisions;
+        calcedSx[id].width = `calc(${width}% - ${spaceBetweenEntries}px)`;
+        calcedSx[id].left = `calc(${width * metadata.position}% + ${spaceBetweenEntries}px)`;
+      });
+
+      setEntrySx(calcedSx);
+      setLoading(false);
+    }
+
+    if (debug) {
+      console.groupCollapsed('METADATA AND CALCED SX');
+      console.log(entryMetadata);
+      console.log(calcedSx);
+      console.groupEnd();
+    }
+
+    /**
+     * Get entry widths and horizontal offsets
+     * Second attempt
+     * Me no likey but maybe I'll swing back around l8r
+     */
+    // {
+    //   const sorted = validatedEntries.sort((a, b) => {
+    //     // If two events start at the same time, the one with a later end
+    //     //  time goes first
+    //     if (a[startKey].getTime() === b[startKey].getTime()) {
+    //       return b[endKey] - a[endKey];
+    //     }
+
+    //     return a[startKey] - b[startKey];
+    //   });
+
+    //   function calcHorizontal(entries) {
+    //     let done = true;
+    //     let i = 0;
+    //     while (!done) {
+    //       const entry = entries[i];
+    //       const next = i + 1;
+
+    //       // Check that we aren't at the end and if we have collisions
+    //       if (
+    //         next < entries.length
+    //         && entries[next][startKey] > entry[endKey]
+    //       ) {
+    //         let maxCollisions = 1; // 1 collision just means itself
+    //         let lastEntryStart = 0;
+    //         let lastEntryEnd = 0;
+    //         let overlapping = true;
+    //         let nextOverlap = next;
+    //         let subOverlap = [];
+    //         let foundEndOfContained = false;
+    //         while (overlapping) {
+    //           // Check if we are at the end or have found all overlapping entries
+    //           if (
+    //             nextOverlap >= entries.length
+    //             || entries[nextOverlap][startKey] >= entry[endKey]
+    //           ) {
+    //             overlapping = false;
+    //             break;
+    //           }
+
+    //           nextOverlappingEntry = entries[nextOverlap];
+
+    //           // No more contained entries
+    //           if (nextOverlappingEntry[endKey] > entry[endKey]) {
+    //             foundEndOfContained = true;
+    //           }
+
+    //           if (!foundEndOfContained) {
+    //             // Find contained entries that overlap with each other
+    //             if (nextOverlappingEntry[endKey] <= entry[endKey]) {
+    //               subOverlap.push(nextOverlappingEntry);
+    //             }
+
+    //             // We want to restart the most outer loop at this entry
+    //             // Will end up being the first entry not contained
+    //             i = nextOverlap + 1;
+    //           }
+
+    //           nextOverlap += 1;
+    //         }
+
+    //         const width = 100;
+    //         calcedSx[entry.id].width = `calc(${width}% - ${spaceBetweenEntries}px)`;
+    //         calcedSx[entry.id].left = `calc(${width * metadata.position}% + ${spaceBetweenEntries}px)`;
+
+    //       } else {
+    //         // No collisions or at the end; either way, no collisions
+    //         i = next;
+    //         const width = 100;
+    //         calcedSx[entry.id].width = `calc(${width}% - ${spaceBetweenEntries}px)`;
+    //         calcedSx[entry.id].left = `calc(${width * metadata.position}% + ${spaceBetweenEntries}px)`;
+    //       }
+
+    //       // If we are at the end of the entries, stop
+    //       if (i >= entries.length) {
+    //         done = false;
+    //       }
+    //     }
+
+    //     // calcedSx[id].maxCollisions
+    //     // calcedSx[id].position
+    //   }
+
+    //   calcHorizontal(sorted);
+
+    //   // Add horizontal offsets to calcedSx
+    //   const spaceBetweenEntries = 2; // in px
+    //   Object.entries(entryMetadata).forEach(([id, metadata]) => {
+    //     const width = 100 / metadata.maxCollisions;
+    //     calcedSx[id].width = `calc(${width}% - ${spaceBetweenEntries}px)`;
+    //     calcedSx[id].left = `calc(${width * metadata.position}% + ${spaceBetweenEntries}px)`;
+    //   });
+    //   // setEntrySx(calcedSx);
+    //   // setLoading(false);
+    // }
+
+
+    if (debug) {
+      console.timeEnd(timerLabel);
+    }
   }, [entries]);
 
   if (loading) {

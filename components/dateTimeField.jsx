@@ -6,6 +6,10 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { Settings } from 'luxon';
 
+import {
+  dateTimeMinuteStep,
+} from '../utils/config';
+
 Settings.defaultZone = 'utc';
 
 function DateTimeField({
@@ -13,7 +17,10 @@ function DateTimeField({
 }) {
   return (
     <LocalizationProvider dateAdapter={AdapterLuxon}>
-      <DateTimePicker {...props} />
+      <DateTimePicker
+        minutesStep={dateTimeMinuteStep}
+        {...props}
+      />
     </LocalizationProvider>
   );
 }
