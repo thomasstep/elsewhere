@@ -8,9 +8,18 @@ import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 
 import {
-  dateTimeMinuteStep,
   debug,
+  hourHeight,
 } from '../utils/config';
+
+const dividerStyle = {
+  position: 'absolute',
+  width: '100%',
+  // Body's line height is 1.5rem
+  // This offsets the "divider with text" enough to
+  //   line up with the top of the grid item
+  top: '-0.75rem',
+};
 
 function formatDate(date) {
   return new Intl.DateTimeFormat('en', {
@@ -39,13 +48,7 @@ function getDateRange(startTs, endTs) {
   return dates;
 }
 
-function Schedule({
-  entries,
-  activeEntry,
-  startKey,
-  endKey,
-  entryOnClick,
-}) {
+function DayHours() {
   // Date constitutes as midnight/00:00 in the time layer
   const hours = [
     '01:00',
@@ -71,7 +74,54 @@ function Schedule({
     '21:00',
     '22:00',
     '23:00'];
-  const hourHeight = 40; // In px
+
+    return (
+      <React.Fragment>
+        {hours.map((hour) => (
+          <Grid
+            key={`${hour}`}
+            item
+            xs={12}
+            sx={{
+              height: `${hourHeight}px`,
+              width: '100%',
+              position: 'relative',
+            }}
+          >
+            <Grid
+              container
+              direction="row"
+            >
+              <Grid
+                item
+                xs={12}
+                sx={{
+                  height: `${hourHeight}px`,
+                  position: 'relative',
+                }}
+              >
+                <Divider
+                  textAlign="left"
+                  variant="fullWidth"
+                  sx={dividerStyle}
+                >
+                  {hour}
+                </Divider>
+              </Grid>
+            </Grid>
+          </Grid>
+        ))}
+      </React.Fragment>
+    );
+}
+
+function Schedule({
+  entries,
+  activeEntry,
+  startKey,
+  endKey,
+  entryOnClick,
+}) {
   const minuteHeight = hourHeight / 60;
   const timerLabel = 'scheduleAlgo';
 
@@ -199,9 +249,11 @@ function Schedule({
       });
       const sortedIds = sorted.map((entry) => entry.id);
 
-      const blockResolution = dateTimeMinuteStep; // minutes, detail to which we calculate overlapping
-      const blocksPerDay = (24 * 60) / blockResolution;
-      const totalBlocks = blocksPerDay * dateRange.length;
+      // const blockResolution = dateTimeMinuteStep; // minutes, detail to which we calculate overlapping
+      // const blocksPerDay = (24 * 60) / blockResolution;
+      // const totalBlocks = blocksPerDay * dateRange.length;
+
+      // Given entry length n, make an nxn matrix
       const entryLength = validatedEntries.length;
       const columns = [];
       for (let i = 0; i < entryLength; i += 1) {
@@ -209,81 +261,66 @@ function Schedule({
       }
 
       let matrix = [];
-      for (let i = 0; i < totalBlocks; i += 1) {
+      for (let i = 0; i < entryLength; i += 1) {
         matrix.push(Array.from(columns));
       }
 
       // Seed matrix
-      // TODO figure out how to reduce size of matrix here like what happens in next step
-      sortedIds.forEach((entryId, entryIndex) => {
-        const blocksFromEarliest = entryMetadata[entryId].msTimeFromEarliest
-          / (1000 * 60 * blockResolution);
-        const blockDuration = entryMetadata[entryId].msDuration / (1000 * 60 * blockResolution);
-
-        let startingBlock = blocksFromEarliest;
-        for (let i = 0; i < blockDuration; i += 1) {
-          matrix[startingBlock][entryIndex] = 1;
-          startingBlock += 1;
+      sorted.forEach((entry, i) => {
+        matrix[i][i] = 1
+        for (let j = i + 1; j < sortedIds.length; j += 1) {
+          // If there is an overlap, then mark the current entry
+          //   in the overlapping space
+          // When we no longer find overlaps, end
+          if (entry[endKey] > sorted[j][startKey]) {
+            matrix[j][i] = 1;
+          } else {
+            break;
+          }
         }
-
-        entryMetadata[entryId].blocksFromEarliest = blocksFromEarliest;
-        entryMetadata[entryId].blockDuration = blockDuration;
       });
 
-      // Seed matrix with collision values
-      // Reduce size of matrix
-      // No duplicate rows after one another
-      // No zero rows
-      const reducedMatrix = [];
-      matrix.forEach((row, i) => {
-        // Check to see if we have a duplicate row compared to previous
-        if (
-          i > 0
-          && row.every((val, j) => val === matrix[i - 1][j])
-        ) {
-          return;
-        }
+      if (debug) {
+        console.groupCollapsed('SEED MATRIX');
+        console.log(matrix);
+        console.groupEnd();
+      }
 
+      // Populate matrix with collision values
+      matrix = matrix.map((row, i) => {
         // Calculate collisions per row
         const collisions = row.reduce(
           (accumulator, currentValue) => accumulator + currentValue,
           0,
         );
 
-        // There's nothing on this row and we don't need to keep it
-        if (collisions === 0) {
-          return;
-        }
-
         // There's only one entry on this row
         if (collisions === 1) {
-          reducedMatrix.push(row);
-          return;
+          return row;
         }
 
         // Change each entry's value to collisions in row
-        const collisionRow = row.map((entry) => {
+        return row.map((entry) => {
           if (entry) {
             return collisions;
           }
 
           return 0;
         });
-        reducedMatrix.push(collisionRow);
       });
 
       if (debug) {
-        console.groupCollapsed('REDUCED MATRIX');
-        console.log(reducedMatrix);
+        console.groupCollapsed('COLLISION MATRIX');
+        console.log(matrix);
         console.groupEnd();
       }
 
-      reducedMatrix.forEach((row) => {
+      matrix.forEach((row) => {
         let position = 0;
         row.forEach((collisions, entryIndex) => {
           const entryId = sortedIds[entryIndex];
           const currentMaxCollisions = entryMetadata[entryId].maxCollisions || 0;
-          // When we find the max collisions, set it and position
+          // When we find the max collisions, set it and entry's position
           if (collisions > currentMaxCollisions) {
             entryMetadata[entryId].maxCollisions = collisions;
             entryMetadata[entryId].position = position;
@@ -315,107 +352,6 @@ function Schedule({
       console.groupEnd();
     }
 
-    /**
-     * Get entry widths and horizontal offsets
-     * Second attempt
-     * Me no likey but maybe I'll swing back around l8r
-     */
-    // {
-    //   const sorted = validatedEntries.sort((a, b) => {
-    //     // If two events start at the same time, the one with a later end
-    //     //  time goes first
-    //     if (a[startKey].getTime() === b[startKey].getTime()) {
-    //       return b[endKey] - a[endKey];
-    //     }
-
-    //     return a[startKey] - b[startKey];
-    //   });
-
-    //   function calcHorizontal(entries) {
-    //     let done = true;
-    //     let i = 0;
-    //     while (!done) {
-    //       const entry = entries[i];
-    //       const next = i + 1;
-
-    //       // Check that we aren't at the end and if we have collisions
-    //       if (
-    //         next < entries.length
-    //         && entries[next][startKey] > entry[endKey]
-    //       ) {
-    //         let maxCollisions = 1; // 1 collision just means itself
-    //         let lastEntryStart = 0;
-    //         let lastEntryEnd = 0;
-    //         let overlapping = true;
-    //         let nextOverlap = next;
-    //         let subOverlap = [];
-    //         let foundEndOfContained = false;
-    //         while (overlapping) {
-    //           // Check if we are at the end or have found all overlapping entries
-    //           if (
-    //             nextOverlap >= entries.length
-    //             || entries[nextOverlap][startKey] >= entry[endKey]
-    //           ) {
-    //             overlapping = false;
-    //             break;
-    //           }
-
-    //           nextOverlappingEntry = entries[nextOverlap];
-
-    //           // No more contained entries
-    //           if (nextOverlappingEntry[endKey] > entry[endKey]) {
-    //             foundEndOfContained = true;
-    //           }
-
-    //           if (!foundEndOfContained) {
-    //             // Find contained entries that overlap with each other
-    //             if (nextOverlappingEntry[endKey] <= entry[endKey]) {
-    //               subOverlap.push(nextOverlappingEntry);
-    //             }
-
-    //             // We want to restart the most outer loop at this entry
-    //             // Will end up being the first entry not contained
-    //             i = nextOverlap + 1;
-    //           }
-
-    //           nextOverlap += 1;
-    //         }
-
-    //         const width = 100;
-    //         calcedSx[entry.id].width = `calc(${width}% - ${spaceBetweenEntries}px)`;
-    //         calcedSx[entry.id].left = `calc(${width * metadata.position}% + ${spaceBetweenEntries}px)`;
-
-    //       } else {
-    //         // No collisions or at the end; either way, no collisions
-    //         i = next;
-    //         const width = 100;
-    //         calcedSx[entry.id].width = `calc(${width}% - ${spaceBetweenEntries}px)`;
-    //         calcedSx[entry.id].left = `calc(${width * metadata.position}% + ${spaceBetweenEntries}px)`;
-    //       }
-
-    //       // If we are at the end of the entries, stop
-    //       if (i >= entries.length) {
-    //         done = false;
-    //       }
-    //     }
-
-    //     // calcedSx[id].maxCollisions
-    //     // calcedSx[id].position
-    //   }
-
-    //   calcHorizontal(sorted);
-
-    //   // Add horizontal offsets to calcedSx
-    //   const spaceBetweenEntries = 2; // in px
-    //   Object.entries(entryMetadata).forEach(([id, metadata]) => {
-    //     const width = 100 / metadata.maxCollisions;
-    //     calcedSx[id].width = `calc(${width}% - ${spaceBetweenEntries}px)`;
-    //     calcedSx[id].left = `calc(${width * metadata.position}% + ${spaceBetweenEntries}px)`;
-    //   });
-    //   // setEntrySx(calcedSx);
-    //   // setLoading(false);
-    // }
-
 
     if (debug) {
       console.timeEnd(timerLabel);
@@ -440,15 +376,6 @@ function Schedule({
   }
 
   if (entries.length > 0) {
-    const dividerStyle = {
-      position: 'absolute',
-      width: '100%',
-      // Body's line height is 1.5rem
-      // This offsets the "divider with text" enough to
-      //   line up with the top of the grid item
-      top: '-0.75rem',
-    };
-
     return (
       <Box
         sx={{
@@ -517,40 +444,7 @@ function Schedule({
                   </Grid>
                 </Grid>
               </Grid>
-              {hours.map((hour) => (
-                <Grid
-                  key={`${day}T${hour}`}
-                  item
-                  xs={12}
-                  sx={{
-                    height: `${hourHeight}px`,
-                    width: '100%',
-                    position: 'relative',
-                  }}
-                >
-                  <Grid
-                    container
-                    direction="row"
-                  >
-                    <Grid
-                      item
-                      xs={12}
-                      sx={{
-                        height: `${hourHeight}px`,
-                        position: 'relative',
-                      }}
-                    >
-                      <Divider
-                        textAlign="left"
-                        variant="fullWidth"
-                        sx={dividerStyle}
-                      >
-                        {hour}
-                      </Divider>
-                    </Grid>
-                  </Grid>
-                </Grid>
-              ))}
+              <DayHours />
             </React.Fragment>
           ))}
         </Grid>

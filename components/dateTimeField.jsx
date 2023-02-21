@@ -18,7 +18,6 @@ function DateTimeField({
   return (
     <LocalizationProvider dateAdapter={AdapterLuxon}>
       <DateTimePicker
-        minutesStep={dateTimeMinuteStep}
         {...props}
       />
     </LocalizationProvider>

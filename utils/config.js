@@ -10,5 +10,5 @@ module.exports = {
   mapView: 'map',
   scheduleView: 'schedule',
   snackbarAutoCloseTime: 5000, // in milliseconds
-  dateTimeMinuteStep: 1, // in minutes
+  hourHeight: 40, // in px
 };
