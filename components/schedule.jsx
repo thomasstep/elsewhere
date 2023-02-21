@@ -75,44 +75,44 @@ function DayHours() {
     '22:00',
     '23:00'];
 
-    return (
-      <React.Fragment>
-        {hours.map((hour) => (
+  return (
+    <>
+      {hours.map((hour) => (
+        <Grid
+          key={`${hour}`}
+          item
+          xs={12}
+          sx={{
+            height: `${hourHeight}px`,
+            width: '100%',
+            position: 'relative',
+          }}
+        >
           <Grid
-            key={`${hour}`}
-            item
-            xs={12}
-            sx={{
-              height: `${hourHeight}px`,
-              width: '100%',
-              position: 'relative',
-            }}
+            container
+            direction="row"
           >
             <Grid
-              container
-              direction="row"
+              item
+              xs={12}
+              sx={{
+                height: `${hourHeight}px`,
+                position: 'relative',
+              }}
             >
-              <Grid
-                item
-                xs={12}
-                sx={{
-                  height: `${hourHeight}px`,
-                  position: 'relative',
-                }}
+              <Divider
+                textAlign="left"
+                variant="fullWidth"
+                sx={dividerStyle}
               >
-                <Divider
-                  textAlign="left"
-                  variant="fullWidth"
-                  sx={dividerStyle}
-                >
-                  {hour}
-                </Divider>
-              </Grid>
+                {hour}
+              </Divider>
             </Grid>
           </Grid>
-        ))}
-      </React.Fragment>
-    );
+        </Grid>
+      ))}
+    </>
+  );
 }
 
 function Schedule({
@@ -249,10 +249,6 @@ function Schedule({
       });
       const sortedIds = sorted.map((entry) => entry.id);
 
-      // const blockResolution = dateTimeMinuteStep; // minutes, detail to which we calculate overlapping
-      // const blocksPerDay = (24 * 60) / blockResolution;
-      // const totalBlocks = blocksPerDay * dateRange.length;
-
       // Given entry length n, make an nxn matrix
       const entryLength = validatedEntries.length;
       const columns = [];
@@ -267,7 +263,7 @@ function Schedule({
 
       // Seed matrix
       sorted.forEach((entry, i) => {
-        matrix[i][i] = 1
+        matrix[i][i] = 1;
         for (let j = i + 1; j < sortedIds.length; j += 1) {
           // If there is an overlap, then mark the current entry
           //   in the overlapping space
@@ -287,7 +283,7 @@ function Schedule({
       }
 
       // Populate matrix with collision values
-      matrix = matrix.map((row, i) => {
+      matrix = matrix.map((row) => {
         // Calculate collisions per row
         const collisions = row.reduce(
           (accumulator, currentValue) => accumulator + currentValue,

@@ -118,6 +118,7 @@ given n entries, make an nxn matrix
 start entry "i" at point ixi
 extend from ixi to ixi+m where m is the last conflicting entry
 
+i = 0
 for entry in entries:
   mark entry at ixi
   j = i + 1
@@ -127,3 +128,4 @@ for entry in entries:
       j += 1
     else:
       break
+  i += 1
