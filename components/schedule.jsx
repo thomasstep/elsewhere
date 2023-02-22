@@ -7,9 +7,19 @@ import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 
-// import {
-//   debug,
-// } from '../utils/config';
+import {
+  debug,
+  hourHeight,
+} from '../utils/config';
+
+const dividerStyle = {
+  position: 'absolute',
+  width: '100%',
+  // Body's line height is 1.5rem
+  // This offsets the "divider with text" enough to
+  //   line up with the top of the grid item
+  top: '-0.75rem',
+};
 
 function formatDate(date) {
   return new Intl.DateTimeFormat('en', {
@@ -38,13 +48,7 @@ function getDateRange(startTs, endTs) {
   return dates;
 }
 
-function Schedule({
-  entries,
-  activeEntry,
-  startKey,
-  endKey,
-  entryOnClick,
-}) {
+function DayHours() {
   // Date constitutes as midnight/00:00 in the time layer
   const hours = [
     '01:00',
@@ -70,8 +74,56 @@ function Schedule({
     '21:00',
     '22:00',
     '23:00'];
-  const hourHeight = 40; // In px
+
+  return (
+    <>
+      {hours.map((hour) => (
+        <Grid
+          key={`${hour}`}
+          item
+          xs={12}
+          sx={{
+            height: `${hourHeight}px`,
+            width: '100%',
+            position: 'relative',
+          }}
+        >
+          <Grid
+            container
+            direction="row"
+          >
+            <Grid
+              item
+              xs={12}
+              sx={{
+                height: `${hourHeight}px`,
+                position: 'relative',
+              }}
+            >
+              <Divider
+                textAlign="left"
+                variant="fullWidth"
+                sx={dividerStyle}
+              >
+                {hour}
+              </Divider>
+            </Grid>
+          </Grid>
+        </Grid>
+      ))}
+    </>
+  );
+}
+
+function Schedule({
+  entries,
+  activeEntry,
+  startKey,
+  endKey,
+  entryOnClick,
+}) {
   const minuteHeight = hourHeight / 60;
+  const timerLabel = 'scheduleAlgo';
 
   const [days, setDays] = useState([]);
   const [scheduleHeight, setScheduleHeight] = useState(0);
@@ -81,6 +133,10 @@ function Schedule({
   useEffect(() => {
     setLoading(true);
     if (entries.length < 1) return;
+
+    if (debug) {
+      console.time(timerLabel);
+    }
 
     const calcedSx = {};
 
@@ -181,119 +237,121 @@ function Schedule({
      * Get entry widths and horizontal offsets
      * TODO this whole piece of the operation could use some optimization ASAP
      */
-    const sorted = validatedEntries.sort((a, b) => {
-      // If two events start at the same time, the one with a later start
-      //  time goes first
-      if (a[startKey].getTime() === b[startKey].getTime()) {
-        return b[endKey] - a[endKey];
-      }
-
-      return a[startKey] - b[startKey];
-    });
-    const sortedIds = sorted.map((entry) => entry.id);
-
-    const blockResolution = 5; // minutes, detail to which we calculate overlapping
-    const blocksPerDay = (24 * 60) / blockResolution;
-    const totalBlocks = blocksPerDay * dateRange.length;
-    const entryLength = validatedEntries.length;
-    const columns = [];
-    for (let i = 0; i < entryLength; i += 1) {
-      columns.push(0);
-    }
-
-    let matrix = [];
-    for (let i = 0; i < totalBlocks; i += 1) {
-      matrix.push(Array.from(columns));
-    }
-
-    // if (debug) {
-    //   console.groupCollapsed('MATRIX INIT');
-    //   console.log(matrix);
-    //   console.groupEnd();
-    // }
-
-    // Seed matrix
-    sortedIds.forEach((entryId, entryIndex) => {
-      const blocksFromEarliest = entryMetadata[entryId].msTimeFromEarliest
-        / (1000 * 60 * blockResolution);
-      const blockDuration = entryMetadata[entryId].msDuration / (1000 * 60 * blockResolution);
-      // if (debug) {
-      //   console.groupCollapsed(`SEED MATRIX ${entryId}`);
-      //   console.log(entryMetadata[entryId]);
-      //   console.log(blocksFromEarliest);
-      //   console.log(blockDuration);
-      //   console.groupEnd();
-      // }
-
-      let startingBlock = blocksFromEarliest;
-      for (let i = 0; i < blockDuration; i += 1) {
-        matrix[startingBlock][entryIndex] = 1;
-        startingBlock += 1;
-      }
-
-      entryMetadata[entryId].blocksFromEarliest = blocksFromEarliest;
-      entryMetadata[entryId].blockDuration = blockDuration;
-    });
-    // Seed matrix with collision values
-    matrix = matrix.map((row) => {
-      // Calculate collisions per row
-      const collisions = row.reduce(
-        (accumulator, currentValue) => accumulator + currentValue,
-        0,
-      );
-      // Change each entry's value to collisions in row
-      return row.map((entry) => {
-        if (entry) {
-          return collisions;
+    {
+      const sorted = validatedEntries.sort((a, b) => {
+        // If two events start at the same time, the one with a later end
+        //  time goes first
+        if (a[startKey].getTime() === b[startKey].getTime()) {
+          return b[endKey] - a[endKey];
         }
-        return 0;
+
+        return a[startKey] - b[startKey];
       });
-    });
-    // Find max collisions per entry; 1 means no collisions
-    sorted.forEach((entry, entryIndex) => {
-      const {
-        blocksFromEarliest,
-        blockDuration,
-      } = entryMetadata[entry.id];
-      let maxCollisions = 1;
-      let startingBlock = blocksFromEarliest;
-      for (let i = 0; i < blockDuration; i += 1) {
-        const collisions = matrix[startingBlock][entryIndex];
-        if (collisions > maxCollisions) {
-          maxCollisions = collisions;
-        }
-        startingBlock += 1;
+      const sortedIds = sorted.map((entry) => entry.id);
+
+      // Given entry length n, make an nxn matrix
+      const entryLength = validatedEntries.length;
+      const columns = [];
+      for (let i = 0; i < entryLength; i += 1) {
+        columns.push(0);
       }
-      entryMetadata[entry.id].maxCollisions = maxCollisions;
-    });
-    // Determine position relative to overlaps
-    matrix.forEach((row) => {
-      // Check if row contains an entry's max collisions and note its position
-      let position = 0;
-      row.forEach((collisions, entryIndex) => {
-        if (collisions === entryMetadata[sortedIds[entryIndex]].maxCollisions) {
-          // If the overlap already has a position don't give it a new one,
-          //  but push the position for subsequent entries
-          const currentPositionDefined = entryMetadata[sortedIds[entryIndex]].position;
-          if (currentPositionDefined) {
-            position = currentPositionDefined + 1;
+
+      let matrix = [];
+      for (let i = 0; i < entryLength; i += 1) {
+        matrix.push(Array.from(columns));
+      }
+
+      // Seed matrix
+      sorted.forEach((entry, i) => {
+        matrix[i][i] = 1;
+        for (let j = i + 1; j < sortedIds.length; j += 1) {
+          // If there is an overlap, then mark the current entry
+          //   in the overlapping space
+          // When we no longer find overlaps, end
+          if (entry[endKey] > sorted[j][startKey]) {
+            matrix[j][i] = 1;
           } else {
-            entryMetadata[sortedIds[entryIndex]].position = position;
-            position += 1;
+            break;
           }
         }
       });
-    });
-    // Add horizontal offsets to calcedSx
-    const spaceBetweenEntries = 2; // in px
-    Object.entries(entryMetadata).forEach(([id, metadata]) => {
-      const width = 100 / metadata.maxCollisions;
-      calcedSx[id].width = `calc(${width}% - ${spaceBetweenEntries}px)`;
-      calcedSx[id].left = `calc(${width * metadata.position}% + ${spaceBetweenEntries}px)`;
-    });
 
-    setEntrySx(calcedSx);
-    setLoading(false);
+      if (debug) {
+        console.groupCollapsed('SEED MATRIX');
+        console.log(matrix);
+        console.groupEnd();
+      }
+
+      // Populate matrix with collision values
+      matrix = matrix.map((row) => {
+        // Calculate collisions per row
+        const collisions = row.reduce(
+          (accumulator, currentValue) => accumulator + currentValue,
+          0,
+        );
+
+        // There's only one entry on this row
+        if (collisions === 1) {
+          return row;
+        }
+
+        // Change each entry's value to collisions in row
+        return row.map((entry) => {
+          if (entry) {
+            return collisions;
+          }
+
+          return 0;
+        });
+      });
+
+      if (debug) {
+        console.groupCollapsed('COLLISION MATRIX');
+        console.log(matrix);
+        console.groupEnd();
+      }
+
+      matrix.forEach((row) => {
+        let position = 0;
+        row.forEach((collisions, entryIndex) => {
+          const entryId = sortedIds[entryIndex];
+          const currentMaxCollisions = entryMetadata[entryId].maxCollisions || 0;
+          // When we find the max collisions, set it and entry's position
+          if (collisions > currentMaxCollisions) {
+            entryMetadata[entryId].maxCollisions = collisions;
+            entryMetadata[entryId].position = position;
+          }
+
+          // Keep track of how many entries we have already seen
+          if (collisions > 0) {
+            position += 1;
+          }
+        });
+      });
+
+      // Add horizontal offsets to calcedSx
+      const spaceBetweenEntries = 2; // in px
+      Object.entries(entryMetadata).forEach(([id, metadata]) => {
+        const width = 100 / metadata.maxCollisions;
+        calcedSx[id].width = `calc(${width}% - ${spaceBetweenEntries}px)`;
+        calcedSx[id].left = `calc(${width * metadata.position}% + ${spaceBetweenEntries}px)`;
+      });
+
+      setEntrySx(calcedSx);
+      setLoading(false);
+    }
+
+    if (debug) {
+      console.groupCollapsed('METADATA AND CALCED SX');
+      console.log(entryMetadata);
+      console.log(calcedSx);
+      console.groupEnd();
+    }
+
+
+    if (debug) {
+      console.timeEnd(timerLabel);
+    }
   }, [entries]);
 
   if (loading) {
@@ -314,15 +372,6 @@ function Schedule({
   }
 
   if (entries.length > 0) {
-    const dividerStyle = {
-      position: 'absolute',
-      width: '100%',
-      // Body's line height is 1.5rem
-      // This offsets the "divider with text" enough to
-      //   line up with the top of the grid item
-      top: '-0.75rem',
-    };
-
     return (
       <Box
         sx={{
@@ -391,40 +440,7 @@ function Schedule({
                   </Grid>
                 </Grid>
               </Grid>
-              {hours.map((hour) => (
-                <Grid
-                  key={`${day}T${hour}`}
-                  item
-                  xs={12}
-                  sx={{
-                    height: `${hourHeight}px`,
-                    width: '100%',
-                    position: 'relative',
-                  }}
-                >
-                  <Grid
-                    container
-                    direction="row"
-                  >
-                    <Grid
-                      item
-                      xs={12}
-                      sx={{
-                        height: `${hourHeight}px`,
-                        position: 'relative',
-                      }}
-                    >
-                      <Divider
-                        textAlign="left"
-                        variant="fullWidth"
-                        sx={dividerStyle}
-                      >
-                        {hour}
-                      </Divider>
-                    </Grid>
-                  </Grid>
-                </Grid>
-              ))}
+              <DayHours />
             </React.Fragment>
           ))}
         </Grid>

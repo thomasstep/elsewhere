@@ -95,3 +95,37 @@ result (just a visualization, each index is 1/3 width because that's how the num
 3[0,4,5]
 4[0,4,5]
 5[0,4,x]
+
+iteration 4:
+
+sort entries by start time, if same start time sort by later end time first
+stop gap happens when there is and entry with at least one entry directly after it with a start time greater than or equal to its end time (since we are sorted)
+  in the stop gap, count all entries with start times before the trigger entry's end time
+  make a note of the first entry with an end time after the trigger entry's end time because it will need to become the next trigger entry
+  entries completely contained in the trigger entry (start time on or after and end time on or before) will need to recursively call the same schedule sorting function
+if there is no stop gap/trigger entry, move on to the next entry
+
+at worst 0(n^2)
+
+iteration 5:
+
+there might be something to do with an interval tree?
+
+iteration 6:
+
+sort all entries by start time and latest end time (something that starts at the same time but runs longer goes first)
+given n entries, make an nxn matrix
+start entry "i" at point ixi
+extend from ixi to ixi+m where m is the last conflicting entry
+
+i = 0
+for entry in entries:
+  mark entry at ixi
+  j = i + 1
+  for conflict in entries[i,]:
+    if entry.endTime > conflict.startTime:
+      mark entry at ixi+j
+      j += 1
+    else:
+      break
+  i += 1

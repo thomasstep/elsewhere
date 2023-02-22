@@ -216,25 +216,31 @@ function Trip() {
     }
 
     // Build request data
-    const entryData = { location: {} };
+    const entryData = { };
     if (activeEntry.name !== '') entryData.name = activeEntry.name;
     if (activeEntry.startTimestamp !== '') entryData.startTimestamp = activeEntry.startTimestamp;
     if (activeEntry.endTimestamp !== '') entryData.endTimestamp = activeEntry.endTimestamp;
     if (activeEntry.notes !== '') entryData.notes = activeEntry.notes;
     if (
       activeEntry.location
-      && activeEntry.location.latitude) {
+      && activeEntry.location.latitude
+    ) {
+      if (!entryData.location) entryData.location = {};
       entryData.location.latitude = activeEntry.location.latitude;
     }
 
     if (
       activeEntry.location
-      && activeEntry.location.longitude) {
+      && activeEntry.location.longitude
+    ) {
+      if (!entryData.location) entryData.location = {};
       entryData.location.longitude = activeEntry.location.longitude;
     }
     if (
       activeEntry.location
-      && activeEntry.location.address !== '') {
+      && activeEntry.location.address !== ''
+    ) {
+      if (!entryData.location) entryData.location = {};
       entryData.location.address = activeEntry.location.address;
     }
 
