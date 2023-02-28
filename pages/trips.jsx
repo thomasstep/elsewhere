@@ -23,6 +23,7 @@ import {
 import { getCookie } from '../utils/util';
 
 function Trips() {
+  const limit = 20;
   const [id, setId] = useState('');
   const [trips, setTrips] = useState([]);
   const [newTripNameField, setNewTripNameField] = useState('');
@@ -31,6 +32,7 @@ function Trips() {
   const [loading, setLoading] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [nextToken, setNextToken] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -60,7 +62,7 @@ function Trips() {
         router.push('/signin');
       });
 
-    fetch(`${elsewhereApiUrl}/v1/trip`, {
+    fetch(`${elsewhereApiUrl}/v1/trip?${new URLSearchParams({ limit })}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -72,13 +74,53 @@ function Trips() {
         return res.json();
       })
       .then((data) => {
-        setTrips(data);
+        const resTrips = data.trips;
+        const resNextToken = data.pagination.nextToken;
+        setTrips(resTrips);
+        if (resTrips.length === limit && resNextToken) {
+          setNextToken(resNextToken);
+        }
       })
       .catch(() => {
         setSnackbarMessage('Could not load trips. Please reload or try again later.');
         setSnackbarOpen(true);
       });
   }, [router, token]);
+
+  // Scroll through pagination
+  useEffect(() => {
+    if (!nextToken) return;
+
+    const params = {
+      limit,
+      nextToken,
+    };
+    fetch(`${elsewhereApiUrl}/v1/trip?${new URLSearchParams(params)}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (res.status === 401) router.push('/signin');
+        if (res.status === 403) router.push('/signin');
+        if (res.status !== 200) throw new Error('Unhandled status');
+        return res.json();
+      })
+      .then((data) => {
+        const resTrips = data.trips;
+        const resNextToken = data.pagination.nextToken;
+        const newTrips = Array.from(trips);
+        newTrips.push(...resTrips);
+        setTrips(newTrips);
+        if (resTrips.length === limit && resNextToken) {
+          setNextToken(resNextToken);
+        }
+      })
+      .catch(() => {
+        setSnackbarMessage('Could not load all trips. Some trips will be missing.');
+        setSnackbarOpen(true);
+      });
+  }, [nextToken]);
 
   function handleNewTripNameFieldChange(event) {
     event.preventDefault();

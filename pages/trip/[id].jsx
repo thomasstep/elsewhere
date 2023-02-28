@@ -102,6 +102,7 @@ function a11yProps(index) {
 }
 
 function Trip() {
+  const limit = 20;
   const router = useRouter();
   // id is the user's ID; only dictates layout links
   const [id, setId] = useState('');
@@ -127,6 +128,8 @@ function Trip() {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('error');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  // Controls pagination scrolling
+  const [nextToken, setNextToken] = useState(null);
 
   if (debug) {
     console.groupCollapsed('STATE UPDATE');
@@ -165,25 +168,67 @@ function Trip() {
         router.push('/signin');
       });
 
-    fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/entry`, {
+    fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/entry?${new URLSearchParams({ limit })}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
       .then((res) => {
+        if (res.status === 401) router.push('/signin');
+        if (res.status === 403) router.push('/signin');
         if (res.status !== 200) throw new Error('Unhandled status code');
 
         return res.json();
       })
       .then((data) => {
-        setEntries(data);
+        const resEntries = data.entries;
+        const resNextToken = data.pagination.nextToken;
+        setEntries(resEntries);
+        if (resEntries.length === limit && resNextToken) {
+          setNextToken(resNextToken);
+        }
       })
-      .catch((err) => {
+      .catch(() => {
         setSnackbarMessage('Could not load entries. Please reload or try again later.');
         setSnackbarOpen(true);
-        console.error(err);
       });
   }, [router, token]);
+
+  // Scroll through pagination
+  useEffect(() => {
+    if (!nextToken) return;
+
+    const params = {
+      limit,
+      nextToken,
+    };
+    fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}/entry?${new URLSearchParams(params)}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (res.status === 401) router.push('/signin');
+        if (res.status === 403) router.push('/signin');
+        if (res.status !== 200) throw new Error('Unhandled status code');
+
+        return res.json();
+      })
+      .then((data) => {
+        const resEntries = data.entries;
+        const resNextToken = data.pagination.nextToken;
+        const newEntries = Array.from(entries);
+        newEntries.push(...resEntries);
+        setEntries(newEntries);
+        if (resEntries.length === limit && resNextToken) {
+          setNextToken(resNextToken);
+        }
+      })
+      .catch(() => {
+        setSnackbarMessage('Could not load all entries. Some entries will be missing.');
+        setSnackbarOpen(true);
+      });
+  }, [nextToken]);
 
 
   async function createEntry() {
