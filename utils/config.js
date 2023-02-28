@@ -5,10 +5,6 @@ module.exports = {
   googleMapsKey: process.env.GOOGLE_MAPS_KEY,
   debug: (process.env.DEBUG || 'false') === 'true',
   jwtCookieName: 'authToken',
-  newEntryFormView: 'newEntry',
-  activeEntryFormView: 'activeEntry',
-  mapView: 'map',
-  scheduleView: 'schedule',
   snackbarAutoCloseTime: 5000, // in milliseconds
   hourHeight: 40, // in px
 };

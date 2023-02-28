@@ -6,11 +6,13 @@ import PropTypes from 'prop-types';
 import { Wrapper, Status } from '@googlemaps/react-wrapper';
 
 import Alert from '@mui/material/Alert';
-import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
+import Grid from '@mui/material/Grid';
 import Snackbar from '@mui/material/Snackbar';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
+import Typography from '@mui/material/Typography';
 
 import Layout from '../../components/layout';
 import LoadingPage from '../../components/loadingPage';
@@ -19,16 +21,12 @@ import MapView from '../../components/mapView';
 import NewEntryForm from '../../components/newEntryForm';
 import ScheduleView from '../../components/scheduleView';
 import {
-  activeEntryFormView,
   applicationId,
   authenticationServiceUrl,
   debug,
   elsewhereApiUrl,
   googleMapsKey,
   jwtCookieName,
-  mapView,
-  newEntryFormView,
-  scheduleView,
   snackbarAutoCloseTime,
 } from '../../utils/config';
 import {
@@ -120,10 +118,6 @@ function Trip() {
   const [token, setToken] = useState(null);
   // Controls the tabs
   const [activeTab, setActiveTab] = useState(0);
-  // Controls badge visibility
-  const [activeBadge, setActiveBadge] = useState(null);
-  // Controls timer to smooth out active badge operation
-  const [activeBadgeTimer, setActiveBadgeTimer] = useState(null);
   // Controls the snackbar for error or success info
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('error');
@@ -330,62 +324,9 @@ function Trip() {
 
   const deleteEntryCallback = useCallback(() => deleteEntry());
 
-  function calloutTab(view) {
-    switch (view) {
-      case (mapView):
-        setActiveBadge(null);
-        clearTimeout(activeBadgeTimer);
-
-        setActiveBadge(0);
-        setActiveBadgeTimer(
-          setTimeout(() => {
-            setActiveBadge(null);
-          }, 3000),
-        );
-        break;
-      case (scheduleView):
-        setActiveBadge(null);
-        clearTimeout(activeBadgeTimer);
-
-        setActiveBadge(1);
-        setActiveBadgeTimer(
-          setTimeout(() => {
-            setActiveBadge(null);
-          }, 3000),
-        );
-        break;
-      case (activeEntryFormView):
-        setActiveBadge(null);
-        clearTimeout(activeBadgeTimer);
-
-        setActiveBadge(2);
-        setActiveBadgeTimer(
-          setTimeout(() => {
-            setActiveBadge(null);
-          }, 3000),
-        );
-        break;
-      case (newEntryFormView):
-        setActiveBadge(null);
-        clearTimeout(activeBadgeTimer);
-
-        setActiveBadge(3);
-        setActiveBadgeTimer(
-          setTimeout(() => {
-            setActiveBadge(null);
-          }, 3000),
-        );
-        break;
-      default:
-        break;
-    }
-  }
-
-  const calloutTabCallback = useCallback((view) => {
-    calloutTab(view);
-  });
-
   if (id) {
+    // eslint-disable-next-line eqeqeq
+    const activeEntryExists = typeof activeEntry.id === 'string' && activeEntry.id.length > 0;
     return (
       <Layout session={id}>
 
@@ -400,52 +341,12 @@ function Trip() {
             allowScrollButtonsMobile
           >
             <Tab
-              label={(
-                <Badge
-                  color="secondary"
-                  variant="dot"
-                  invisible={!(activeBadge === 0)}
-                >
-                  Map
-                </Badge>
-              )}
+              label="Map"
               {...a11yProps(0)}
             />
             <Tab
-              label={(
-                <Badge
-                  color="secondary"
-                  variant="dot"
-                  invisible={!(activeBadge === 1)}
-                >
-                  Schedule
-                </Badge>
-              )}
+              label="Schedule"
               {...a11yProps(1)}
-            />
-            <Tab
-              label={(
-                <Badge
-                  color="secondary"
-                  variant="dot"
-                  invisible={!(activeBadge === 2)}
-                >
-                  Selected Entry
-                </Badge>
-              )}
-              {...a11yProps(2)}
-            />
-            <Tab
-              label={(
-                <Badge
-                  color="secondary"
-                  variant="dot"
-                  invisible={!(activeBadge === 3)}
-                >
-                  New Entry
-                </Badge>
-              )}
-              {...a11yProps(3)}
             />
           </Tabs>
         </Box>
@@ -463,7 +364,6 @@ function Trip() {
               setActiveEntry={setActiveEntry}
               newEntryData={newEntryData}
               setNewEntryData={setNewEntryData}
-              calloutTab={calloutTabCallback}
             />
           </Wrapper>
         </TabPanel>
@@ -475,36 +375,57 @@ function Trip() {
             setActiveEntry={setActiveEntry}
             newEntryData={newEntryData}
             setNewEntryData={setNewEntryData}
-            calloutTab={calloutTabCallback}
           />
         </TabPanel>
 
-        <TabPanel value={activeTab} index={2}>
-          <EntryInfo
-            entries={entries}
-            setEntries={setEntries}
-            activeEntry={activeEntry}
-            setActiveEntry={setActiveEntry}
-            updateEntry={updateEntryCallback}
-            deleteEntry={deleteEntryCallback}
-            setSnackbarMessage={setSnackbarMessage}
-            setSnackbarSeverity={setSnackbarSeverity}
-            setSnackbarOpen={setSnackbarOpen}
-          />
-        </TabPanel>
+        <Divider />
 
-        <TabPanel value={activeTab} index={3}>
-          <NewEntryForm
-            entries={entries}
-            setEntries={setEntries}
-            newEntryData={newEntryData}
-            setNewEntryData={setNewEntryData}
-            createEntry={createEntryCallback}
-            setSnackbarMessage={setSnackbarMessage}
-            setSnackbarSeverity={setSnackbarSeverity}
-            setSnackbarOpen={setSnackbarOpen}
-          />
-        </TabPanel>
+        {activeEntryExists
+          ? (
+            <Grid
+              container
+              direction="column"
+              justifyContent="center"
+              alignItems="center"
+              sx={{ py: 3 }}
+            >
+              <Typography variant="h5" sx={{ pb: 3 }}>Update</Typography>
+
+              <EntryInfo
+                entries={entries}
+                setEntries={setEntries}
+                activeEntry={activeEntry}
+                setActiveEntry={setActiveEntry}
+                updateEntry={updateEntryCallback}
+                deleteEntry={deleteEntryCallback}
+                setSnackbarMessage={setSnackbarMessage}
+                setSnackbarSeverity={setSnackbarSeverity}
+                setSnackbarOpen={setSnackbarOpen}
+              />
+            </Grid>
+          )
+          : (
+            <Grid
+              container
+              direction="column"
+              justifyContent="center"
+              alignItems="center"
+              sx={{ py: 3 }}
+            >
+              <Typography variant="h5" sx={{ pb: 3 }}>Create</Typography>
+
+              <NewEntryForm
+                entries={entries}
+                setEntries={setEntries}
+                newEntryData={newEntryData}
+                setNewEntryData={setNewEntryData}
+                createEntry={createEntryCallback}
+                setSnackbarMessage={setSnackbarMessage}
+                setSnackbarSeverity={setSnackbarSeverity}
+                setSnackbarOpen={setSnackbarOpen}
+              />
+            </Grid>
+          )}
 
         <Snackbar
           open={snackbarOpen}

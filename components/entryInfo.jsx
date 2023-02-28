@@ -27,8 +27,6 @@ function EntryInfo({
 }) {
   // Boolean tells whether the entry has been edited
   const [edited, setEdited] = useState(false);
-  // Timer so we don't spam update the mapView
-  // Timer so we don't spam update the scheduleView
   // Using truthy on purpose
   // eslint-disable-next-line eqeqeq
   const activeEntryExists = typeof activeEntry.id === 'string' && activeEntry.id.length > 0;
@@ -105,7 +103,7 @@ function EntryInfo({
                   setEdited(true);
                 }}
                 multiline
-                rows={10}
+                rows={5}
               />
             </Grid>
           </Grid>
@@ -254,10 +252,13 @@ function EntryInfo({
           >
             Save
           </Button>
+        </Grid>
 
+        <Grid item xs={12}>
           <Button
             variant="contained"
             disabled={!activeEntryExists}
+            color="error"
             startIcon={<DeleteIcon />}
             onClick={async () => {
               // Make API call

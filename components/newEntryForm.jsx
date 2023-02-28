@@ -45,7 +45,7 @@ function NewEntryForm({
             <Grid item>
               <TextField
                 id="filled-basic"
-                value={newEntryData.name}
+                value={newEntryData.name || ''}
                 label="Name"
                 variant="standard"
                 onChange={(e) => {
@@ -71,7 +71,7 @@ function NewEntryForm({
             <Grid item>
               <TextField
                 id="filled-basic"
-                value={newEntryData.notes}
+                value={newEntryData.notes || ''}
                 label="Notes"
                 variant="standard"
                 onChange={(e) => {
@@ -81,7 +81,7 @@ function NewEntryForm({
                   });
                 }}
                 multiline
-                rows={10}
+                rows={5}
               />
             </Grid>
           </Grid>
@@ -191,7 +191,6 @@ function NewEntryForm({
         <Grid item xs={12}>
           <Button
             variant="contained"
-            // className={classes.saveButton}
             startIcon={<SaveIcon />}
             onClick={async () => {
               // Make API call
@@ -210,12 +209,14 @@ function NewEntryForm({
               setEntries(newEntries);
             }}
           >
-            Save
+            Create
           </Button>
+        </Grid>
 
+        <Grid item xs={12}>
           <Button
             variant="contained"
-            // className={classes.deleteButton}
+            color="error"
             startIcon={<DeleteIcon />}
             onClick={() => {
               setNewEntryData({});

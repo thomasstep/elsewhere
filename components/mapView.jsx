@@ -6,8 +6,6 @@ import Box from '@mui/material/Box';
 import Map from './map';
 import Marker from './marker';
 import {
-  activeEntryFormView,
-  newEntryFormView,
   debug,
 } from '../utils/config';
 
@@ -17,7 +15,6 @@ function MapView({
   setActiveEntry,
   newEntryData,
   setNewEntryData,
-  calloutTab,
 }) {
   const [bounds, setBounds] = useState(null);
 
@@ -71,9 +68,12 @@ function MapView({
             && newEntryData.location.longitude
           ) {
             // Reset new entry's location
+            const {
+              location,
+              ...newEntryDataNoLocation
+            } = newEntryData;
             setNewEntryData({
-              ...newEntryData,
-              location: {},
+              ...newEntryDataNoLocation,
             });
           } else {
             // Set new entry's location based on click
@@ -84,7 +84,6 @@ function MapView({
                 longitude: e.latLng.lng(),
               },
             });
-            calloutTab(newEntryFormView);
           }
         }}
         // TODO is there a better way to do this instead of passing new entry data and setter?
@@ -120,7 +119,6 @@ function MapView({
               }}
               onClick={() => {
                 setActiveEntry(entry);
-                calloutTab(activeEntryFormView);
               }}
               // eslint-disable-next-line no-undef
               animation={animate && google.maps.Animation.BOUNCE}
@@ -147,6 +145,13 @@ function MapView({
                 color: '#ffffff',
                 fontSize: '18px',
               }}
+              // Animate if there's no ID (not a real entry)
+              // and lat/lng match new entry
+              animation={
+                !activeEntry.id
+                // eslint-disable-next-line no-undef
+                && google.maps.Animation.BOUNCE
+}
             />
           )
           : null}
@@ -165,7 +170,6 @@ MapView.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   newEntryData: PropTypes.object.isRequired,
   setNewEntryData: PropTypes.func.isRequired,
-  calloutTab: PropTypes.func.isRequired,
 };
 
 export default MapView;
