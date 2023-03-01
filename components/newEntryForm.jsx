@@ -99,7 +99,7 @@ function NewEntryForm({
                 ...newEntryData,
                 location: {
                   ...newEntryData.location,
-                  latitude: e.target.value,
+                  latitude: parseFloat(e.target.value),
                 },
               });
             }}
@@ -118,7 +118,7 @@ function NewEntryForm({
                 ...newEntryData,
                 location: {
                   ...newEntryData.location,
-                  longitude: e.target.value,
+                  longitude: parseFloat(e.target.value),
                 },
               });
             }}

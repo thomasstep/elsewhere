@@ -38,6 +38,17 @@ function MapView({
         lng: entry.location.longitude,
       });
     });
+
+    if (
+      newEntryData.location
+      && newEntryData.location.latitude
+      && newEntryData.location.longitude) {
+      newBounds.extend({
+        lat: newEntryData.location.latitude,
+        lng: newEntryData.location.longitude,
+      });
+    }
+
     if (debug) {
       console.groupCollapsed('MAP VIEW BOUNDS SET');
       console.log(newBounds);
@@ -45,7 +56,7 @@ function MapView({
     }
 
     setBounds(newBounds);
-  }, [entries]);
+  }, [entries, newEntryData]);
 
   return (
     <Box>
@@ -94,7 +105,6 @@ function MapView({
         fullscreenControl={false}
         mapType="TERRAIN"
         mapTypeControl={false}
-        // clickableIcons
         style={{ height: '100vh', width: '100%' }}
       >
 
@@ -145,13 +155,6 @@ function MapView({
                 color: '#ffffff',
                 fontSize: '18px',
               }}
-              // Animate if there's no ID (not a real entry)
-              // and lat/lng match new entry
-              animation={
-                !activeEntry.id
-                // eslint-disable-next-line no-undef
-                && google.maps.Animation.BOUNCE
-}
             />
           )
           : null}

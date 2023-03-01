@@ -122,7 +122,7 @@ function EntryInfo({
                 ...activeEntry,
                 location: {
                   ...activeEntry.location,
-                  latitude: e.target.value,
+                  latitude: parseFloat(e.target.value),
                 },
               });
               setEdited(true);
@@ -143,7 +143,7 @@ function EntryInfo({
                 ...activeEntry,
                 location: {
                   ...activeEntry.location,
-                  longitude: e.target.value,
+                  longitude: parseFloat(e.target.value),
                 },
               });
               setEdited(true);
