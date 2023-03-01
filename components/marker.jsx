@@ -3,10 +3,12 @@ import PropTypes from 'prop-types';
 
 function Marker({
   onClick,
+  onDragEnd,
   ...options
 }) {
   const [marker, setMarker] = useState();
   const [clickListener, setClickListener] = useState();
+  const [dragEndListener, setDragEndListener] = useState();
 
   useEffect(() => {
     if (!marker) {
@@ -15,14 +17,24 @@ function Marker({
       const clk = newMarker.addListener('click', (e) => {
         onClick(e);
       });
-      setMarker(newMarker);
       setClickListener(clk);
+      const de = newMarker.addListener('dragend', (e) => {
+        const lat = newMarker.position.lat();
+        const lng = newMarker.position.lng();
+        onDragEnd(e, lat, lng);
+      });
+      setDragEndListener(de);
+      setMarker(newMarker);
     }
 
     // remove marker from map on unmount
     return () => {
       if (marker) {
         marker.setMap(null);
+        // eslint-disable-next-line no-undef
+        google.maps.event.removeListener(clickListener);
+        // eslint-disable-next-line no-undef
+        google.maps.event.removeListener(dragEndListener);
       }
     };
   }, [marker]);
@@ -50,10 +62,12 @@ function Marker({
 
 Marker.propTypes = {
   onClick: PropTypes.func,
+  onDragEnd: PropTypes.func,
 };
 
 Marker.defaultProps = {
   onClick: () => {},
+  onDragEnd: () => {},
 };
 
 export default Marker;

@@ -5,9 +5,9 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Grid from '@mui/material/Grid';
+import ReplayIcon from '@mui/icons-material/Replay';
 import SaveIcon from '@mui/icons-material/Save';
 import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
 import { DateTime, Settings } from 'luxon';
 
 import DateTimeField from './dateTimeField';
@@ -69,16 +69,6 @@ function EntryInfo({
           </Grid>
         </Grid>
 
-        {/* Created By field */}
-        {
-          activeEntry.createdBy ? (
-            <Grid item xs={12}>
-              <Typography variant="h5">Created By</Typography>
-              <Typography variant="body1">{activeEntry.createdBy}</Typography>
-            </Grid>
-          ) : null
-        }
-
         {/* Notes field */}
         <Grid item xs={12}>
           <Grid
@@ -113,7 +103,7 @@ function EntryInfo({
         <Grid item xs={12}>
           <TextField
             id="filled-basic"
-            value={activeEntry.location ? activeEntry.location.latitude : ''}
+            value={activeEntry?.location.latitude ? activeEntry.location.latitude : ''}
             disabled={!activeEntryExists}
             label="Latitude"
             variant="standard"
@@ -134,7 +124,7 @@ function EntryInfo({
         <Grid item xs={12}>
           <TextField
             id="filled-basic"
-            value={activeEntry.location ? activeEntry.location.longitude : ''}
+            value={activeEntry?.location.longitude ? activeEntry.location.longitude : ''}
             disabled={!activeEntryExists}
             label="Longitude"
             variant="standard"
@@ -156,7 +146,7 @@ function EntryInfo({
         <Grid item xs={12}>
           <TextField
             id="filled-basic"
-            value={activeEntry.location ? activeEntry.location.address : ''}
+            value={activeEntry?.location.address ? activeEntry.location.address : ''}
             disabled={!activeEntryExists}
             label="Address"
             variant="standard"
@@ -251,6 +241,28 @@ function EntryInfo({
             }}
           >
             Save
+          </Button>
+        </Grid>
+
+        <Grid item xs={12}>
+          <Button
+            variant="contained"
+            disabled={!activeEntryExists}
+            color="secondary"
+            startIcon={<ReplayIcon />}
+            onClick={async () => {
+              // Update state back to original
+              const originalEntry = entries.find((entry) => activeEntry.id === entry.id);
+              if (originalEntry) {
+                setActiveEntry(originalEntry);
+              } else {
+                setSnackbarSeverity('error');
+                setSnackbarMessage('There was a problem updating the page. Please reload the page for updated information.');
+                setSnackbarOpen(true);
+              }
+            }}
+          >
+            Undo Changes
           </Button>
         </Grid>
 

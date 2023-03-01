@@ -127,8 +127,11 @@ function Trip() {
 
   if (debug) {
     console.groupCollapsed('STATE UPDATE');
+    console.log('entries');
     console.log(entries);
+    console.log('activeEntry');
     console.log(activeEntry);
+    console.log('newEntryData');
     console.log(newEntryData);
     console.groupEnd();
   }
@@ -412,7 +415,7 @@ function Trip() {
               alignItems="center"
               sx={{ py: 3 }}
             >
-              <Typography variant="h5" sx={{ pb: 3 }}>Create</Typography>
+              <Typography variant="h5" sx={{ pb: 3 }}>New</Typography>
 
               <NewEntryForm
                 entries={entries}

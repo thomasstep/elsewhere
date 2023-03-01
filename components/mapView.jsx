@@ -114,24 +114,39 @@ function MapView({
             || !entry.location.latitude
             || !entry.location.longitude) return null;
 
-          let animate = null;
+          let isActive = false;
           if (entry.id === activeEntry.id) {
-            animate = true;
+            isActive = true;
           }
 
+          const data = isActive ? activeEntry : entry;
+
           const googleMarker = (
-            // TODO https://developers.google.com/maps/documentation/javascript/advanced-markers/accessible-markers#make_a_marker_draggable
             <Marker
-              key={entry.id}
+              key={data.id}
               position={{
-                lat: entry.location.latitude,
-                lng: entry.location.longitude,
+                lat: data.location.latitude,
+                lng: data.location.longitude,
               }}
               onClick={() => {
-                setActiveEntry(entry);
+                if (isActive) {
+                  setActiveEntry({});
+                } else {
+                  setActiveEntry(data);
+                }
+              }}
+              draggable
+              onDragEnd={(e, lat, lng) => {
+                setActiveEntry({
+                  ...data,
+                  location: {
+                    latitude: lat,
+                    longitude: lng,
+                  },
+                });
               }}
               // eslint-disable-next-line no-undef
-              animation={animate && google.maps.Animation.BOUNCE}
+              animation={isActive ? google.maps.Animation.BOUNCE : null}
             />
           );
 
@@ -154,6 +169,16 @@ function MapView({
                 fontFamily: 'Material Icons',
                 color: '#ffffff',
                 fontSize: '18px',
+              }}
+              draggable
+              onDragEnd={(e, lat, lng) => {
+                setNewEntryData({
+                  ...newEntryData,
+                  location: {
+                    latitude: lat,
+                    longitude: lng,
+                  },
+                });
               }}
             />
           )
