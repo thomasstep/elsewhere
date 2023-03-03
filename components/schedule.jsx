@@ -235,7 +235,6 @@ function Schedule({
 
     /**
      * Get entry widths and horizontal offsets
-     * TODO this whole piece of the operation could use some optimization ASAP
      */
     {
       const sorted = validatedEntries.sort((a, b) => {
