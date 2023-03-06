@@ -121,6 +121,7 @@ function Schedule({
   startKey,
   endKey,
   idKey,
+  styleKey,
   entryOnClick,
 }) {
   const minuteHeight = hourHeight / 60;
@@ -164,7 +165,11 @@ function Schedule({
       }
 
       // Initialize sx for each valid entry
-      calcedSx[entry[idKey]] = {};
+      if (entry[styleKey]) {
+        calcedSx[entry[idKey]] = { ...entry[styleKey] };
+      } else {
+        calcedSx[entry[idKey]] = {};
+      }
 
       // Fade everything that is not the active entry
       if (activeEntry[idKey]) {
@@ -504,6 +509,7 @@ Schedule.propTypes = {
   startKey: PropTypes.string,
   endKey: PropTypes.string,
   idKey: PropTypes.string,
+  styleKey: PropTypes.string,
   entryOnClick: PropTypes.func,
 };
 
@@ -512,6 +518,7 @@ Schedule.defaultProps = {
   startKey: 'start',
   endKey: 'end',
   idKey: 'id',
+  styleKey: 'style',
   entryOnClick: () => {},
 };
 

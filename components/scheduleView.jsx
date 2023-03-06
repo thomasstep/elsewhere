@@ -9,17 +9,27 @@ import Typography from '@mui/material/Typography';
 import LoadingPage from './loadingPage';
 import Schedule from './schedule';
 
+const newEntryScheduleId = 'newentry';
+
 function ScheduleView({
   entries,
   activeEntry,
   setActiveEntry,
-  // newEntryData,
+  newEntryData,
   // setNewEntryData,
 }) {
   if (entries.length > 0) {
     const noTime = [];
-    let withTime = [];
-    entries.forEach((entry) => {
+    const withTime = [];
+    // Add styling for schedule's event
+    const newEntryWithStyle = {
+      ...newEntryData,
+      id: newEntryScheduleId,
+      style: {
+        bgcolor: 'secondary.main',
+      },
+    };
+    entries.concat(newEntryWithStyle).forEach((entry) => {
       // Prefer active data because it might have updates
       let entryData = entry;
       if (entry.id === activeEntry.id) entryData = activeEntry;
@@ -60,34 +70,31 @@ function ScheduleView({
               </Typography>
             </Divider>
           )
-          : null
-        }
+          : null}
 
-        {noTime.map((entry) => {
-          return (
-            <Paper
-              key={entry.id}
-              onClick={() => {
-                if (activeEntry.id === entry.id) {
-                  setActiveEntry({});
-                } else {
-                  setActiveEntry(entry);
-                }
-              }}
-              sx={{
-                bgcolor: 'primary.main',
-                m: 1,
-                p: 1,
-                width: '100%',
-                opacity: !activeEntry.id || activeEntry.id === entry.id ? '1.0' : '0.60',
-              }}
-            >
-              <Typography variant="body1">
-                {entry.name || 'No name'}
-              </Typography>
-            </Paper>
-          );
-        })}
+        {noTime.map((entry) => (
+          <Paper
+            key={entry.id}
+            onClick={() => {
+              if (activeEntry.id === entry.id) {
+                setActiveEntry({});
+              } else {
+                setActiveEntry(entry);
+              }
+            }}
+            sx={{
+              bgcolor: 'primary.main',
+              m: 1,
+              p: 1,
+              width: '100%',
+              opacity: !activeEntry.id || activeEntry.id === entry.id ? '1.0' : '0.60',
+            }}
+          >
+            <Typography variant="body1">
+              {entry.name || 'No name'}
+            </Typography>
+          </Paper>
+        ))}
 
 
         {noTime.length
@@ -104,8 +111,7 @@ function ScheduleView({
               </Typography>
             </Divider>
           )
-          : null
-        }
+          : null}
 
         <Schedule
           entries={withTime}
@@ -113,6 +119,7 @@ function ScheduleView({
           startKey="startTimestamp"
           endKey="endTimestamp"
           entryOnClick={(e, entry) => {
+            if (entry.id === newEntryScheduleId) return;
             if (activeEntry.id === entry.id) {
               setActiveEntry({});
             } else {
@@ -135,7 +142,7 @@ ScheduleView.propTypes = {
   activeEntry: PropTypes.object.isRequired,
   setActiveEntry: PropTypes.func.isRequired,
   // eslint-disable-next-line react/forbid-prop-types
-  // newEntryData: PropTypes.object.isRequired,
+  newEntryData: PropTypes.object.isRequired,
   // setNewEntryData: PropTypes.func.isRequired,
 };
 
