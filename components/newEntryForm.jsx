@@ -91,7 +91,7 @@ function NewEntryForm({
         <Grid item xs={12}>
           <TextField
             id="filled-basic"
-            value={newEntryData.location ? newEntryData.location.latitude : ''}
+            value={newEntryData?.location?.latitude ? newEntryData.location.latitude : ''}
             label="Latitude"
             variant="standard"
             onChange={(e) => {
@@ -110,7 +110,7 @@ function NewEntryForm({
         <Grid item xs={12}>
           <TextField
             id="filled-basic"
-            value={newEntryData.location ? newEntryData.location.longitude : ''}
+            value={newEntryData?.location?.longitude ? newEntryData.location.longitude : ''}
             label="Longitude"
             variant="standard"
             onChange={(e) => {
@@ -130,7 +130,7 @@ function NewEntryForm({
         <Grid item xs={12}>
           <TextField
             id="filled-basic"
-            value={newEntryData.location ? newEntryData.location.address : ''}
+            value={newEntryData?.location?.address ? newEntryData.location.address : ''}
             label="Address"
             variant="standard"
             onChange={(e) => {

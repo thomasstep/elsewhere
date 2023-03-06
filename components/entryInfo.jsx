@@ -103,7 +103,7 @@ function EntryInfo({
         <Grid item xs={12}>
           <TextField
             id="filled-basic"
-            value={activeEntry?.location.latitude ? activeEntry.location.latitude : ''}
+            value={activeEntry?.location?.latitude ? activeEntry.location.latitude : ''}
             disabled={!activeEntryExists}
             label="Latitude"
             variant="standard"
@@ -124,7 +124,7 @@ function EntryInfo({
         <Grid item xs={12}>
           <TextField
             id="filled-basic"
-            value={activeEntry?.location.longitude ? activeEntry.location.longitude : ''}
+            value={activeEntry?.location?.longitude ? activeEntry.location.longitude : ''}
             disabled={!activeEntryExists}
             label="Longitude"
             variant="standard"
@@ -146,7 +146,7 @@ function EntryInfo({
         <Grid item xs={12}>
           <TextField
             id="filled-basic"
-            value={activeEntry?.location.address ? activeEntry.location.address : ''}
+            value={activeEntry?.location?.address ? activeEntry.location.address : ''}
             disabled={!activeEntryExists}
             label="Address"
             variant="standard"

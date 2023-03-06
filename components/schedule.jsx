@@ -120,6 +120,7 @@ function Schedule({
   activeEntry,
   startKey,
   endKey,
+  idKey,
   entryOnClick,
 }) {
   const minuteHeight = hourHeight / 60;
@@ -148,9 +149,10 @@ function Schedule({
     let earliestEntry = entries[0];
     let latestEntry = entries[0];
     entries.forEach((entry) => {
-      if (entry[startKey] > entry[endKey]) {
-        return;
-      }
+      // All entries need an ID and valid times
+      if (!entry[idKey]) return;
+      if (entry[startKey] > entry[endKey]) return;
+
       validatedEntries.push(entry);
 
       if (entry[startKey] < earliestEntry[startKey]) {
@@ -162,15 +164,16 @@ function Schedule({
       }
 
       // Initialize sx for each valid entry
-      calcedSx[entry.id] = {};
+      calcedSx[entry[idKey]] = {};
 
       // Fade everything that is not the active entry
-      if (activeEntry.id) {
-        if (entry.id !== activeEntry.id) {
-          calcedSx[entry.id].opacity = '0.60';
+      if (activeEntry[idKey]) {
+        if (entry[idKey] !== activeEntry[idKey]) {
+          calcedSx[entry[idKey]].opacity = '0.60';
         }
       }
     });
+
     if (validatedEntries.length < 1) return;
 
     const entryMetadata = {};
@@ -224,13 +227,13 @@ function Schedule({
       topOffset += (msTimeFromEarliest / (1000 * 60)) * minuteHeight;
 
       // Add to metadata cache for use in horizontal calculations
-      entryMetadata[entry.id] = {
+      entryMetadata[entry[idKey]] = {
         msTimeFromEarliest,
         msDuration,
       };
 
-      calcedSx[entry.id].top = `${topOffset}px`;
-      calcedSx[entry.id].height = `${height}px`;
+      calcedSx[entry[idKey]].top = `${topOffset}px`;
+      calcedSx[entry[idKey]].height = `${height}px`;
     });
 
     /**
@@ -246,7 +249,7 @@ function Schedule({
 
         return a[startKey] - b[startKey];
       });
-      const sortedIds = sorted.map((entry) => entry.id);
+      const sortedIds = sorted.map((entry) => entry[idKey]);
 
       // Given entry length n, make an nxn matrix
       const entryLength = validatedEntries.length;
@@ -471,13 +474,13 @@ function Schedule({
           >
             {entries.map((entry) => (
               <Paper
-                key={entry.id}
+                key={entry[idKey]}
                 onClick={(e) => entryOnClick(e, entry)}
                 sx={{
                   position: 'absolute',
                   bgcolor: 'primary.main',
                   p: 1,
-                  ...entrySx[entry.id],
+                  ...entrySx[entry[idKey]],
                 }}
               >
                 {entry.name || 'No name'}
@@ -500,6 +503,7 @@ Schedule.propTypes = {
   activeEntry: PropTypes.object,
   startKey: PropTypes.string,
   endKey: PropTypes.string,
+  idKey: PropTypes.string,
   entryOnClick: PropTypes.func,
 };
 
@@ -507,6 +511,7 @@ Schedule.defaultProps = {
   activeEntry: {},
   startKey: 'start',
   endKey: 'end',
+  idKey: 'id',
   entryOnClick: () => {},
 };
 
