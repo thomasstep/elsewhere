@@ -62,7 +62,7 @@ function Header(props) {
                     </ListItemButton>
                   </ListItem>
                   <ListItem key="Sign Out">
-                    <ListItemButton component={Link} href="/signout">
+                    <ListItemButton component={Link} href="/">
                       <ListItemIcon>
                         <LogoutIcon />
                       </ListItemIcon>

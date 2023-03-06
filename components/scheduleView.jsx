@@ -46,9 +46,11 @@ function ScheduleView({
             endTimestamp: endDate,
           });
         } catch (err) {
-          noTime.push(entryData);
+          // Only want the new entry if it has times
+          if (entry.id !== newEntryScheduleId) noTime.push(entryData);
         }
-      } else {
+      } else if (entry.id !== newEntryScheduleId) {
+        // Only want the new entry if it has times
         noTime.push(entryData);
       }
     });
