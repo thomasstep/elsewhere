@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, {
+  memo, useEffect, useRef, useState,
+} from 'react';
 import PropTypes from 'prop-types';
 
 import Box from '@mui/material/Box';
@@ -127,10 +129,30 @@ function Schedule({
   const minuteHeight = hourHeight / 60;
   const timerLabel = 'scheduleAlgo';
 
+  const elemRef = useRef(null);
   const [days, setDays] = useState([]);
   const [scheduleHeight, setScheduleHeight] = useState(0);
   const [entrySx, setEntrySx] = useState({});
   const [loading, setLoading] = useState(true);
+
+  // If there is an active entry on render, scroll to it
+  useEffect(() => {
+    if (debug) {
+      console.groupCollapsed('AUTO SCROLLING');
+      console.log(elemRef);
+      console.log(activeEntry);
+      console.groupEnd();
+    }
+    if (elemRef.current) {
+      if (activeEntry.id) {
+        const topStr = entrySx[activeEntry.id]?.top;
+        if (topStr) {
+          // Take off the px at the end of the string
+          elemRef.current.scrollTo(0, topStr.substring(0, parseInt(topStr.length - 2, 10)));
+        }
+      }
+    }
+  }, [elemRef, activeEntry, entrySx]);
 
   useEffect(() => {
     setLoading(true);
@@ -321,6 +343,7 @@ function Schedule({
       matrix.forEach((row) => {
         let position = 0;
         row.forEach((collisions, entryIndex) => {
+          const positionsTaken = new Set();
           const entryId = sortedIds[entryIndex];
           const currentMaxCollisions = entryMetadata[entryId].maxCollisions || 0;
           // When we find the max collisions, set it and entry's position
@@ -331,7 +354,16 @@ function Schedule({
 
           // Keep track of how many entries we have already seen
           if (collisions > 0) {
-            position += 1;
+            // Add position of entry even if it isn't a max collision entry
+            positionsTaken.add(entryMetadata[entryId].position);
+            // Find next position that isn't a collision
+            for (let i = position; i < collisions; i += 1) {
+              if (positionsTaken.has(i)) {
+                position += 1;
+              } else {
+                break;
+              }
+            }
           }
         });
       });
@@ -381,6 +413,7 @@ function Schedule({
   if (entries.length > 0) {
     return (
       <Box
+        ref={elemRef}
         sx={{
           position: 'relative',
           height: '100vh',
@@ -479,6 +512,7 @@ function Schedule({
           >
             {entries.map((entry) => (
               <Paper
+                id={entry[idKey]}
                 key={entry[idKey]}
                 onClick={(e) => entryOnClick(e, entry)}
                 sx={{
@@ -522,4 +556,4 @@ Schedule.defaultProps = {
   entryOnClick: () => {},
 };
 
-export default Schedule;
+export default memo(Schedule);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 import Box from '@mui/material/Box';
@@ -18,7 +18,7 @@ function ScheduleView({
   newEntryData,
   // setNewEntryData,
 }) {
-  if (entries.length > 0) {
+  const sortedEntries = useMemo(() => {
     const noTime = [];
     const withTime = [];
     // Add styling for schedule's event
@@ -54,11 +54,17 @@ function ScheduleView({
         noTime.push(entryData);
       }
     });
+    return {
+      noTime,
+      withTime,
+    };
+  }, [entries, newEntryData]);
 
+  if (entries.length > 0) {
     return (
       <Box>
 
-        {noTime.length
+        {sortedEntries.noTime.length
           ? (
             <Divider
               variant="fullWidth"
@@ -74,7 +80,7 @@ function ScheduleView({
           )
           : null}
 
-        {noTime.map((entry) => (
+        {sortedEntries.noTime.map((entry) => (
           <Paper
             key={entry.id}
             onClick={() => {
@@ -99,7 +105,7 @@ function ScheduleView({
         ))}
 
 
-        {noTime.length
+        {sortedEntries.noTime.length
           ? (
             <Divider
               variant="fullWidth"
@@ -116,7 +122,7 @@ function ScheduleView({
           : null}
 
         <Schedule
-          entries={withTime}
+          entries={sortedEntries.withTime}
           activeEntry={activeEntry}
           startKey="startTimestamp"
           endKey="endTimestamp"
@@ -148,4 +154,4 @@ ScheduleView.propTypes = {
   // setNewEntryData: PropTypes.func.isRequired,
 };
 
-export default ScheduleView;
+export default memo(ScheduleView);

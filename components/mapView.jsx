@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import Box from '@mui/material/Box';
@@ -200,4 +200,4 @@ MapView.propTypes = {
   setNewEntryData: PropTypes.func.isRequired,
 };
 
-export default MapView;
+export default memo(MapView);

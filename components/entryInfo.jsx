@@ -52,7 +52,6 @@ function EntryInfo({
           >
             <Grid item>
               <TextField
-                id="filled-basic"
                 value={activeEntry.name ? activeEntry.name : ''}
                 disabled={!activeEntryExists}
                 label="Name"
@@ -80,7 +79,6 @@ function EntryInfo({
           >
             <Grid item>
               <TextField
-                id="filled-basic"
                 value={activeEntry.notes ? activeEntry.notes : ''}
                 disabled={!activeEntryExists}
                 label="Notes"
@@ -102,7 +100,6 @@ function EntryInfo({
         {/* Lat field */}
         <Grid item xs={12}>
           <TextField
-            id="filled-basic"
             value={activeEntry?.location?.latitude ? activeEntry.location.latitude : ''}
             disabled={!activeEntryExists}
             label="Latitude"
@@ -123,7 +120,6 @@ function EntryInfo({
         {/* Lng field */}
         <Grid item xs={12}>
           <TextField
-            id="filled-basic"
             value={activeEntry?.location?.longitude ? activeEntry.location.longitude : ''}
             disabled={!activeEntryExists}
             label="Longitude"
@@ -145,7 +141,6 @@ function EntryInfo({
         {/* TODO make this a search field like the map's */}
         <Grid item xs={12}>
           <TextField
-            id="filled-basic"
             value={activeEntry?.location?.address ? activeEntry.location.address : ''}
             disabled={!activeEntryExists}
             label="Address"

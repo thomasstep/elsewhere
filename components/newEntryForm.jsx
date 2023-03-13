@@ -44,7 +44,6 @@ function NewEntryForm({
           >
             <Grid item>
               <TextField
-                id="filled-basic"
                 value={newEntryData.name || ''}
                 label="Name"
                 variant="standard"
@@ -70,7 +69,6 @@ function NewEntryForm({
           >
             <Grid item>
               <TextField
-                id="filled-basic"
                 value={newEntryData.notes || ''}
                 label="Notes"
                 variant="standard"
@@ -90,7 +88,6 @@ function NewEntryForm({
         {/* Lat field */}
         <Grid item xs={12}>
           <TextField
-            id="filled-basic"
             value={newEntryData?.location?.latitude ? newEntryData.location.latitude : ''}
             label="Latitude"
             variant="standard"
@@ -109,7 +106,6 @@ function NewEntryForm({
         {/* Lng field */}
         <Grid item xs={12}>
           <TextField
-            id="filled-basic"
             value={newEntryData?.location?.longitude ? newEntryData.location.longitude : ''}
             label="Longitude"
             variant="standard"
@@ -129,7 +125,6 @@ function NewEntryForm({
         {/* TODO make this a search field like the map's */}
         <Grid item xs={12}>
           <TextField
-            id="filled-basic"
             value={newEntryData?.location?.address ? newEntryData.location.address : ''}
             label="Address"
             variant="standard"

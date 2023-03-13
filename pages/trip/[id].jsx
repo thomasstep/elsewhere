@@ -14,9 +14,10 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 
+import EntryInfo from '../../components/entryInfo';
+import EventsView from '../../components/eventsView';
 import Layout from '../../components/layout';
 import LoadingPage from '../../components/loadingPage';
-import EntryInfo from '../../components/entryInfo';
 import MapView from '../../components/mapView';
 import NewEntryForm from '../../components/newEntryForm';
 import ScheduleView from '../../components/scheduleView';
@@ -351,6 +352,10 @@ function Trip() {
               label="Schedule"
               {...a11yProps(1)}
             />
+            <Tab
+              label="Events"
+              {...a11yProps(2)}
+            />
           </Tabs>
         </Box>
 
@@ -378,6 +383,14 @@ function Trip() {
             setActiveEntry={setActiveEntry}
             newEntryData={newEntryData}
             setNewEntryData={setNewEntryData}
+          />
+        </TabPanel>
+
+        <TabPanel value={activeTab} index={2}>
+          <EventsView
+            entries={entries}
+            activeEntry={activeEntry}
+            setActiveEntry={setActiveEntry}
           />
         </TabPanel>
 
