@@ -139,6 +139,7 @@ function Trip() {
 
   useEffect(() => {
     const cookieToken = getCookie(jwtCookieName);
+    if (!cookieToken) router.push('/signin');
     setToken(cookieToken);
   }, []);
 
