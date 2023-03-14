@@ -40,6 +40,16 @@ function MapView({
     });
 
     if (
+      activeEntry.location
+      && activeEntry.location.latitude
+      && activeEntry.location.longitude) {
+      newBounds.extend({
+        lat: activeEntry.location.latitude,
+        lng: activeEntry.location.longitude,
+      });
+    }
+
+    if (
       newEntryData.location
       && newEntryData.location.latitude
       && newEntryData.location.longitude) {
@@ -56,7 +66,7 @@ function MapView({
     }
 
     setBounds(newBounds);
-  }, [entries, newEntryData]);
+  }, [entries, activeEntry, newEntryData]);
 
   return (
     <Box>

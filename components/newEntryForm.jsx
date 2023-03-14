@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import Box from '@mui/material/Box';
@@ -10,6 +10,7 @@ import TextField from '@mui/material/TextField';
 import { DateTime, Settings } from 'luxon';
 
 import DateTimeField from './dateTimeField';
+import { debug } from '../utils/config';
 
 Settings.defaultZone = 'utc';
 
@@ -23,6 +24,46 @@ function NewEntryForm({
   setSnackbarSeverity,
   setSnackbarOpen,
 }) {
+  const [autocompleteWidget, setAutocompleteWidget] = useState();
+  const inputRef = useRef(null);
+  const autocompleteRef = useRef(null);
+
+  // Setup autocomplete
+  useEffect(() => {
+    if (inputRef.current && !autocompleteWidget) {
+      // eslint-disable-next-line no-undef
+      const acw = new google.maps.places.Autocomplete(inputRef.current);
+      acw.addListener('place_changed', () => {
+        const place = acw.getPlace();
+
+        if (!place.geometry || !place.geometry.location) {
+          // User entered the name of a Place that was not suggested and
+          // pressed the Enter key, or the Place Details request failed.
+          // window.alert("No details available for input: '" + place.name + "'");
+          return;
+        }
+
+        if (debug) {
+          console.groupCollapsed('PLACE UPDATE');
+          console.log(place);
+          console.groupEnd();
+        }
+
+        setNewEntryData({
+          ...newEntryData,
+          name: place.name,
+          location: {
+            latitude: place.geometry.location.lat(),
+            longitude: place.geometry.location.lng(),
+            address: place.formatted_address,
+          },
+        });
+      });
+      autocompleteRef.current = acw;
+      setAutocompleteWidget(acw);
+    }
+  }, [inputRef]);
+
   return (
     <Box>
       <Grid
@@ -85,46 +126,10 @@ function NewEntryForm({
           </Grid>
         </Grid>
 
-        {/* Lat field */}
-        <Grid item xs={12}>
-          <TextField
-            value={newEntryData?.location?.latitude ? newEntryData.location.latitude : ''}
-            label="Latitude"
-            variant="standard"
-            onChange={(e) => {
-              setNewEntryData({
-                ...newEntryData,
-                location: {
-                  ...newEntryData.location,
-                  latitude: parseFloat(e.target.value),
-                },
-              });
-            }}
-          />
-        </Grid>
-
-        {/* Lng field */}
-        <Grid item xs={12}>
-          <TextField
-            value={newEntryData?.location?.longitude ? newEntryData.location.longitude : ''}
-            label="Longitude"
-            variant="standard"
-            onChange={(e) => {
-              setNewEntryData({
-                ...newEntryData,
-                location: {
-                  ...newEntryData.location,
-                  longitude: parseFloat(e.target.value),
-                },
-              });
-            }}
-          />
-        </Grid>
-
         {/* Address field */}
-        {/* TODO make this a search field like the map's */}
         <Grid item xs={12}>
           <TextField
+            inputRef={inputRef}
             value={newEntryData?.location?.address ? newEntryData.location.address : ''}
             label="Address"
             variant="standard"

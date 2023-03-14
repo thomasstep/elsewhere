@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import Box from '@mui/material/Box';
@@ -11,6 +11,7 @@ import TextField from '@mui/material/TextField';
 import { DateTime, Settings } from 'luxon';
 
 import DateTimeField from './dateTimeField';
+import { debug } from '../utils/config';
 
 Settings.defaultZone = 'utc';
 
@@ -27,6 +28,46 @@ function EntryInfo({
 }) {
   // Boolean tells whether the entry has been edited
   const [edited, setEdited] = useState(false);
+  const [autocompleteWidget, setAutocompleteWidget] = useState();
+  const inputRef = useRef(null);
+  const autocompleteRef = useRef(null);
+
+  // Setup autocomplete
+  useEffect(() => {
+    if (inputRef.current && !autocompleteWidget) {
+      // eslint-disable-next-line no-undef
+      const acw = new google.maps.places.Autocomplete(inputRef.current);
+      acw.addListener('place_changed', () => {
+        const place = acw.getPlace();
+
+        if (!place.geometry || !place.geometry.location) {
+          // User entered the name of a Place that was not suggested and
+          // pressed the Enter key, or the Place Details request failed.
+          // window.alert("No details available for input: '" + place.name + "'");
+          return;
+        }
+
+        if (debug) {
+          console.groupCollapsed('PLACE UPDATE');
+          console.log(place);
+          console.groupEnd();
+        }
+
+        setActiveEntry({
+          ...activeEntry,
+          location: {
+            latitude: place.geometry.location.lat(),
+            longitude: place.geometry.location.lng(),
+            address: place.formatted_address,
+          },
+        });
+      });
+      setEdited(true);
+      autocompleteRef.current = acw;
+      setAutocompleteWidget(acw);
+    }
+  }, [inputRef]);
+
   // Using truthy on purpose
   // eslint-disable-next-line eqeqeq
   const activeEntryExists = typeof activeEntry.id === 'string' && activeEntry.id.length > 0;
@@ -97,50 +138,10 @@ function EntryInfo({
           </Grid>
         </Grid>
 
-        {/* Lat field */}
-        <Grid item xs={12}>
-          <TextField
-            value={activeEntry?.location?.latitude ? activeEntry.location.latitude : ''}
-            disabled={!activeEntryExists}
-            label="Latitude"
-            variant="standard"
-            onChange={(e) => {
-              setActiveEntry({
-                ...activeEntry,
-                location: {
-                  ...activeEntry.location,
-                  latitude: parseFloat(e.target.value),
-                },
-              });
-              setEdited(true);
-            }}
-          />
-        </Grid>
-
-        {/* Lng field */}
-        <Grid item xs={12}>
-          <TextField
-            value={activeEntry?.location?.longitude ? activeEntry.location.longitude : ''}
-            disabled={!activeEntryExists}
-            label="Longitude"
-            variant="standard"
-            onChange={(e) => {
-              setActiveEntry({
-                ...activeEntry,
-                location: {
-                  ...activeEntry.location,
-                  longitude: parseFloat(e.target.value),
-                },
-              });
-              setEdited(true);
-            }}
-          />
-        </Grid>
-
         {/* Address field */}
-        {/* TODO make this a search field like the map's */}
         <Grid item xs={12}>
           <TextField
+            inputRef={inputRef}
             value={activeEntry?.location?.address ? activeEntry.location.address : ''}
             disabled={!activeEntryExists}
             label="Address"

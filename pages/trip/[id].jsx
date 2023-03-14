@@ -396,52 +396,59 @@ function Trip() {
 
         <Divider />
 
-        {activeEntryExists
-          ? (
-            <Grid
-              container
-              direction="column"
-              justifyContent="center"
-              alignItems="center"
-              sx={{ py: 3 }}
-            >
-              <Typography variant="h5" sx={{ pb: 3 }}>Update</Typography>
 
-              <EntryInfo
-                entries={entries}
-                setEntries={setEntries}
-                activeEntry={activeEntry}
-                setActiveEntry={setActiveEntry}
-                updateEntry={updateEntryCallback}
-                deleteEntry={deleteEntryCallback}
-                setSnackbarMessage={setSnackbarMessage}
-                setSnackbarSeverity={setSnackbarSeverity}
-                setSnackbarOpen={setSnackbarOpen}
-              />
-            </Grid>
-          )
-          : (
-            <Grid
-              container
-              direction="column"
-              justifyContent="center"
-              alignItems="center"
-              sx={{ py: 3 }}
-            >
-              <Typography variant="h5" sx={{ pb: 3 }}>New</Typography>
+        <Wrapper
+          apiKey={googleMapsKey}
+          render={loadingRender}
+          libraries={['places']}
+        >
+          {activeEntryExists
+            ? (
+              <Grid
+                container
+                direction="column"
+                justifyContent="center"
+                alignItems="center"
+                sx={{ py: 3 }}
+              >
+                <Typography variant="h5" sx={{ pb: 3 }}>Update</Typography>
 
-              <NewEntryForm
-                entries={entries}
-                setEntries={setEntries}
-                newEntryData={newEntryData}
-                setNewEntryData={setNewEntryData}
-                createEntry={createEntryCallback}
-                setSnackbarMessage={setSnackbarMessage}
-                setSnackbarSeverity={setSnackbarSeverity}
-                setSnackbarOpen={setSnackbarOpen}
-              />
-            </Grid>
-          )}
+                <EntryInfo
+                  entries={entries}
+                  setEntries={setEntries}
+                  activeEntry={activeEntry}
+                  setActiveEntry={setActiveEntry}
+                  updateEntry={updateEntryCallback}
+                  deleteEntry={deleteEntryCallback}
+                  setSnackbarMessage={setSnackbarMessage}
+                  setSnackbarSeverity={setSnackbarSeverity}
+                  setSnackbarOpen={setSnackbarOpen}
+                />
+              </Grid>
+            )
+            : (
+              <Grid
+                container
+                direction="column"
+                justifyContent="center"
+                alignItems="center"
+                sx={{ py: 3 }}
+              >
+                <Typography variant="h5" sx={{ pb: 3 }}>New</Typography>
+
+                <NewEntryForm
+                  entries={entries}
+                  setEntries={setEntries}
+                  newEntryData={newEntryData}
+                  setNewEntryData={setNewEntryData}
+                  createEntry={createEntryCallback}
+                  setSnackbarMessage={setSnackbarMessage}
+                  setSnackbarSeverity={setSnackbarSeverity}
+                  setSnackbarOpen={setSnackbarOpen}
+                />
+              </Grid>
+            )}
+        </Wrapper>
 
         <Snackbar
           open={snackbarOpen}
