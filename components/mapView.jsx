@@ -20,7 +20,7 @@ function MapView({
 
   useEffect(() => {
     if (!(entries.length > 0)) {
-      return;
+      return () => {};
     }
 
     // eslint-disable-next-line no-undef
@@ -30,7 +30,7 @@ function MapView({
         !entry.location
         || !entry.location.latitude
         || !entry.location.longitude) {
-        return;
+          return () => {};
       }
 
       newBounds.extend({

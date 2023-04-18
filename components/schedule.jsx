@@ -156,7 +156,7 @@ function Schedule({
 
   useEffect(() => {
     setLoading(true);
-    if (entries.length < 1) return;
+    if (entries.length < 1) return () => {};
 
     if (debug) {
       console.time(timerLabel);
@@ -201,7 +201,7 @@ function Schedule({
       }
     });
 
-    if (validatedEntries.length < 1) return;
+    if (validatedEntries.length < 1) return () => {};
 
     const entryMetadata = {};
 

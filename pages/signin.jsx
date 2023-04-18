@@ -13,8 +13,12 @@ import Layout from '../components/layout';
 import {
   snackbarAutoCloseTime,
   jwtCookieName,
+  refreshTokenName,
 } from '../utils/config';
-import { setCookie } from '../utils/util';
+import {
+  setCookie,
+  storeItem,
+} from '../utils/util';
 
 function SignIn() {
   const [signInEmail, setSignInEmail] = useState('');
@@ -61,6 +65,7 @@ function SignIn() {
         // Successful sign in
         const resJson = await res.json();
         setCookie(jwtCookieName, resJson.token);
+        storeItem(refreshTokenName, resJson.refreshToken)
         router.push('/trips');
       }
     } catch (err) {

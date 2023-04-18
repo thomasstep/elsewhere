@@ -28,6 +28,7 @@ import {
   snackbarAutoCloseTime,
 } from '../../../utils/config';
 import {
+  attemptRefresh,
   getCookie,
 } from '../../../utils/util';
 
@@ -44,13 +45,25 @@ function ElsewhereTripSettings() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   useEffect(() => {
-    const cookieToken = getCookie(jwtCookieName);
-    setToken(cookieToken);
+    let cookieToken;
+    cookieToken = getCookie(jwtCookieName);
+    if (!cookieToken) {
+      (async () => {
+        const refreshed = await attemptRefresh();
+        if (refreshed) {
+          setToken(refreshed);
+        } else {
+          router.push('/signin');
+        }
+      })();
+    } else {
+      setToken(cookieToken);
+    }
   }, []);
 
   useEffect(() => {
     if (!token || !router.isReady) {
-      return;
+      return () => {};
     }
 
     fetch(`${authenticationServiceUrl}/v1/applications/${applicationId}/users/me`, {
@@ -59,9 +72,29 @@ function ElsewhereTripSettings() {
       },
     })
       .then((res) => {
-        if (res.status === 401) router.push('/signin');
-        if (res.status === 403) router.push('/signin');
-        if (res.status !== 200) router.push('/signin');
+        if (res.status === 401) {
+          (async () => {
+            const refreshed = await attemptRefresh();
+            if (refreshed) {
+              router.reload();
+            } else {
+              router.push('/signin');
+            }
+          })();
+        }
+
+        if (res.status === 403) {
+          (async () => {
+            const refreshed = await attemptRefresh();
+            if (refreshed) {
+              router.reload();
+            } else {
+              router.push('/signin');
+            }
+          })();
+        }
+
+        if (res.status !== 200) router.push('/trips');
 
         return res.json();
       })
@@ -69,7 +102,14 @@ function ElsewhereTripSettings() {
         setId(data.id);
       })
       .catch(() => {
-        router.push('/signin');
+          (async () => {
+            const refreshed = await attemptRefresh();
+            if (refreshed) {
+              router.reload();
+            } else {
+              router.push('/signin');
+            }
+          })();
       });
 
     fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}`, {

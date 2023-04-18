@@ -20,7 +20,10 @@ import {
   jwtCookieName,
   snackbarAutoCloseTime,
 } from '../utils/config';
-import { getCookie } from '../utils/util';
+import {
+  attemptRefresh,
+  getCookie,
+} from '../utils/util';
 
 function Trips() {
   const limit = 20;
@@ -36,13 +39,25 @@ function Trips() {
   const router = useRouter();
 
   useEffect(() => {
-    const cookieToken = getCookie(jwtCookieName);
-    setToken(cookieToken);
+    let cookieToken;
+    cookieToken = getCookie(jwtCookieName);
+    if (!cookieToken) {
+      (async () => {
+        const refreshed = await attemptRefresh();
+        if (refreshed) {
+          setToken(refreshed);
+        } else {
+          router.push('/signin');
+        }
+      })();
+    } else {
+      setToken(cookieToken);
+    }
   }, []);
 
   useEffect(() => {
     if (!token || !router.isReady) {
-      return;
+      return () => {};
     }
 
     fetch(`${authenticationServiceUrl}/v1/applications/${applicationId}/users/me`, {
@@ -51,9 +66,18 @@ function Trips() {
       },
     })
       .then((res) => {
-        if (res.status !== 200) router.push('/signin');
-
-        return res.json();
+        if (res.status !== 200) {
+          (async () => {
+            const refreshed = await attemptRefresh();
+            if (refreshed) {
+              router.reload();
+            } else {
+              router.push('/signin');
+            }
+          })();
+        } else {
+          return res.json();
+        }
       })
       .then((data) => {
         setId(data.id);
@@ -68,8 +92,28 @@ function Trips() {
       },
     })
       .then((res) => {
-        if (res.status === 401) router.push('/signin');
-        if (res.status === 403) router.push('/signin');
+        if (res.status === 401) {
+          (async () => {
+            const refreshed = await attemptRefresh();
+            if (refreshed) {
+              router.reload();
+            } else {
+              router.push('/signin');
+            }
+          })();
+        }
+
+        if (res.status === 403) {
+          (async () => {
+            const refreshed = await attemptRefresh();
+            if (refreshed) {
+              router.reload();
+            } else {
+              router.push('/signin');
+            }
+          })();
+        }
+
         if (res.status !== 200) throw new Error('Unhandled status');
         return res.json();
       })
@@ -89,7 +133,7 @@ function Trips() {
 
   // Scroll through pagination
   useEffect(() => {
-    if (!nextToken) return;
+    if (!nextToken) return () => {};
 
     const params = {
       limit,
@@ -101,8 +145,28 @@ function Trips() {
       },
     })
       .then((res) => {
-        if (res.status === 401) router.push('/signin');
-        if (res.status === 403) router.push('/signin');
+        if (res.status === 401) {
+          (async () => {
+            const refreshed = await attemptRefresh();
+            if (refreshed) {
+              router.reload();
+            } else {
+              router.push('/signin');
+            }
+          })();
+        }
+
+        if (res.status === 403) {
+          (async () => {
+            const refreshed = await attemptRefresh();
+            if (refreshed) {
+              router.reload();
+            } else {
+              router.push('/signin');
+            }
+          })();
+        }
+
         if (res.status !== 200) throw new Error('Unhandled status');
         return res.json();
       })
