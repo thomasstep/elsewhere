@@ -154,6 +154,7 @@ function Schedule({
     }
   }, [elemRef, activeEntry, entrySx]);
 
+  // eslint-disable-next-line consistent-return
   useEffect(() => {
     setLoading(true);
     if (entries.length < 1) return () => {};

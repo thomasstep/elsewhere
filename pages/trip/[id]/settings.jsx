@@ -45,8 +45,7 @@ function ElsewhereTripSettings() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   useEffect(() => {
-    let cookieToken;
-    cookieToken = getCookie(jwtCookieName);
+    const cookieToken = getCookie(jwtCookieName);
     if (!cookieToken) {
       (async () => {
         const refreshed = await attemptRefresh();
@@ -61,6 +60,7 @@ function ElsewhereTripSettings() {
     }
   }, []);
 
+  // eslint-disable-next-line consistent-return
   useEffect(() => {
     if (!token || !router.isReady) {
       return () => {};
@@ -102,14 +102,14 @@ function ElsewhereTripSettings() {
         setId(data.id);
       })
       .catch(() => {
-          (async () => {
-            const refreshed = await attemptRefresh();
-            if (refreshed) {
-              router.reload();
-            } else {
-              router.push('/signin');
-            }
-          })();
+        (async () => {
+          const refreshed = await attemptRefresh();
+          if (refreshed) {
+            router.reload();
+          } else {
+            router.push('/signin');
+          }
+        })();
       });
 
     fetch(`${elsewhereApiUrl}/v1/trip/${router.query.id}`, {

@@ -85,6 +85,7 @@ function Map({
   useEffect(() => {
     if (map && autocompleteWidget) {
       autocompleteWidget.bindTo('bounds', map);
+      // eslint-disable-next-line consistent-return
       autocompleteWidget.addListener('place_changed', () => {
         const place = autocompleteWidget.getPlace();
 

@@ -39,8 +39,7 @@ function Trips() {
   const router = useRouter();
 
   useEffect(() => {
-    let cookieToken;
-    cookieToken = getCookie(jwtCookieName);
+    const cookieToken = getCookie(jwtCookieName);
     if (!cookieToken) {
       (async () => {
         const refreshed = await attemptRefresh();
@@ -55,6 +54,7 @@ function Trips() {
     }
   }, []);
 
+  // eslint-disable-next-line consistent-return
   useEffect(() => {
     if (!token || !router.isReady) {
       return () => {};
@@ -65,6 +65,7 @@ function Trips() {
         Authorization: `Bearer ${token}`,
       },
     })
+      // eslint-disable-next-line consistent-return
       .then((res) => {
         if (res.status !== 200) {
           (async () => {
@@ -132,6 +133,7 @@ function Trips() {
   }, [router, token]);
 
   // Scroll through pagination
+  // eslint-disable-next-line consistent-return
   useEffect(() => {
     if (!nextToken) return () => {};
 

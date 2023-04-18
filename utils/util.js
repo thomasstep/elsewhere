@@ -3,7 +3,7 @@ const {
   applicationId,
   jwtCookieName,
   refreshTokenName,
-} = require("./config");
+} = require('./config');
 
 function setCookie(name, value) {
   const newCookie = `${name}=${value}; secure; samesite=strict; path=/`;
@@ -27,12 +27,12 @@ function getItem(name) {
 
 async function attemptRefresh() {
   const refreshToken = getItem(refreshTokenName);
-  const res = await fetch(`${authenticationServiceUrl}/v1/applications/${applicationId}/users/token?${new URLSearchParams({refreshToken})}`);
+  const res = await fetch(`${authenticationServiceUrl}/v1/applications/${applicationId}/users/token?${new URLSearchParams({ refreshToken })}`);
   if (res.status === 200) {
     // Successful sign in
     const resJson = await res.json();
     setCookie(jwtCookieName, resJson.token);
-    storeItem(refreshTokenName, resJson.refreshToken)
+    storeItem(refreshTokenName, resJson.refreshToken);
     return resJson.token;
   }
 

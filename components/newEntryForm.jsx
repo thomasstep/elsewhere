@@ -33,6 +33,7 @@ function NewEntryForm({
     if (inputRef.current && !autocompleteWidget) {
       // eslint-disable-next-line no-undef
       const acw = new google.maps.places.Autocomplete(inputRef.current);
+      // eslint-disable-next-line consistent-return
       acw.addListener('place_changed', () => {
         const place = acw.getPlace();
 

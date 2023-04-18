@@ -65,7 +65,7 @@ function SignIn() {
         // Successful sign in
         const resJson = await res.json();
         setCookie(jwtCookieName, resJson.token);
-        storeItem(refreshTokenName, resJson.refreshToken)
+        storeItem(refreshTokenName, resJson.refreshToken);
         router.push('/trips');
       }
     } catch (err) {

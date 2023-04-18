@@ -18,6 +18,7 @@ function MapView({
 }) {
   const [bounds, setBounds] = useState(null);
 
+  // eslint-disable-next-line consistent-return
   useEffect(() => {
     if (!(entries.length > 0)) {
       return () => {};
@@ -25,12 +26,13 @@ function MapView({
 
     // eslint-disable-next-line no-undef
     const newBounds = new google.maps.LatLngBounds();
+    // eslint-disable-next-line consistent-return
     entries.forEach((entry) => {
       if (
         !entry.location
         || !entry.location.latitude
         || !entry.location.longitude) {
-          return () => {};
+        return () => {};
       }
 
       newBounds.extend({
