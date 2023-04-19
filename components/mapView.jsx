@@ -20,7 +20,8 @@ function MapView({
 
   // eslint-disable-next-line consistent-return
   useEffect(() => {
-    if (!(entries.length > 0)) {
+    // Only update if bounds have not been set
+    if (!(entries.length > 0) || bounds) {
       return () => {};
     }
 
@@ -68,7 +69,7 @@ function MapView({
     }
 
     setBounds(newBounds);
-  }, [entries, activeEntry, newEntryData]);
+  }, [entries]);
 
   return (
     <Box>
