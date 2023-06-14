@@ -118,7 +118,7 @@ function MapView({
         fullscreenControl={false}
         mapType="TERRAIN"
         mapTypeControl={false}
-        style={{ height: '100vh', width: '100%' }}
+        style={{ height: '60vh', width: '100%' }}
       >
 
         {entries.length ? entries.map((entry) => {

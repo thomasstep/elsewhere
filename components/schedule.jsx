@@ -402,7 +402,7 @@ function Schedule({
         direction="column"
         alignItems="center"
         justifyContent="center"
-        style={{ minHeight: '100vh' }}
+        style={{ height: '60vh' }}
       >
         <Grid item xs={2}>
           <CircularProgress />
@@ -417,7 +417,7 @@ function Schedule({
         ref={elemRef}
         sx={{
           position: 'relative',
-          height: '100vh',
+          height: '50vh',
           overflow: 'hidden',
           overflowY: 'scroll',
           // Offset the top of the box for the first divider

@@ -105,36 +105,37 @@ function ScheduleView({
         ))}
 
 
-        {sortedEntries.noTime.length
+        {sortedEntries.withTime.length
           ? (
-            <Divider
-              variant="fullWidth"
-              sx={{
-                width: '100%',
-                my: 3,
-              }}
-            >
-              <Typography variant="h6">
-                Scheduled Events
-              </Typography>
-            </Divider>
+            <>
+              <Divider
+                variant="fullWidth"
+                sx={{
+                  width: '100%',
+                  my: 3,
+                }}
+              >
+                <Typography variant="h6">
+                  Scheduled Events
+                </Typography>
+              </Divider>
+              <Schedule
+                entries={sortedEntries.withTime}
+                activeEntry={activeEntry}
+                startKey="startTimestamp"
+                endKey="endTimestamp"
+                entryOnClick={(e, entry) => {
+                  if (entry.id === newEntryScheduleId) return;
+                  if (activeEntry.id === entry.id) {
+                    setActiveEntry({});
+                  } else {
+                    setActiveEntry(entry);
+                  }
+                }}
+              />
+            </>
           )
           : null}
-
-        <Schedule
-          entries={sortedEntries.withTime}
-          activeEntry={activeEntry}
-          startKey="startTimestamp"
-          endKey="endTimestamp"
-          entryOnClick={(e, entry) => {
-            if (entry.id === newEntryScheduleId) return;
-            if (activeEntry.id === entry.id) {
-              setActiveEntry({});
-            } else {
-              setActiveEntry(entry);
-            }
-          }}
-        />
       </Box>
     );
   }
